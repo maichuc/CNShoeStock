@@ -610,7 +610,7 @@ $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
 
             // Load supplier details via AJAX
             $.ajax({
-                url: 'api/get_supplier.php',
+                url: 'api/lay_nha_cung_cap.php',
                 method: 'GET',
                 data: { id: supplierId },
                 success: function(response) {
@@ -698,7 +698,7 @@ $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
                 if (result.isConfirmed) {
                     // Update status via AJAX
                     $.ajax({
-                        url: 'api/toggle_supplier_status.php',
+                        url: 'api/chuyen_doi_trang_thai_ncc.php',
                         method: 'POST',
                         data: { 
                             supplier_id: supplierId,

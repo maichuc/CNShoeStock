@@ -1288,7 +1288,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
 
         function searchCustomers(query) {
             $.ajax({
-                url: 'api/search_customers.php',
+                url: 'api/tim_kiem_khach_hang.php',
                 method: 'GET',
                 data: { query: query },
                 dataType: 'json',
@@ -1347,7 +1347,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
             productSelect.empty().append('<option value="">-- Đang tải sản phẩm... --</option>').prop('disabled', true);
             
             $.ajax({
-                url: 'api/search_products.php',
+                url: 'api/tim_kiem_san_pham.php',
                 method: 'GET',
                 data: { 
                     product_type: productType,

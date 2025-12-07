@@ -145,7 +145,7 @@ function updatePickedQuantity($pdo, $input, $userId, $warehouseId) {
         
         // ⚠️ KHÔNG TRỪ TỒN KHO Ở ĐÂY - ĐÃ TRỪ KHI CHẤP NHẬN ĐƠN HÀNG
         // Inventory was already reduced when manager accepted the order
-        // See: api/confirm_order.php - reduceInventory() function
+        // See: api/xac_nhan_don_hang.php - reduceInventory() function
         error_log("updatePickedQuantity: Skipping inventory reduction (already reduced when order accepted)");
         
         // Log audit

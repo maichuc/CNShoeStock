@@ -679,7 +679,7 @@ $statusColors = [
 
         function viewOrder(orderId) {
             $.ajax({
-                url: 'api/get_order_detail.php',
+                url: 'api/lay_chi_tiet_don_hang.php',
                 method: 'GET',
                 data: { order_id: orderId },
                 dataType: 'json',
@@ -799,7 +799,7 @@ $statusColors = [
             const actionText = statusText[newStatus] || newStatus;
             if (confirm(`Bạn có chắc chắn muốn ${actionText}?`)) {
                 $.ajax({
-                    url: 'api/update_order_status.php',
+                    url: 'api/cap_nhat_trang_thai_don_hang.php',
                     method: 'POST',
                     data: {
                         order_id: orderId,
@@ -867,7 +867,7 @@ $statusColors = [
             `);
 
             $.ajax({
-                url: 'api/confirm_order.php',
+                url: 'api/xac_nhan_don_hang.php',
                 method: 'POST',
                 data: JSON.stringify({
                     order_id: orderId,

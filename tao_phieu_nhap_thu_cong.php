@@ -2535,7 +2535,7 @@ try {
                                 text: 'Vui lòng đăng nhập lại để sử dụng chức năng này!',
                                 confirmButtonText: 'Đến trang đăng nhập'
                             }).then(() => {
-                                window.location.href = 'login.php';
+                                window.location.href = 'login.html';
                             });
                             return;
                         }

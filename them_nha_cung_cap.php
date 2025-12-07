@@ -597,7 +597,7 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
             const supplierId = $('#supplier_id').val();
             
             $.ajax({
-                url: 'api/check_duplicate_supplier.php',
+                url: 'api/kiem_tra_ncc_trung.php',
                 method: 'POST',
                 data: { 
                     tax_code: taxCode,
@@ -677,7 +677,7 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
 
             // Send AJAX request
             $.ajax({
-                url: 'api/save_supplier.php',
+                url: 'api/luu_nha_cung_cap.php',
                 method: 'POST',
                 data: formData,
                 success: function(response) {
@@ -738,7 +738,7 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
             
             // Generate new supplier code
             $.ajax({
-                url: 'api/generate_supplier_code.php',
+                url: 'api/tao_ma_nha_cung_cap.php',
                 method: 'GET',
                 success: function(response) {
                     if (response.success) {

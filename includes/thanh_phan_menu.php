@@ -270,7 +270,7 @@ function renderLogoutModal() {
                 <div class="modal-body">Chọn "Đăng xuất" bên dưới nếu bạn sẵn sàng kết thúc phiên làm việc hiện tại.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
-                    <a class="btn btn-primary" href="auth/dang_xuat.php">Đăng xuất</a>
+                    <a class="btn btn-primary" href="dang_xuat.php">Đăng xuất</a>
                 </div>
             </div>
         </div>

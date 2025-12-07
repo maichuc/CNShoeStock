@@ -477,7 +477,7 @@ try {
         if (confirm('Bạn có chắc chắn muốn xác nhận phiếu nhập này? Hành động này không thể hoàn tác.')) {
             // TODO: Implement confirm receipt functionality via AJAX
             $.ajax({
-                url: 'api/confirm_receipt.php',
+                url: 'api/xac_nhan_phieu_nhap.php',
                 method: 'POST',
                 data: { receipt_id: <?php echo $receiptId; ?> },
                 dataType: 'json',
