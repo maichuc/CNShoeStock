@@ -7936,7 +7936,7 @@ Dữ liệu AI sẽ được merge:
                                 // Thêm nút chuyển đến nhập kho
                                 $('#step4-content .row').prepend(`
                                     <div class="col-md-6 mb-3">
-                                        <a href="create_stock_receipt.php?product_id=${response.product_id}" class="btn btn-warning btn-block">
+                                        <a href="tao_phieu_nhap_moi.php?product_id=${response.product_id}" class="btn btn-warning btn-block">
                                             <i class="fas fa-warehouse"></i> Tạo phiếu nhập kho ngay
                                         </a>
                                     </div>

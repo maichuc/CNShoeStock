@@ -2,7 +2,7 @@
 /**
  * Similarity Calculation Helper
  * Tập hợp các hàm tính toán độ tương đồng và phát hiện trùng lặp
- * Được sử dụng bởi: them_san_pham_ai.php, create_stock_receipt.php
+ * Được sử dụng bởi: them_san_pham_ai.php, tao_phieu_nhap_moi.php
  */
 
 // Hàm normalize text để so sánh tốt hơn

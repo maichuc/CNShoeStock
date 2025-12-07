@@ -93,7 +93,7 @@ function renderStandardSidebar($currentPage = '') {
                 </a>
                 <div id="collapseReceipts" class="collapse ' . $collapseShow(['create_stock_receipt', 'stock_receipts_management']) . '" aria-labelledby="headingReceipts" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item ' . ($currentPage == 'create_stock_receipt' ? 'active' : '') . '" href="create_stock_receipt.php">
+                        <a class="collapse-item ' . ($currentPage == 'create_stock_receipt' ? 'active' : '') . '" href="tao_phieu_nhap_moi.php">
                             <i class="fas fa-file-import mr-1"></i> Tạo phiếu nhập
                         </a>
                         <a class="collapse-item ' . ($currentPage == 'stock_receipts_management' ? 'active' : '') . '" href="quan_ly_phieu_nhap_kho.php">

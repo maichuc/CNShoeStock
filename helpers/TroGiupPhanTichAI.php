@@ -2,7 +2,7 @@
 /**
  * AI Analysis Helper
  * Tập hợp các hàm dùng chung cho phân tích AI sản phẩm
- * Được sử dụng bởi: them_san_pham_ai.php, create_stock_receipt.php, api_luu_phieu_ai.php
+ * Được sử dụng bởi: them_san_pham_ai.php, tao_phieu_nhap_moi.php, api_luu_phieu_ai.php
  */
 
 // Load environment variables

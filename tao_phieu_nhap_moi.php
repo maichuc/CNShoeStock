@@ -4024,7 +4024,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('👁️ Viewing product details for ID:', productId);
             
             // Open product detail page in new tab
-            window.open(`product_details.php?id=${productId}`, '_blank');
+            window.open(`xem_san_pham.php?id=${productId}`, '_blank');
         };
         
         // Function to show warning when trying to select inactive product
