@@ -4,14 +4,22 @@
 - **Ngày thực hiện**: 2024-2025
 - **Branch**: refactor/viet-hoa-ten-file  
 - **Commit đầu**: 9839d1f (backup)
-- **Commit cuối**: 2f06162 (hoàn thành)
+- **Commit cuối**: f4e6843 (hoàn thành)
 
 ## ✅ KẾT QUẢ HOÀN THÀNH
 ✅ **108 files đã được rename thành công** (93 main + 14 API + 1 auth)  
 ✅ **3 API files mới được tạo**  
 ✅ **0 lỗi syntax sau refactor**  
 ✅ **600+ references được cập nhật**  
-✅ **Đã kiểm tra từng chi tiết - 0 lỗi tham chiếu**
+✅ **Đã kiểm tra từng chi tiết - 0 lỗi tham chiếu**  
+✅ **Database kết nối thành công - 9 users**  
+✅ **6 file tạm đã được dọn dẹp**
+
+## 📝 Files Từ Chuyên Ngành (KHÔNG ĐỔI)
+- `config/database.php` - "Database" là thuật ngữ kỹ thuật chuẩn
+- Class names trong code (Database, User, etc.) - giữ nguyên
+- HTML tags (header, footer, div, etc.) - không đổi
+- Variable names, function names - không đổi
 
 ## Chi Tiết Files Được Rename
 
@@ -294,8 +302,22 @@ b87a05c - Update final report
 ✅ Tất cả AJAX URLs đúng  
 ✅ Tất cả window.location redirects đúng  
 
-## Git Commits Summary
+### Commit 43361aa - Revert Database.php (Technical Term)
+- Rollback `config/cau_hinh_csdl.php` → `config/database.php`
+- Update 97 references từ `cau_hinh_csdl.php` → `database.php`
+- Fix `login.html` form action: `login_process.php` → `xu_ly_dang_nhap.php`
+- Fix `register.html` AJAX: `register_process.php` → `xu_ly_dang_ky.php`
+
+### Commit f4e6843 - Final Cleanup
+- Fix `login.html` AJAX URL: `auth/login_process.php` → `auth/xu_ly_dang_nhap.php`
+- Xóa 6 files tạm trong `temp/bulk_imports/` (import_result_*.csv)
+- Database connection test: ✅ SUCCESS (9 users)
+
+## Git Commits Summary (15 commits)
 ```
+f4e6843 - Fix: Login AJAX URL + cleanup temp import files
+08467b4 - Final: Complete validation report - 0 errors found
+43361aa - Fix: Revert database.php (technical term) + fix login/register forms
 2f06162 - Fix: Rename auth/logout.php and fix stock_receipts.php reference
 2b31bbe - Update report with API files refactor
 3de2dda - Fix: Update login.php to login.html redirects
