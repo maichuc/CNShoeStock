@@ -7,7 +7,7 @@
 session_start();
 header('Content-Type: application/json');
 
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 require_once 'classes/DichVuAI.php';
 require_once 'classes/GhepSanPhamThongMinh.php';
 require_once 'helpers/DichVuTaiAnhLen.php';

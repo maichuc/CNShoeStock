@@ -1,5 +1,5 @@
 <?php
-// Copy this file to cau_hinh_csdl.php and fill credentials or use .env variables
+// Copy this file to database.php and fill credentials or use .env variables
 
 class Database {
     private $host;

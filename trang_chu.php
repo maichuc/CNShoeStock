@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Include database connection
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 
 // Initialize database connection
 $database = new Database();

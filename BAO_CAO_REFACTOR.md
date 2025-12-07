@@ -45,7 +45,7 @@
 ### 3. Config (1 file)
 | Tên Cũ | Tên Mới |
 |---------|---------|
-| config/database.php | config/cau_hinh_csdl.php |
+| config/cau_hinh_csdl.php | config/database.php |
 
 ### 4. Includes (5 files)
 | Tên Cũ | Tên Mới |
@@ -161,7 +161,7 @@
 
 ## Files Dependency Cao Nhất
 1. **classes/CSDuLieu.php** (Database.php): 91 files phụ thuộc
-2. **config/cau_hinh_csdl.php** (database.php): 91 files phụ thuộc
+2. **config/database.php** (cau_hinh_csdl.php): 91 files phụ thuộc
 3. **includes/thanh_ben.php** (sidebar.php): 23 files phụ thuộc
 4. **includes/thanh_tren.php** (topbar.php): 18 files phụ thuộc
 5. **includes/chan_trang.php** (footer.php): 11 files phụ thuộc
@@ -233,7 +233,7 @@
 
 ## Lưu Ý
 - **Entry point mới**: `trang_chu.php` (có index.php redirect)
-- **Database config**: `config/cau_hinh_csdl.php`
+- **Database config**: `config/database.php`
 - **Database class**: `classes/CSDuLieu.php` (class name "Database" giữ nguyên - từ chuyên ngành)
 - **Sidebar**: `includes/thanh_ben.php`
 - **Modal logout**: `includes/modal_dang_xuat.php`

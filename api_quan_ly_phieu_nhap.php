@@ -11,7 +11,7 @@ session_start();
 header('Content-Type: application/json');
 
 try {
-    require_once 'config/cau_hinh_csdl.php';
+    require_once 'config/database.php';
     require_once 'classes/LichSuPhieuNhap.php';
     require_once 'classes/QuanLyMaQR.php';
     require_once 'classes/TaoMaQR.php';

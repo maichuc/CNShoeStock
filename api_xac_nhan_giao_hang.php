@@ -22,7 +22,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 
 // Kiểm tra đăng nhập
 if (!isset($_SESSION['user_id'])) {

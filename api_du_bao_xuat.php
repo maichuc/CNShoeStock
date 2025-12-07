@@ -17,7 +17,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 require_once 'vendor/autoload.php'; // PHPSpreadsheet
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;

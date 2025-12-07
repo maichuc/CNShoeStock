@@ -13,7 +13,7 @@
  * - Validation & Security
  */
 
-require_once __DIR__ . '/../config/cau_hinh_csdl.php';
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/DichVuEmail.php';
 require_once __DIR__ . '/../helpers/TaoTenNguoiDung.php';
 

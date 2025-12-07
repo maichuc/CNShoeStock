@@ -10,7 +10,7 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
 session_start();
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 
 // Kiểm tra đăng nhập
 if (!isset($_SESSION['user_id'])) {

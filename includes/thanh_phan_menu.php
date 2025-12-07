@@ -2,7 +2,7 @@
 // Standard menu component based on trang_chu.php
 function renderStandardSidebar($currentPage = '') {
     session_start();
-    require_once 'config/cau_hinh_csdl.php';
+    require_once 'config/database.php';
     require_once 'classes/Kho.php';
     
     $database = new Database();

@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 require_once 'helpers/GhiNhatKyKiemToan.php';
 require_once 'helpers/DichVuTaiAnhLen.php';
 require_once 'helpers/TroGiupPhanTichAI.php';

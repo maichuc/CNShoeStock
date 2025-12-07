@@ -150,7 +150,7 @@
             <h3>Database Connection</h3>
             <?php
             try {
-                require_once 'config/cau_hinh_csdl.php';
+                require_once 'config/database.php';
                 $database = new Database();
                 $pdo = $database->getConnection();
                 echo '<div class="status ok">✓ Kết Nối Thành Công</div>';

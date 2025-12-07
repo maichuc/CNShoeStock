@@ -10,7 +10,7 @@ header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
 session_start();
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);

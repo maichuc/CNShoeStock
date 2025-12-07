@@ -19,7 +19,7 @@ if (empty($userWarehouseId)) {
 }
 
 // Database connection
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 
 try {
     $database = new Database();

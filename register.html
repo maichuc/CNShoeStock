@@ -222,7 +222,7 @@
                 $('#registerBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang đăng ký...');
                 
                 $.ajax({
-                    url: 'auth/register_process.php',
+                    url: 'auth/xu_ly_dang_ky.php',
                     type: 'POST',
                     data: formData,
                     dataType: 'json',

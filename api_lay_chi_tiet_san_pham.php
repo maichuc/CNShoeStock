@@ -13,7 +13,7 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE);
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 
 // Clear any output that might have been generated
 ob_end_clean();

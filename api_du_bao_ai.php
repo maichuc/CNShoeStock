@@ -26,7 +26,7 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 require_once 'api_phan_tich_ai.php';  // Import hàm chuẩn hóa loại giày
 
 session_start();

@@ -5,7 +5,7 @@
  */
 
 session_start();
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 require_once 'helpers/TroGiupDoTuongDong.php'; // UNIFIED: Use shared similarity functions
 
 header('Content-Type: application/json');

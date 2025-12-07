@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 require_once 'classes/Kho.php';
 
 // Kiểm tra đăng nhập

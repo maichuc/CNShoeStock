@@ -10,7 +10,7 @@
  *   * * * * * php /path/to/xu_ly_hang_doi_email.php
  */
 
-require_once __DIR__ . '/config/cau_hinh_csdl.php';
+require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/classes/DichVuEmail.php';
 
 $database = new Database();

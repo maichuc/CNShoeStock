@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 require_once 'classes/QuanLyMaQR.php';
 
 // Kiểm tra đăng nhập

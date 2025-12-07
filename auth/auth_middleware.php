@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/cau_hinh_csdl.php';
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../classes/User.php';
 
 class AuthMiddleware {

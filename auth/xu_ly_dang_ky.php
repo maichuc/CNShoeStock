@@ -8,7 +8,7 @@ header('Content-Type: application/json');
 
 try {
     // Include các file cần thiết
-    require_once __DIR__ . '/../config/cau_hinh_csdl.php';
+    require_once __DIR__ . '/../config/database.php';
     require_once __DIR__ . '/../classes/User.php';
     require_once __DIR__ . '/../classes/Kho.php';
     require_once __DIR__ . '/../helpers/TaoTenNguoiDung.php';

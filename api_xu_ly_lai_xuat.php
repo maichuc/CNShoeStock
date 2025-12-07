@@ -8,7 +8,7 @@ ini_set('log_errors', 1);
 ob_start();
 
 session_start();
-require_once 'config/cau_hinh_csdl.php';
+require_once 'config/database.php';
 
 // Clear any output buffer trước khi set header
 ob_end_clean();
