@@ -130,7 +130,7 @@ try {
     error_log("Database error loading suppliers: " . $e->getMessage());
 }
 
-// Note: Product data is now loaded dynamically via AJAX cascading filters
+// Lưu ý: Dữ liệu sản phẩm giờ được tải động qua bộ lọc AJAX
 
 ?>
 

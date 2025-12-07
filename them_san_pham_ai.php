@@ -8269,7 +8269,7 @@ Dữ liệu AI sẽ được merge:
                 } else if (step === 2) {
                     // Step 2: AI Analysis
                     // Only show results if data exists (normal forward flow)
-                    // Note: backToAnalysis button already clears all data, so this is for forward navigation only
+                    // Lưu ý: Nút backToAnalysis đã xóa tất cả dữ liệu, đây chỉ dành cho điều hướng tiến
                     if (uploadedImages.length > 0) {
                         displayImagesInAnalysisStep();
                         $('#analyzingImages').show();

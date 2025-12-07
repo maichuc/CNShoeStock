@@ -1567,7 +1567,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->beginTransaction();
             
             // Create receipt with status 'draft' (bản nháp)
-            // Note: stock_receipts table has 'user_id', 'notes' (not 'note'), no 'receipt_date'
+            // Lưu ý: Bảng stock_receipts có 'user_id', 'notes' (không phải 'note'), không có 'receipt_date'
             $stmt = $pdo->prepare("
                 INSERT INTO stock_receipts (supplier_id, user_id, warehouse_id, status, notes, created_at) 
                 VALUES (?, ?, ?, 'draft', ?, NOW())
@@ -8120,8 +8120,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             // ===== HELPER FUNCTIONS FOR DUPLICATE SELECTION =====
-            // Note: Main selection functions (selectStockReceiptDuplicateForUpdate, 
-            // selectProductForStockReceipt, etc.) are defined globally at the top of the script
+            // Lưu ý: Các hàm lựa chọn chính (selectStockReceiptDuplicateForUpdate, 
+            // selectProductForStockReceipt, v.v.) được định nghĩa global ở đầu script
             
             // Function to update selected duplicate product
             function updateSelectedStockReceiptDuplicate() {
@@ -8229,7 +8229,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             // ===== FUNCTION FOR SELECTING EXISTING PRODUCT FOR STOCK RECEIPT =====
-            // Note: selectProductForStockReceipt is defined globally at the top of the script
+            // Lưu ý: selectProductForStockReceipt được định nghĩa global ở đầu script
             
             // Function to load product data and proceed to stock receipt entry
             function loadProductForStockReceiptEntry(productId, productName) {
@@ -10066,7 +10066,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else if (step === 3) {
                     // Step 3: AI Analysis
                     // Only show results if data exists (normal forward flow)
-                    // Note: backToAnalysis button already clears all data, so this is for forward navigation only
+                    // Lưu ý: Nút backToAnalysis đã xóa tất cả dữ liệu, đây chỉ dành cho điều hướng tiến
                     if (uploadedImages.length > 0) {
                         displayImagesInAnalysisStep();
                         $('#analyzingImages').show();
@@ -10990,8 +10990,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
         
         // Enhanced Receipt Summary Functions for step 5
-        // NOTE: saveReceiptDraft() is now handled by event handler in document.ready
-        // This old function is kept for reference but not used
+        // LƯU Ý: saveReceiptDraft() giờ được xử lý bởi event handler trong document.ready
+        // Hàm cũ này được giữ lại để tham khảo nhưng không sử dụng
         /*
         function saveReceiptDraft() {
             console.log('💾 Saving receipt draft...');
@@ -11274,7 +11274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $('#confirmUpdateSource').prop('disabled', true);
         });
         
-        // Note: showStep4Loading and removeStep4Loading are defined globally above
+        // Lưu ý: showStep4Loading và removeStep4Loading được định nghĩa global ở trên
         
         // Define functions before they are called
         function updateFromAIData() {

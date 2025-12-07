@@ -575,7 +575,7 @@ function detectMaterialCategory($material, $materialCategories) {
     return null;
 }
 
-// Note: calculateColorSimilarityEnhanced() and normalizeColorEnhanced() 
-// are now defined in helpers/TroGiupDoTuongDong.php (included above)
+// Lưu ý: calculateColorSimilarityEnhanced() và normalizeColorEnhanced() 
+// giờ được định nghĩa trong helpers/TroGiupDoTuongDong.php (đã include ở trên)
 
 ?>

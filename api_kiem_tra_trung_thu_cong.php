@@ -268,7 +268,7 @@ function calculateManualSimilarity($inputData, $dbProduct) {
     return min(100, max(0, $similarity));
 }
 
-// Note: calculateTextSimilarity() is now imported from helpers/TroGiupDoTuongDong.php
-// Note: calculateColorSimilarityEnhanced() and normalizeColorEnhanced() are in TroGiupDoTuongDong.php
-// This ensures UNIFIED similarity calculation for both AI and Manual systems
+// Lưu ý: calculateTextSimilarity() giờ được import từ helpers/TroGiupDoTuongDong.php
+// Lưu ý: calculateColorSimilarityEnhanced() và normalizeColorEnhanced() nằm trong TroGiupDoTuongDong.php
+// Điều này đảm bảo tính toán độ tương đồng THỐNG NHẤT cho cả hệ thống AI và Thủ công
 ?>
