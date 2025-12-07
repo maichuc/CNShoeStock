@@ -110,7 +110,7 @@
                 $('#loginBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang đăng nhập...');
                 
                 $.ajax({
-                    url: 'auth/login_process.php',
+                    url: 'auth/xu_ly_dang_nhap.php',
                     type: 'POST',
                     data: {
                         username: username,
