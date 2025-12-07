@@ -9,7 +9,7 @@
  */
 
 // Load environment variables
-require_once __DIR__ . '/tai_bien_moi_truong.php';
+require_once __DIR__ . '/env_loader.php';
 
 // Suppress all PHP errors and warnings for clean JSON output
 error_reporting(0);
