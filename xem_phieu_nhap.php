@@ -154,7 +154,7 @@ try {
                 <div id="collapseReceipts" class="collapse show" aria-labelledby="headingReceipts" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Quản lý nhập kho:</h6>
-                        <a class="collapse-item" href="create_stock_receipt.php">Tạo phiếu nhập mới</a>
+                        <a class="collapse-item" href="tao_phieu_nhap_moi.php">Tạo phiếu nhập mới</a>
                         <a class="collapse-item active" href="quan_ly_phieu_nhap_kho.php">Quản lý phiếu nhập</a>
                     </div>
                 </div>

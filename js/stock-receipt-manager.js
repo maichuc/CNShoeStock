@@ -277,7 +277,7 @@ class StockReceiptManager {
             image: analysis.processed_image
         });
         
-        window.location.href = `add_product_ai.php?${params.toString()}`;
+        window.location.href = `them_san_pham_ai.php?${params.toString()}`;
     }
 
     async saveDraft() {

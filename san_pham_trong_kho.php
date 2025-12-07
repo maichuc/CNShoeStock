@@ -427,7 +427,7 @@ $categories = $stmt->fetchAll();
                                 </div>
                                 
                                 <div class="d-flex justify-content-between">
-                                    <a href="product_details.php?id=<?php echo $product['product_id']; ?>" 
+                                    <a href="xem_san_pham.php?id=<?php echo $product['product_id']; ?>" 
                                        class="btn btn-primary btn-sm">
                                         <i class="fas fa-eye mr-1"></i>Xem chi tiết
                                     </a>

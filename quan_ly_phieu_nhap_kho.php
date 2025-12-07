@@ -196,7 +196,7 @@ try {
                             <button class="btn btn-sm btn-info shadow-sm mr-2" onclick="qrManager.startQRScanner()">
                                 <i class="fas fa-qrcode fa-sm text-white-50"></i> Scan QR Code
                             </button>
-                            <a href="create_stock_receipt.php" class="btn btn-sm btn-primary shadow-sm">
+                            <a href="tao_phieu_nhap_moi.php" class="btn btn-sm btn-primary shadow-sm">
                                 <i class="fas fa-plus fa-sm text-white-50"></i> Tạo phiếu nhập mới
                             </a>
                         </div>
@@ -723,7 +723,7 @@ try {
     // Hàm chỉnh sửa phiếu nhập
     function editReceipt(receiptId) {
         // Chuyển hướng đến trang tạo phiếu nhập với receipt_id để chỉnh sửa
-        window.location.href = 'create_stock_receipt.php?edit=' + receiptId;
+        window.location.href = 'tao_phieu_nhap_moi.php?edit=' + receiptId;
     }
 
     // Hàm xóa phiếu nhập

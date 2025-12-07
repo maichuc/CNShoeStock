@@ -269,7 +269,8 @@ $dataAge = $dataCheck['earliest_order'] ? (time() - strtotime($dataCheck['earlie
                                 </p>
                             </div>
                             <div class="col-md-4 text-right">
-                                <button class="btn btn-warning" onclick="window.location.href='add_test_data.php'">
+                                <!-- Button test data removed - file not exists -->
+                                <button class="btn btn-warning d-none" onclick="alert('File test không tồn tại')">
                                     <i class="fas fa-plus mr-2"></i>
                                     Thêm dữ liệu test
                                 </button>

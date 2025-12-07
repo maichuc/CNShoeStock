@@ -121,9 +121,9 @@ function renderStandardSidebar($currentPage = '') {
 
             <!-- Nav Item - Tồn kho -->
             <li class="nav-item ' . $activeClass('inventory') . '">
-                <a class="nav-link" href="inventory.php">
+                <a class="nav-link" href="quan_ly_kho.php">
                     <i class="fas fa-fw fa-boxes"></i>
-                    <span>Tồn kho</span>
+                    <span>Quản lý kho</span>
                 </a>
             </li>
 

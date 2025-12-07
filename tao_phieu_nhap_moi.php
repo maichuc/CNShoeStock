@@ -7669,7 +7669,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 console.log('  type:', productType);
                 console.log('  color:', colors);
                 
-                // ===== GỬI REQUEST GIỐNG HỆT ADD_PRODUCT_AI.PHP =====
+                // ===== GỬI REQUEST GIỐNG HỆT THEM_SAN_PHAM_AI.PHP =====
                 // Sử dụng cùng API: api_kiem_tra_trung_thu_cong.php
                 // Cùng action: check_manual_duplicates
                 // Cùng tham số: product_name, brand, type, color
