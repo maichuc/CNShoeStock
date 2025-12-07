@@ -6,7 +6,7 @@
 
 class QRCodeManager {
     constructor(config = {}) {
-        this.apiUrl = config.apiUrl || 'api_qr_management.php';
+        this.apiUrl = config.apiUrl || 'api_quan_ly_ma_qr.php';
         this.scanner = null;
         this.isScanning = false;
         this.debugMode = typeof config.debug !== 'undefined' ? config.debug : true; // Always enable debug by default

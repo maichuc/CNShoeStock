@@ -512,7 +512,7 @@ class StockReceiptManager {
 
     async reprintQR(qrCode) {
         try {
-            const response = await fetch('api_qr_management.php', {
+            const response = await fetch('api_quan_ly_ma_qr.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'reprint', qr_code: qrCode })
