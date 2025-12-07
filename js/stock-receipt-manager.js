@@ -404,7 +404,7 @@ class StockReceiptManager {
     }
 
     async apiCall(action, data) {
-        const response = await fetch('api_stock_receipt_management.php', {
+        const response = await fetch('api_quan_ly_phieu_nhap.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
