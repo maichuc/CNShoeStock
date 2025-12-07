@@ -246,7 +246,33 @@ ddbf8e1 - Cleanup debug/automation files
 b1cdc88 - Add entry point redirect
 34fec23 - Fix remaining file links in JS/HTML
 e6f0433 - Final: Fix all remaining references
+b87a05c - Update final report
+6f63519 - Refactor: Rename all API files in api/ folder (14 files) + create 3 missing APIs
+3de2dda - Fix: Update login.php to login.html redirects
 ```
+
+## API Files Renamed (api/ folder - Commit 6f63519)
+| Tên Cũ | Tên Mới |
+|---------|---------|
+| add_supplier.php | them_nha_cung_cap.php |
+| confirm_order.php | xac_nhan_don_hang.php |
+| create_order.php | tao_don_hang.php |
+| delete_supplier.php | xoa_nha_cung_cap.php |
+| get_order_detail.php | lay_chi_tiet_don_hang.php |
+| get_order_details.php | lay_chi_tiet_cac_don_hang.php |
+| get_orders.php | lay_cac_don_hang.php |
+| get_supplier.php | lay_nha_cung_cap.php |
+| save_supplier.php | luu_nha_cung_cap.php |
+| search_customers.php | tim_kiem_khach_hang.php |
+| search_products.php | tim_kiem_san_pham.php |
+| suggest_location.php | goi_y_vi_tri.php |
+| toggle_supplier_status.php | chuyen_doi_trang_thai_ncc.php |
+| update_order_status.php | cap_nhat_trang_thai_don_hang.php |
+
+## New API Files Created
+1. **api/xac_nhan_phieu_nhap.php** - Xác nhận phiếu nhập kho
+2. **api/kiem_tra_ncc_trung.php** - Kiểm tra nhà cung cấp trùng
+3. **api/tao_ma_nha_cung_cap.php** - Tạo mã nhà cung cấp tự động
 
 ## Khuyến Nghị Tiếp Theo
 1. **Fix known issues** trong quan_ly_kho.php và san_pham_trong_kho.php
