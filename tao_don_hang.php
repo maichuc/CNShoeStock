@@ -979,7 +979,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                 allowClear: true
             });
 
-            // Step navigation
+            // Điều hướng bước
             $('#nextStep1').click(function() {
                 if (validateStep1()) {
                     goToStep(2);

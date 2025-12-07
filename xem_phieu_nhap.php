@@ -475,7 +475,7 @@ try {
     <script>
     function confirmReceipt() {
         if (confirm('Bạn có chắc chắn muốn xác nhận phiếu nhập này? Hành động này không thể hoàn tác.')) {
-            // TODO: Implement confirm receipt functionality via AJAX
+            // CẦN LÀM: Triển khai chức năng xác nhận phiếu nhập qua AJAX
             $.ajax({
                 url: 'api/xac_nhan_phieu_nhap.php',
                 method: 'POST',

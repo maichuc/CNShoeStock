@@ -1195,7 +1195,7 @@ class EmployeeManager {
      * Generate result Excel file
      */
     private function generateResultFile($importId, $successRecords, $failedRecords) {
-        // TODO: Generate Excel file with results
+        // CẦN LÀM: Tạo file Excel với kết quả
         // For now, return a simple CSV path
         $resultDir = __DIR__ . '/../temp/bulk_imports/';
         if (!is_dir($resultDir)) {

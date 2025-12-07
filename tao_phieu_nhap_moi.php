@@ -5967,7 +5967,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Initialize size management
             updateRemoveButtons();
 
-            // Step 1 validation and navigation
+            // Xác thực và điều hướng Bước 1
             function validateStep1() {
                 const receiptDate = $('#receiptDate').val();
                 const supplierSelect = $('#supplierSelect').val();
@@ -10058,13 +10058,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Special handling for going back to previous steps
                 if (step === 1) {
-                    // Step 1: Basic Info - no special handling needed
+                    // Bước 1: Thông tin cơ bản - không cần xử lý đặc biệt
                 } else if (step === 2) {
-                    // Step 2: Upload images
+                    // Bước 2: Tải ảnh lên
                     // Only show analyze section if images exist (but they should be cleared by backToAnalysis)
                     $('#analyzeSection').toggle(uploadedImages.length > 0);
                 } else if (step === 3) {
-                    // Step 3: AI Analysis
+                    // Bước 3: Phân tích AI
                     // Only show results if data exists (normal forward flow)
                     // Lưu ý: Nút backToAnalysis đã xóa tất cả dữ liệu, đây chỉ dành cho điều hướng tiến
                     if (uploadedImages.length > 0) {
@@ -10076,7 +10076,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $('#aiResults').show();
                     }
                 } else if (step === 4) {
-                    // Step 4: Edit Info - Show suggestions if going back
+                    // Bước 4: Chỉnh sửa thông tin - Hiển thị gợi ý nếu quay lại
                     // Clean up any duplicate content first
                     if (typeof cleanupStep4Content === 'function') {
                         cleanupStep4Content();
@@ -10115,7 +10115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         updateContinueToStep5Button();
                     }
                 } else if (step === 5) {
-                    // Step 5: Complete - Load data and update summary
+                    // Bước 5: Hoàn tất - Tải dữ liệu và cập nhật tóm tắt
                     console.log('📋 Entering Step 5 - Receipt Summary');
                     
                     // KHÔNG load từ localStorage ở đây vì nó có thể trigger moveToStep() lại

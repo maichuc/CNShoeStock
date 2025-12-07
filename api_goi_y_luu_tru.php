@@ -392,7 +392,7 @@ try {
     $suggestions = [];
     
     // ============================================================
-    // STEP 1: Ưu tiên cao nhất - Tìm vị trí trống CÙNG KỆ với SKU cơ sở
+    // BƯỚC 1: Ưu tiên cao nhất - Tìm vị trí trống CÙNG KỆ với SKU cơ sở
     // Định nghĩa mã vị trí: SNEAKER-K1-T1-P1
     //   - Khu vực: SNEAKER
     //   - Kệ: K1
@@ -541,7 +541,7 @@ try {
         exit;
     }
     
-    // Step 1: Define zone mapping based on product type
+    // Bước 1: Định nghĩa ánh xạ khu vực dựa trên loại sản phẩm
     $zoneMapping = [
         'Sneaker' => 'A',
         'Boot' => 'A',
@@ -560,7 +560,7 @@ try {
     
     $preferredZone = $zoneMapping[$productType] ?? 'D'; // Default to zone D for unknown types
     
-    // Step 2: Get size information if available (for size-based shelf logic)
+    // Bước 2: Lấy thông tin kích cỡ nếu có (cho logic kệ theo size)
     // Priority: 1. From request input, 2. From database
     if (!$product_size && $product_id) {
         // Fallback: Try to get from database if not provided in request
@@ -570,7 +570,7 @@ try {
         $product_size = $sizeRow ? $sizeRow['size'] : null;
     }
     
-    // Step 3: Tìm vị trí phù hợp (theo type và chưa có size này)
+    // Bước 3: Tìm vị trí phù hợp (theo type và chưa có size này)
     // Convert product type sang không dấu để match với shelf_code
     function removeVietnameseTones($str) {
         $vietnameseMap = array(

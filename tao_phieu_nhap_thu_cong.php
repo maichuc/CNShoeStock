@@ -1108,7 +1108,7 @@ try {
                 }
             });
 
-            // Step navigation
+            // Điều hướng bước
             $('#nextToEdit').click(function() {
                 if (validateStep1()) {
                     moveToStep(2);

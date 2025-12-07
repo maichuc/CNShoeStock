@@ -8263,11 +8263,11 @@ Dữ liệu AI sẽ được merge:
 
                 // Special handling for going back to previous steps
                 if (step === 1) {
-                    // Step 1: Upload images
+                    // Bước 1: Tải ảnh lên
                     // Only show analyze section if images exist (but they should be cleared by backToAnalysis)
                     $('#analyzeSection').toggle(uploadedImages.length > 0);
                 } else if (step === 2) {
-                    // Step 2: AI Analysis
+                    // Bước 2: Phân tích AI
                     // Only show results if data exists (normal forward flow)
                     // Lưu ý: Nút backToAnalysis đã xóa tất cả dữ liệu, đây chỉ dành cho điều hướng tiến
                     if (uploadedImages.length > 0) {
@@ -8279,7 +8279,7 @@ Dữ liệu AI sẽ được merge:
                         $('#aiResults').show();
                     }
                 } else if (step === 3) {
-                    // Step 3: Edit product info
+                    // Bước 3: Chỉnh sửa thông tin sản phẩm
                     // Show suggestions if going back to step 3 (KHÔNG gọi khi update mode)
                     const isAIUpdateMode = window.aiUpdateMode && window.aiUpdateMode.productId;
                     if (suggestions && !isAIUpdateMode) {

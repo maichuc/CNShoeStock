@@ -1753,7 +1753,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
         
         function createRestockOrder(productId, quantity) {
             showNotification(`Đang tạo đơn nhập ${quantity} sản phẩm ID: ${productId}...`, 'info');
-            // TODO: Implement create restock order functionality
+            // CẦN LÀM: Triển khai chức năng tạo đơn nhập hàng
             // Redirect to stock receipt page with pre-filled data
             window.location.href = `api_phieu_nhap_don_gian.php?product_id=${productId}&quantity=${quantity}`;
         }
