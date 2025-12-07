@@ -1,5 +1,5 @@
 <?php
-// Enable error reporting for debugging
+// Bật báo lỗi để debug
 error_reporting(E_ALL);
 ini_set('display_errors', 0); // MUST BE 0 for JSON API
 ini_set('log_errors', 1);
@@ -12,13 +12,13 @@ if (!headers_sent()) {
     header('Access-Control-Allow-Headers: Content-Type, Accept');
 }
 
-// Handle preflight OPTIONS request
+// Xử lý yêu cầu OPTIONS preflight
 if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
-// Start session only if not already started
+// Khởi động session nếu chưa được khởi động
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

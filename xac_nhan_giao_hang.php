@@ -606,7 +606,7 @@ $stats = [
                     { "orderable": false, "targets": [0, 8] } // Disable sorting for STT and action column
                 ],
                 "drawCallback": function() {
-                    // Update STT numbers after each draw (sort, filter, paginate)
+                    // Cập nhật số STT sau mỗi lần vẽ (sắp xếp, lọc, phân trang)
                     var api = this.api();
                     api.column(0, {search:'applied', order:'applied'}).nodes().each(function(cell, i) {
                         var pageInfo = api.page.info();

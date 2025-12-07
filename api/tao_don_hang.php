@@ -69,7 +69,7 @@ try {
             $availableStock = $stockResult ? $stockResult['quantity'] : 0;
             
             if ($availableStock < $item['quantity']) {
-                // Get product name for better error message
+                // Lấy tên sản phẩm để hiển thị thông báo lỗi tốt hơn
                 $productSql = "SELECT p.product_name, pv.size, pv.color 
                               FROM product_variants pv 
                               JOIN products p ON pv.product_id = p.product_id 

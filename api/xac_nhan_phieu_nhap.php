@@ -23,7 +23,7 @@ try {
         throw new Exception('Thiếu mã phiếu nhập');
     }
     
-    // Update receipt status
+    // Cập nhật trạng thái phiếu nhập
     $stmt = $pdo->prepare("UPDATE stock_receipts SET status = 'confirmed', confirmed_at = NOW(), confirmed_by = ? WHERE receipt_id = ?");
     $stmt->execute([$_SESSION['user_id'], $receipt_id]);
     

@@ -22,7 +22,7 @@ echo "   EMAIL QUEUE PROCESSOR\n";
 echo "====================================\n";
 echo "Started at: " . date('Y-m-d H:i:s') . "\n\n";
 
-// Process email queue
+// Xử lý hàng đợi email
 $result = $emailService->processEmailQueue();
 
 echo "Results:\n";

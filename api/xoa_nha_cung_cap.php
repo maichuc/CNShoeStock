@@ -19,7 +19,7 @@ try {
         throw new Exception('ID nhà cung cấp không hợp lệ');
     }
     
-    // Get supplier info before deletion
+    // Lấy thông tin nhà cung cấp trước khi xóa
     $stmt = $pdo->prepare("SELECT name, supplier_code FROM suppliers WHERE supplier_id = ?");
     $stmt->execute([$supplierId]);
     $supplier = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -28,7 +28,7 @@ try {
         throw new Exception('Không tìm thấy nhà cung cấp');
     }
     
-    // Check if supplier is being used in other tables
+    // Kiểm tra xem nhà cung cấp có đang được sử dụng không
     $checkTables = [
         'purchase_orders' => 'supplier_id',
         'stock_receipts' => 'supplier_id',
@@ -46,7 +46,7 @@ try {
                 $dependencies[] = "$table ($count bản ghi)";
             }
         } catch (Exception $e) {
-            // Table might not exist, continue
+            // Bảng có thể không tồn tại, tiếp tục
             continue;
         }
     }
@@ -57,7 +57,7 @@ try {
     
     $pdo->beginTransaction();
     
-    // Delete supplier
+    // Xóa nhà cung cấp
     $deleteStmt = $pdo->prepare("DELETE FROM suppliers WHERE supplier_id = ?");
     $deleteStmt->execute([$supplierId]);
     

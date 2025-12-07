@@ -24,7 +24,7 @@ try {
     
     $duplicates = [];
     
-    // Check by name
+    // Kiểm tra theo tên
     if ($name) {
         $sql = "SELECT supplier_id, name FROM suppliers WHERE name = ? AND is_deleted = 0";
         if ($exclude_id) $sql .= " AND supplier_id != ?";
@@ -37,7 +37,7 @@ try {
         }
     }
     
-    // Check by email
+    // Kiểm tra theo email
     if ($email) {
         $sql = "SELECT supplier_id, name, email FROM suppliers WHERE email = ? AND is_deleted = 0";
         if ($exclude_id) $sql .= " AND supplier_id != ?";
@@ -50,7 +50,7 @@ try {
         }
     }
     
-    // Check by phone
+    // Kiểm tra theo số điện thoại
     if ($phone) {
         $sql = "SELECT supplier_id, name, phone FROM suppliers WHERE phone = ? AND is_deleted = 0";
         if ($exclude_id) $sql .= " AND supplier_id != ?";

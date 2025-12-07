@@ -502,7 +502,7 @@ function calculateBrandFeatureSimilarity($aiData, $dbProduct) {
     $maxScore += 40;
     $featureScore = 0;
     
-    // Check for specific feature keywords
+    // Kiểm tra các từ khóa đặc điểm cụ thể
     $aiFeatures = strtolower(($aiData['features'] ?? '') . ' ' . ($aiData['description'] ?? ''));
     $dbFeatures = strtolower(($dbProduct['description'] ?? '') . ' ' . ($dbProduct['name'] ?? ''));
     

@@ -42,7 +42,7 @@ try {
     
     // Enhance each order with customer and product info
     foreach ($orders as &$order) {
-        // Get customer info if customer_id exists
+        // Lấy thông tin khách hàng nếu có customer_id
         if (!empty($order['customer_id'])) {
             $customerSql = "SELECT full_name, phone, address FROM customers WHERE customer_id = :customer_id";
             $customerStmt = $pdo->prepare($customerSql);
@@ -57,7 +57,7 @@ try {
             }
         }
         
-        // Set defaults if no customer info
+        // Đặt giá trị mặc định nếu không có thông tin khách hàng
         if (empty($order['customer_name'])) {
             $order['customer_name'] = 'Unknown Customer';
         }
@@ -68,7 +68,7 @@ try {
             $order['customer_address'] = '';
         }
         
-        // Get first product info for display
+        // Lấy thông tin sản phẩm đầu tiên để hiển thị
         $productSql = "
             SELECT 
                 od.quantity,

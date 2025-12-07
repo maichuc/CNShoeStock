@@ -40,7 +40,7 @@ try {
         throw new Exception('Order ID and status are required');
     }
     
-    // Validate status
+    // Kiểm tra trạng thái
     if (!in_array($status, ['accepted', 'canceled'])) {
         throw new Exception('Invalid status. Must be accepted or canceled');
     }
@@ -53,7 +53,7 @@ try {
     $pdo->beginTransaction();
     
     try {
-        // Check if order exists (chỉ trong warehouse của user)
+        // Kiểm tra xem đơn hàng có tồn tại không (chỉ trong warehouse của user)
         $checkSql = "SELECT * FROM orders WHERE order_id = :order_id AND warehouse_id = :warehouse_id";
         $checkStmt = $pdo->prepare($checkSql);
         $checkStmt->bindParam(':order_id', $orderId, PDO::PARAM_INT);
@@ -65,7 +65,7 @@ try {
             throw new Exception('Order not found');
         }
         
-        // Update order status with cancellation reason if canceled
+        // Cập nhật trạng thái đơn hàng với lý do huỷ nếu bị huỷ
         if ($status === 'canceled') {
             $cancellationReason = 'Do thao tác xử lý';
             $updateSql = "UPDATE orders SET status = :status, cancellation_reason = :reason, updated_at = NOW() WHERE order_id = :order_id";
@@ -89,12 +89,12 @@ try {
         // If accepted, try to create warehouse export slip (optional)
         if ($status === 'accepted') {
             try {
-                // Check if warehouse_exports table exists
+                // Kiểm tra xem bảng warehouse_exports có tồn tại không
                 $tableCheckSql = "SHOW TABLES LIKE 'warehouse_exports'";
                 $tableCheckStmt = $pdo->query($tableCheckSql);
                 
                 if ($tableCheckStmt->rowCount() > 0) {
-                    // Get order and customer details
+                    // Lấy thông tin đơn hàng và khách hàng
                     $orderInfoSql = "
                         SELECT 
                             o.order_id,
@@ -111,10 +111,10 @@ try {
                     $orderData = $orderInfoStmt->fetch(PDO::FETCH_ASSOC);
                     
                     if ($orderData) {
-                        // Generate export code
+                        // Tạo mã phiếu xuất
                         $exportCode = 'EXP' . date('Ymd') . str_pad($orderId, 4, '0', STR_PAD_LEFT);
                         
-                        // Create export slip
+                        // Tạo phiếu xuất
                         $exportSql = "
                             INSERT INTO warehouse_exports (
                                 order_id, warehouse_id, export_code, customer_name, 
@@ -134,7 +134,7 @@ try {
                         
                         $exportId = $pdo->lastInsertId();
                         
-                        // Get all order details for this order
+                        // Lấy tất cả chi tiết đơn hàng
                         $orderDetailsSql = "
                             SELECT variant_id, quantity, unit_price, total_price
                             FROM order_details 
@@ -146,7 +146,7 @@ try {
                         $orderDetailsStmt->execute();
                         $orderDetails = $orderDetailsStmt->fetchAll(PDO::FETCH_ASSOC);
                         
-                        // Create export details if table exists
+                        // Tạo chi tiết phiếu xuất nếu bảng tồn tại
                         $detailTableCheckSql = "SHOW TABLES LIKE 'warehouse_export_details'";
                         $detailTableCheckStmt = $pdo->query($detailTableCheckSql);
                         
@@ -211,7 +211,7 @@ try {
         
         $pdo->commit();
         
-        // Return success
+        // Trả về thành công
         echo json_encode([
             'success' => true,
             'message' => $status === 'accepted' ? 'Order accepted successfully' : 'Order cancelled successfully',

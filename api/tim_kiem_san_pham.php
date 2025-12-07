@@ -14,7 +14,7 @@ try {
     // Debug log (commented out for production)
     // error_log("DEBUG search_products.php - Query: $query, Category: $categoryId, Type: $productType, Warehouse: $warehouseId");
     
-    // Build the SQL query - CHỈ hiển thị products có trong warehouse hiện tại
+    // Xây dựng truy vấn SQL - CHỈ hiển thị products có trong warehouse hiện tại
     $sql = "SELECT 
                 p.product_id,
                 p.name as product_name,
@@ -31,7 +31,7 @@ try {
     
     $params = [':warehouse_id' => $warehouseId];
     
-    // Add search by product name if query provided
+    // Thêm tìm kiếm theo tên sản phẩm nếu có truy vấn
     if (!empty($query)) {
         $sql .= " AND p.name LIKE :query";
         $params[':query'] = '%' . $query . '%';

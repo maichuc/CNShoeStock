@@ -732,11 +732,11 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
                 $('#btnSaveBulk').show();
                 $('#templateSection').hide();
                 
-                // Update button states
+                // Cập nhật trạng thái nút
                 $('#btnSingleMode').removeClass('active').addClass('btn-outline-primary').removeClass('btn-primary');
                 $('#btnBulkMode').addClass('active').removeClass('btn-outline-primary').addClass('btn-primary');
                 
-                // Copy product types to bulk select
+                // Sao chép loại sản phẩm sang chế độ hàng loạt
                 const options = $('#rackZone').html();
                 $('#bulkRackZone').html(options);
             } else {
@@ -747,7 +747,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
                 $('#templateSection').show();
                 $('#bulkPreviewSection').hide();
                 
-                // Update button states
+                // Cập nhật trạng thái nút
                 $('#btnBulkMode').removeClass('active').addClass('btn-outline-primary').removeClass('btn-primary');
                 $('#btnSingleMode').addClass('active').removeClass('btn-outline-primary').addClass('btn-primary');
             }
@@ -762,7 +762,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             const floorToVal = $('#bulkFloorTo').val();
             const positionCountVal = $('#bulkPositionCount').val();
             
-            // Debug - xem giá trị đang lấy được
+            // Gỡ lỗi - xem giá trị đang lấy được
             console.log('Zone:', zone);
             console.log('RackFrom:', rackFromVal);
             console.log('RackTo:', rackToVal);
@@ -938,7 +938,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             });
         }
         
-        // Load danh sách loại sản phẩm theo warehouse
+        // Tải danh sách loại sản phẩm theo kho
         function loadProductTypes(warehouseId, targetSelects = '#rackZone, #bulkRackZone') {
             if (!warehouseId) {
                 $(targetSelects).html('<option value="">-- Chọn kho trước --</option>');
@@ -971,7 +971,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             });
         }
         
-        // Load danh sách warehouses
+        // Tải danh sách kho
         function loadWarehouses() {
             $.ajax({
                 url: 'api_vi_tri_kho.php?action=warehouses',
@@ -1041,7 +1041,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             });
         }
 
-        // Load danh sách locations
+        // Tải danh sách vị trí
         function loadLocations() {
             const warehouseId = $('#filterWarehouse').val();
             const search = $('#searchInput').val();
@@ -1077,7 +1077,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             
             if (locations.length === 0) {
                 tbody.html('<tr><td colspan="7" class="text-center">Không có dữ liệu</td></tr>');
-                // Update statistics
+                // Cập nhật thống kê
                 $('#totalCount').text('Tổng: 0 vị trí');
                 $('#activeCount').text('Hoạt động: 0');
                 $('#inactiveCount').text('Không hoạt động: 0');
@@ -1085,7 +1085,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
                 return;
             }
             
-            // Calculate statistics
+            // Tính toán thống kê
             let activeCount = 0;
             let inactiveCount = 0;
             
@@ -1096,7 +1096,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
                     ? '<span class="badge badge-active">Đang hoạt động</span>' 
                     : '<span class="badge badge-inactive">Không hoạt động</span>';
                 
-                // Count statistics
+                // Đếm thống kê
                 if (isActive) {
                     activeCount++;
                 } else {
@@ -1147,14 +1147,14 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             
             tbody.html(html);
             
-            // Update statistics badges
+            // Cập nhật huy hiệu thống kê
             $('#totalCount').text('Tổng: ' + locations.length + ' vị trí');
             $('#activeCount').text('Hoạt động: ' + activeCount);
             $('#inactiveCount').text('Không hoạt động: ' + inactiveCount);
             $('#resultCount').text(locations.length);
         }
 
-        // Apply template
+        // Áp dụng mẫu
         function applyTemplate(type) {
             switch(type) {
                 case 'sneaker':
@@ -1203,7 +1203,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             }
         }
         
-        // Update location code format
+        // Cập nhật định dạng mã vị trí
         function updateLocationCodeFormat() {
             const type = $('#locationType').val();
             $('.location-type-inputs').hide();
@@ -1235,7 +1235,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             return str.toUpperCase().replace(/\s+/g, '-');
         }
         
-        // Generate rack code
+        // Tạo mã kệ
         function generateRackCode() {
             const zone = $('#rackZone').val(); // Tên gốc có thể có dấu
             const zoneCode = removeVietnameseTones(zone); // Chuyển thành không dấu cho mã
@@ -1251,7 +1251,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
                 // Lưu type (loại sản phẩm có dấu)
                 $('#addLocationType').val(zone);
                 
-                // Show generated code preview
+                // Hiển thị xem trước mã đã tạo
                 $('#generatedCodeDisplay').text(code);
                 $('#generatedCodePreview').slideDown();
                 
@@ -1261,7 +1261,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             }
         }
         
-        // Generate size code
+        // Tạo mã size
         function generateSizeCode() {
             const from = $('#sizeFrom').val();
             const to = $('#sizeTo').val();
@@ -1274,7 +1274,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             }
         }
         
-        // Generate zone code
+        // Tạo mã khu vực
         function generateZoneCode() {
             const name = $('#zoneName').val().toUpperCase();
             
@@ -1286,7 +1286,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             }
         }
         
-        // Validate location code
+        // Kiểm tra mã vị trí
         function validateLocationCode(code) {
             const feedback = $('#locationCodeFeedback');
             
@@ -1295,7 +1295,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
                 return;
             }
             
-            // Check format
+            // Kiểm tra định dạng
             const patterns = {
                 rack: /^[A-Z-]+-K\d+-T\d+-P\d+$/,
                 size: /^SIZE-\d+-\d+$/,
@@ -1331,7 +1331,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
                 return;
             }
             
-            // Get existing locations for this warehouse
+            // Lấy danh sách vị trí hiện có của kho này
             const existingCodes = filteredLocations
                 .filter(loc => loc.warehouse_id == warehouseId)
                 .map(loc => loc.location_code);

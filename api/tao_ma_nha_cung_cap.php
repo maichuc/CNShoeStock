@@ -17,7 +17,7 @@ try {
     $database = new Database();
     $pdo = $database->getConnection();
     
-    // Get latest supplier code
+    // Lấy mã nhà cung cấp mới nhất
     $stmt = $pdo->query("SELECT supplier_code FROM suppliers WHERE supplier_code LIKE 'NCC%' ORDER BY supplier_id DESC LIMIT 1");
     $lastCode = $stmt->fetchColumn();
     

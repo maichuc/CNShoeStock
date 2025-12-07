@@ -757,7 +757,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
         
         // Hiển thị chi tiết vị trí
         function showLocationDetail(locationText) {
-            // Parse location text: "A01-01-01 (10)" -> shelf_code: A01-01-01, quantity: 10
+            // Phân tích cú pháp văn bản vị trí: "A01-01-01 (10)" -> shelf_code: A01-01-01, quantity: 10
             const match = locationText.match(/^(.+?)\s*\((\d+)\)$/);
             
             if (match) {
@@ -799,7 +799,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
             }
         }
         
-        // Initialize QR Scanner
+        // Khởi tạo QR Scanner
         function initQRScanner() {
             if (html5QrcodeScanner) {
                 html5QrcodeScanner.clear();
@@ -853,7 +853,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
             }
         }
         
-        // Process QR Code
+        // Xử lý mã QR
         function processQRCode(qrCode) {
             console.log('Processing QR Code:', qrCode);
             
@@ -924,7 +924,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
                 const requiredQty = matchedItem.getAttribute('data-required');
                 const productName = matchedItem.querySelector('.card-title').textContent;
                 
-                // Hide QR modal and show quantity modal
+                // Ẩn modal QR và hiển thị modal số lượng
                 $('#qrScanModal').modal('hide');
                 showQuantityModal(itemId, requiredQty);
                 
@@ -983,13 +983,13 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
             }
         }
         
-        // Toggle Manual Input
+        // Bật/tắt nhập thủ công
         function toggleManualInput() {
             const section = document.getElementById('manualInputSection');
             section.style.display = section.style.display === 'none' ? 'block' : 'none';
         }
         
-        // Open QR Modal for specific item
+        // Mở modal QR cho sản phẩm cụ thể
         function openQRModal(itemId) {
             currentItemId = itemId;
             $('#qrScanModal').modal('show');
@@ -1003,7 +1003,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
             $('#manualSkuModal').modal('show');
         }
         
-        // Validate SKU
+        // Kiểm tra SKU
         function validateSku() {
             const inputSku = document.getElementById('manualSku').value.trim().toUpperCase();
             
@@ -1062,14 +1062,14 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
             }, 500);
         }
         
-        // Show Quantity Modal
+        // Hiển thị modal số lượng
         function showQuantityModal(itemId, requiredQty) {
             currentItemId = itemId;
             document.getElementById('requiredQuantity').textContent = requiredQty;
             document.getElementById('pickedQuantity').value = requiredQty;
             document.getElementById('pickedQuantity').max = requiredQty;
             
-            // Get product info
+            // Lấy thông tin sản phẩm
             const itemCard = document.querySelector(`[data-item-id="${itemId}"]`);
             const productName = itemCard.querySelector('.card-title').textContent;
             document.getElementById('productInfo').innerHTML = `
@@ -1081,7 +1081,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
             $('#quantityModal').modal('show');
         }
         
-        // Save Quantity
+        // Lưu số lượng
         function saveQuantity() {
             const pickedQty = parseInt(document.getElementById('pickedQuantity').value);
             const requiredQty = parseInt(document.getElementById('requiredQuantity').textContent);
@@ -1118,7 +1118,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
                 return;
             }
             
-            // Send to server
+            // Gửi lên server
             fetch('api_xu_ly_xuat.php', {
                 method: 'POST',
                 headers: {
@@ -1226,7 +1226,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
                     throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 200)}`);
                 }
                 
-                // Parse JSON
+                // Phân tích JSON
                 let data;
                 try {
                     data = JSON.parse(responseText);
