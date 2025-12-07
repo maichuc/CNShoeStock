@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
-require_once '../config/database.php';
-require_once '../helpers/AuditLogger.php';
+require_once '../config/cau_hinh_csdl.php';
+require_once '../helpers/GhiNhatKyKiemToan.php';
 session_start();
 
 try {

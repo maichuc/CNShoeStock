@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-require_once '../config/database.php';
+require_once '../config/cau_hinh_csdl.php';
 
 session_start();
 
@@ -157,7 +157,7 @@ try {
                 'customer_id' => $customerId,
                 'items_count' => count($orderData['items'])
             ],
-            'redirect' => 'orders_management.php?status=pending'
+            'redirect' => 'quan_ly_don_hang.php?status=pending'
         ]);
         
     } catch (Exception $e) {

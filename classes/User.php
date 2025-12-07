@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/cau_hinh_csdl.php';
 
 class User {
     private $conn;
