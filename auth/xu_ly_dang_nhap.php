@@ -75,7 +75,7 @@ try {
             // Use relative path from web root (not from this file location)
             $redirectUrl = 'trang_chu.php';
             if (isset($user['must_change_password']) && $user['must_change_password'] == 1) {
-                $redirectUrl = 'force_doi_mat_khau.php';
+                $redirectUrl = 'bat_buoc_doi_mat_khau.php';
             }
             
             echo json_encode([
