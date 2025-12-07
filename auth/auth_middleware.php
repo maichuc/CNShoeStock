@@ -92,6 +92,11 @@ class AuthMiddleware {
     }
     
     public function logout() {
+        // Start session if not already started
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
         if (isset($_SESSION['session_token']) && method_exists($this->user, 'logout')) {
             $this->user->logout($_SESSION['session_token']);
         }

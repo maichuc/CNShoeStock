@@ -1,0 +1,19 @@
+# Deny access to all files except HTML files for QR printing
+<Files "*">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files "*.html">
+    Order Allow,Deny
+    Allow from all
+</Files>
+
+# Set expiration for temporary files (1 hour)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/html "access plus 1 hour"
+</IfModule>
+
+# Remove server signature
+ServerSignature Off

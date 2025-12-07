@@ -5,14 +5,10 @@ Thumbs.db
 # Environment
 .env
 
-# Vendor/Dependencies
-/vendor/
-/node_modules/
-
-# Local configs with secrets
-/config/database.php
-/config/database.local.php
-/helpers/EmailService.local.php
+# Cache directories
+/cache/
+cache/
+*.cache
 
 # Logs
 *.log

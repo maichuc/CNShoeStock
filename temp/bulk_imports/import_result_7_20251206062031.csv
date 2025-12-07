@@ -1,0 +1,4 @@
+Row,Status,"Full Name",Email,Username,"Generated Password","Error Message"
+3,SUCCESS,,,,5m7tV&#aUQ,
+4,SUCCESS,,,,2RswK@p3rh,
+2,FAILED,"Nguyễn Văn A",nguyenvana@example.com,nguyenvana,,"Email hoặc username đã tồn tại"

@@ -23,9 +23,9 @@ try {
     // Lấy dữ liệu từ form
     $warehouseName = trim($_POST['warehouse_name'] ?? '');
     $warehouseAddress = trim($_POST['warehouse_address'] ?? '');
-    $warehousePhone = trim($_POST['warehouse_phone'] ?? '');
-    $warehouseEmail = trim($_POST['warehouse_email'] ?? '');
     $adminName = trim($_POST['admin_name'] ?? '');
+    $warehousePhone = trim($_POST['warehouse_phone'] ?? ''); // Lưu vào user
+    $warehouseEmail = trim($_POST['warehouse_email'] ?? ''); // Lưu vào user
     $password = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
 
@@ -33,8 +33,8 @@ try {
     error_log("Register data received: " . json_encode($_POST));
 
     // Validate dữ liệu cơ bản
-    if (empty($warehouseName) || empty($warehouseAddress) || empty($warehousePhone) || 
-        empty($warehouseEmail) || empty($adminName) || empty($password)) {
+    if (empty($warehouseName) || empty($warehouseAddress) || empty($adminName) || 
+        empty($warehousePhone) || empty($warehouseEmail) || empty($password)) {
         throw new Exception('Vui lòng điền đầy đủ thông tin bắt buộc');
     }
 
@@ -53,9 +53,6 @@ try {
     $warehouse = new Warehouse($db);
     $warehouse->name = $warehouseName;
     $warehouse->address = $warehouseAddress;
-    $warehouse->phone = $warehousePhone;
-    $warehouse->email = $warehouseEmail;
-    $warehouse->manager_name = $adminName;
     $warehouse->status = 'active';
 
     // Validate warehouse
@@ -78,7 +75,8 @@ try {
     $user->password_hash = password_hash($password, PASSWORD_DEFAULT);
     $user->full_name = $adminName;
     $user->email = $warehouseEmail;
-    $user->role = 'admin';
+    $user->phone = $warehousePhone;
+    $user->role = 'manager';
     $user->warehouse_id = $warehouse->warehouse_id;
     $user->status = 'active';
 
@@ -95,12 +93,22 @@ try {
 
     // Gửi email xác nhận
     $emailSent = false;
+    $emailError = null;
     try {
+        error_log("Attempting to send welcome email to: $warehouseEmail");
         $emailService = new EmailService();
         // Truyền mật khẩu thuần theo chữ ký hàm (đang dùng app password email)
         $emailSent = $emailService->sendWelcomeEmail($warehouseEmail, $adminName, $username, $password, $warehouseName);
+        
+        if ($emailSent) {
+            error_log("Welcome email sent successfully to: $warehouseEmail");
+        } else {
+            error_log("Failed to send welcome email to: $warehouseEmail");
+            $emailError = "Không thể gửi email chào mừng";
+        }
     } catch (Exception $e) {
-        error_log("Email error: " . $e->getMessage());
+        $emailError = $e->getMessage();
+        error_log("Email error: " . $emailError);
     }
 
     // Log audit
@@ -125,7 +133,8 @@ try {
             'username' => $username,
             'warehouse_id' => $warehouse->warehouse_id,
             'email' => $warehouseEmail,
-            'email_sent' => $emailSent
+            'email_sent' => $emailSent,
+            'email_error' => $emailError
         ]
     ]);
 

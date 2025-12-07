@@ -1,0 +1,23 @@
+{
+    "name": "warehouse3/smart-warehouse-system",
+    "description": "Smart Warehouse Management System with Employee Management",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "phpmailer/phpmailer": "^6.8",
+        "phpoffice/phpspreadsheet": "^2.1"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "classes/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    }
+}

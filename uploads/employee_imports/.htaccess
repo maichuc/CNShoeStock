@@ -1,0 +1,10 @@
+# Deny direct access to uploaded files
+<Files "*">
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Allow only PHP scripts to access these files
+<FilesMatch "\.(php)$">
+    Allow from all
+</FilesMatch>

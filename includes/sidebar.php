@@ -1,0 +1,306 @@
+<?php
+// Get warehouse information
+require_once 'config/database.php';
+require_once 'classes/Warehouse.php';
+if (!isset($_SESSION)) {
+    session_start();
+}
+$database = new Database();
+$pdo = $database->getConnection();
+$userWarehouseId = $_SESSION['warehouse_id'] ?? null;
+$warehouseName = 'Smart Warehouse';
+if ($userWarehouseId) {
+    $warehouseObj = new Warehouse($pdo);
+    if ($warehouseObj->getById($userWarehouseId)) {
+        $warehouseName = $warehouseObj->name;
+    }
+}
+
+// Get current page name for active menu
+$currentPage = basename($_SERVER['PHP_SELF']);
+?>
+
+<!-- Sidebar -->
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+    <!-- Sidebar - Brand -->
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-laugh-wink"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3"><?php echo htmlspecialchars($warehouseName); ?></div>
+    </a>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider my-0">
+
+    <!-- Nav Item - Dashboard -->
+    <li class="nav-item <?php echo ($currentPage == 'index.php') ? 'active' : ''; ?>">
+        <a class="nav-link" href="index.php">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">Quản lý kho</div>
+
+    <!-- Nav Item - Quản lý sản phẩm -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProducts" 
+           aria-expanded="<?php echo (in_array($currentPage, ['add_product_ai.php', 'danh_sach_sp.php'])) ? 'true' : 'false'; ?>" 
+           aria-controls="collapseProducts">
+            <i class="fas fa-fw fa-box"></i>
+            <span>Quản lý sản phẩm</span>
+        </a>
+        <div id="collapseProducts" class="collapse <?php echo (in_array($currentPage, ['add_product_ai.php', 'danh_sach_sp.php'])) ? 'show' : ''; ?>" 
+             aria-labelledby="headingProducts" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item <?php echo ($currentPage == 'add_product_ai.php') ? 'active' : ''; ?>" href="add_product_ai.php">
+                    <i class="fas fa-plus-circle mr-1"></i> Thêm sản phẩm
+                </a>
+                <a class="collapse-item <?php echo ($currentPage == 'danh_sach_sp.php') ? 'active' : ''; ?>" href="danh_sach_sp.php">
+                    <i class="fas fa-list mr-1"></i> Danh sách sản phẩm
+                </a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Nav Item - Nhập kho -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReceipts" 
+           aria-expanded="<?php echo (in_array($currentPage, ['create_new_stock_receipt.php', 'create_manual_stock_receipt.php', 'stock_receipts_management.php'])) ? 'true' : 'false'; ?>" 
+           aria-controls="collapseReceipts">
+            <i class="fas fa-fw fa-dolly"></i>
+            <span>Nhập kho</span>
+        </a>
+        <div id="collapseReceipts" class="collapse <?php echo (in_array($currentPage, ['create_new_stock_receipt.php', 'create_manual_stock_receipt.php', 'stock_receipts_management.php'])) ? 'show' : ''; ?>" 
+             aria-labelledby="headingReceipts" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item <?php echo ($currentPage == 'create_new_stock_receipt.php') ? 'active' : ''; ?>" href="create_new_stock_receipt.php">
+                    <i class="fas fa-plus-circle mr-1"></i> Nhập kho AI
+                </a>
+                <a class="collapse-item <?php echo ($currentPage == 'create_manual_stock_receipt.php') ? 'active' : ''; ?>" href="create_manual_stock_receipt.php">
+                    <i class="fas fa-keyboard mr-1"></i> Nhập kho thủ công
+                </a>
+                <a class="collapse-item <?php echo ($currentPage == 'stock_receipts_management.php') ? 'active' : ''; ?>" href="stock_receipts_management.php">
+                    <i class="fas fa-clipboard-list mr-1"></i> Quản lý phiếu nhập
+                </a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Nav Item - Quản lý đơn hàng -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOrders" 
+           aria-expanded="<?php echo (in_array($currentPage, ['create_order.php', 'orders_management.php', 'update_delivery_status.php'])) ? 'true' : 'false'; ?>" 
+           aria-controls="collapseOrders">
+            <i class="fas fa-fw fa-shopping-cart"></i>
+            <span>Quản lý đơn hàng</span>
+        </a>
+        <div id="collapseOrders" class="collapse <?php echo (in_array($currentPage, ['create_order.php', 'orders_management.php', 'update_delivery_status.php'])) ? 'show' : ''; ?>" 
+             aria-labelledby="headingOrders" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item <?php echo ($currentPage == 'create_order.php') ? 'active' : ''; ?>" href="create_order.php">
+                    <i class="fas fa-plus-circle mr-1"></i> Tạo đơn hàng
+                </a>
+                <a class="collapse-item <?php echo ($currentPage == 'orders_management.php') ? 'active' : ''; ?>" href="orders_management.php">
+                    <i class="fas fa-list mr-1"></i> Danh sách đơn hàng
+                </a>
+                <a class="collapse-item <?php echo ($currentPage == 'update_delivery_status.php') ? 'active' : ''; ?>" href="update_delivery_status.php">
+                    <i class="fas fa-shipping-fast mr-1"></i> Cập nhật giao hàng
+                </a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Nav Item - Xuất kho -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseExports" 
+           aria-expanded="<?php echo (in_array($currentPage, ['export_management.php', 'process_export.php', 'view_export.php', 'confirm_delivery.php', 'confirmed_exports.php'])) ? 'true' : 'false'; ?>" 
+           aria-controls="collapseExports">
+            <i class="fas fa-fw fa-truck-loading"></i>
+            <span>Xuất kho</span>
+        </a>
+        <div id="collapseExports" class="collapse <?php echo (in_array($currentPage, ['export_management.php', 'process_export.php', 'view_export.php', 'confirm_delivery.php', 'confirmed_exports.php'])) ? 'show' : ''; ?>" 
+             aria-labelledby="headingExports" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item <?php echo (in_array($currentPage, ['export_management.php', 'process_export.php', 'view_export.php'])) ? 'active' : ''; ?>" href="export_management.php">
+                    <i class="fas fa-qrcode mr-1"></i> Xử lý đơn xuất kho
+                </a>
+                <a class="collapse-item <?php echo ($currentPage == 'confirm_delivery.php') ? 'active' : ''; ?>" href="confirm_delivery.php">
+                    <i class="fas fa-check-circle mr-1"></i> Xác nhận xuất hàng
+                </a>
+                <a class="collapse-item <?php echo ($currentPage == 'confirmed_exports.php') ? 'active' : ''; ?>" href="confirmed_exports.php">
+                    <i class="fas fa-list-check mr-1"></i> Danh sách phiếu xuất
+                </a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Nav Item - Quản lý nhà cung cấp -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSuppliers" 
+           aria-expanded="<?php echo (in_array($currentPage, ['suppliers_management.php', 'add_supplier.php'])) ? 'true' : 'false'; ?>" 
+           aria-controls="collapseSuppliers">
+            <i class="fas fa-fw fa-building"></i>
+            <span>Nhà cung cấp</span>
+        </a>
+        <div id="collapseSuppliers" class="collapse <?php echo (in_array($currentPage, ['suppliers_management.php', 'add_supplier.php'])) ? 'show' : ''; ?>" 
+             aria-labelledby="headingSuppliers" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <a class="collapse-item <?php echo ($currentPage == 'add_supplier.php') ? 'active' : ''; ?>" href="add_supplier.php">
+                    <i class="fas fa-plus-circle mr-1"></i> Thêm nhà cung cấp
+                </a>
+                <a class="collapse-item <?php echo ($currentPage == 'suppliers_management.php') ? 'active' : ''; ?>" href="suppliers_management.php">
+                    <i class="fas fa-list mr-1"></i> Danh sách NCC
+                </a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">
+
+    <!-- Heading -->
+    <div class="sidebar-heading">Hệ thống</div>
+
+    <?php
+    // Lấy role của user
+    $userRole = $_SESSION['role'] ?? 'staff';
+    
+    // Chỉ hiển thị menu Quản lý nhân viên cho Manager và Admin
+    if (in_array($userRole, ['admin', 'manager'])):
+    ?>
+    <!-- Nav Item - Quản lý nhân viên -->
+    <li class="nav-item <?php echo ($currentPage == 'employee_management.php') ? 'active' : ''; ?>">
+        <a class="nav-link" href="employee_management.php">
+            <i class="fas fa-fw fa-users"></i>
+            <span>Quản lý nhân viên</span>
+        </a>
+    </li>
+    <?php endif; ?>
+
+    <!-- Nav Item - Quản lý kho hàng (Warehouse Management) -->
+    <?php if (in_array($userRole, ['admin', 'manager'])): ?>
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseWarehouse" 
+           aria-expanded="<?php echo (in_array($currentPage, ['warehouse_management.php', 'warehouse_locations.php'])) ? 'true' : 'false'; ?>" 
+           aria-controls="collapseWarehouse">
+            <i class="fas fa-fw fa-warehouse"></i>
+            <span>Quản lý kho hàng</span>
+        </a>
+        <div id="collapseWarehouse" class="collapse <?php echo (in_array($currentPage, ['warehouse_management.php', 'warehouse_locations.php'])) ? 'show' : ''; ?>" 
+             aria-labelledby="headingWarehouse" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <?php if ($userRole === 'admin'): ?>
+                <a class="collapse-item <?php echo ($currentPage == 'warehouse_management.php') ? 'active' : ''; ?>" href="warehouse_management.php">
+                    <i class="fas fa-warehouse mr-1"></i> Danh sách kho
+                </a>
+                <?php endif; ?>
+                <a class="collapse-item <?php echo ($currentPage == 'warehouse_locations.php') ? 'active' : ''; ?>" href="warehouse_locations.php">
+                    <i class="fas fa-map-marked-alt mr-1"></i> Vị trí kho
+                </a>
+            </div>
+        </div>
+    </li>
+    <?php endif; ?>
+
+    <!-- Nav Item - Dự báo thông minh -->
+    <li class="nav-item <?php echo ($currentPage == 'ai_forecast.php') ? 'active' : ''; ?>">
+        <a class="nav-link" href="ai_forecast.php">
+            <i class="fas fa-fw fa-brain"></i>
+            <span>Dự báo thông minh</span>
+        </a>
+    </li>
+
+    <!-- Divider -->
+    <?php
+    /*
+    ======================================================================
+    ADDONS MENU - HIDDEN (Kept for future use, especially forgot-password)
+    ======================================================================
+    These menus are commented out but files still exist:
+    - forgot-password.html - Kept for future password recovery feature
+    - Other utility pages (utilities-color.html, utilities-border.html, etc.)
+    - Charts and Tables pages
+    
+    To re-enable, uncomment the section below.
+    ======================================================================
+    
+    <!-- Heading -->
+    <div class="sidebar-heading">Addons</div>
+
+    <!-- Nav Item - Utilities Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
+            aria-expanded="true" aria-controls="collapseUtilities">
+            <i class="fas fa-fw fa-wrench"></i>
+            <span>Utilities</span>
+        </a>
+        <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Custom Utilities:</h6>
+                <a class="collapse-item" href="utilities-color.html">Colors</a>
+                <a class="collapse-item" href="utilities-border.html">Borders</a>
+                <a class="collapse-item" href="utilities-animation.html">Animations</a>
+                <a class="collapse-item" href="utilities-other.html">Other</a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Nav Item - Pages Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
+            aria-expanded="true" aria-controls="collapsePages">
+            <i class="fas fa-fw fa-folder"></i>
+            <span>Pages</span>
+        </a>
+        <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Login Screens:</h6>
+                <a class="collapse-item" href="login.html">Login</a>
+                <a class="collapse-item" href="register.html">Register</a>
+                <a class="collapse-item" href="forgot-password.html">Forgot Password</a>
+                <div class="collapse-divider"></div>
+                <h6 class="collapse-header">Other Pages:</h6>
+                <a class="collapse-item" href="404.html">404 Page</a>
+                <a class="collapse-item" href="blank.html">Blank Page</a>
+            </div>
+        </div>
+    </li>
+
+    <!-- Nav Item - Charts -->
+    <li class="nav-item">
+        <a class="nav-link" href="charts.html">
+            <i class="fas fa-fw fa-chart-area"></i>
+            <span>Charts</span></a>
+    </li>
+
+    <!-- Nav Item - Tables -->
+    <li class="nav-item">
+        <a class="nav-link" href="tables.html">
+            <i class="fas fa-fw fa-table"></i>
+            <span>Tables</span></a>
+    </li>
+    
+    ======================================================================
+    END OF HIDDEN ADDONS MENU
+    ======================================================================
+    */
+    ?>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <!-- Sidebar Toggler (Sidebar) -->
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+
+</ul>
+<!-- End of Sidebar -->

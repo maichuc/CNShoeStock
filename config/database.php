@@ -2,8 +2,8 @@
 class Database {
     private $host = "localhost";
     private $db_name = "smart_shoes_warehouse2";
-    private $username = "nhichuc2003";
-    private $password = "123";
+    private $username = "root";
+    private $password = "";
     public $conn;
 
     public function getConnection() {

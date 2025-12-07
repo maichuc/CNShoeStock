@@ -9,10 +9,15 @@ class AuditLogger {
     /**
      * Ghi log hành động của user
      */
-    public function log($userId, $action, $tableName = null, $recordId = null, $oldValues = null, $newValues = null) {
+    public function log($userId, $action, $tableName = null, $recordId = null, $oldValues = null, $newValues = null, $warehouseId = null) {
         try {
-            $query = "INSERT INTO audit_logs (user_id, action, table_name, record_id, old_values, new_values, ip_address, user_agent, created_at) 
-                     VALUES (:user_id, :action, :table_name, :record_id, :old_values, :new_values, :ip_address, :user_agent, NOW())";
+            // Lấy warehouse_id từ session nếu không truyền vào
+            if ($warehouseId === null && isset($_SESSION['warehouse_id'])) {
+                $warehouseId = $_SESSION['warehouse_id'];
+            }
+            
+            $query = "INSERT INTO audit_logs (user_id, action, table_name, record_id, old_values, new_values, warehouse_id, created_at) 
+                     VALUES (:user_id, :action, :table_name, :record_id, :old_values, :new_values, :warehouse_id, NOW())";
             
             $stmt = $this->db->prepare($query);
             
@@ -26,8 +31,7 @@ class AuditLogger {
             $stmt->bindParam(':record_id', $recordId);
             $stmt->bindParam(':old_values', $oldValuesJson);
             $stmt->bindParam(':new_values', $newValuesJson);
-            $stmt->bindValue(':ip_address', $this->getClientIP());
-            $stmt->bindValue(':user_agent', $_SERVER['HTTP_USER_AGENT'] ?? '');
+            $stmt->bindParam(':warehouse_id', $warehouseId);
             
             return $stmt->execute();
             
@@ -73,21 +77,6 @@ class AuditLogger {
                 'timestamp' => date('Y-m-d H:i:s')
             ]
         );
-    }
-    
-    private function getClientIP() {
-        $ipKeys = ['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'REMOTE_ADDR'];
-        foreach ($ipKeys as $key) {
-            if (array_key_exists($key, $_SERVER) === true) {
-                foreach (explode(',', $_SERVER[$key]) as $ip) {
-                    $ip = trim($ip);
-                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
-                        return $ip;
-                    }
-                }
-            }
-        }
-        return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     }
 }
 ?>

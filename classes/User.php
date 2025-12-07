@@ -10,6 +10,7 @@ class User {
     public $username;
     public $password_hash;
     public $full_name;
+    public $employee_code;
     public $email;
     public $phone;
     public $role; // enum('admin','staff')
@@ -25,9 +26,14 @@ class User {
 
     // Create new user
     public function create() {
+        // Generate employee code if not set
+        if (empty($this->employee_code)) {
+            $this->employee_code = $this->generateEmployeeCode();
+        }
+
         $sql = "INSERT INTO {$this->table_name}
-                (username, password_hash, full_name, email, phone, role, warehouse_id, status)
-                VALUES (:username, :password_hash, :full_name, :email, :phone, :role, :warehouse_id, :status)";
+                (username, password_hash, full_name, employee_code, email, phone, role, warehouse_id, status)
+                VALUES (:username, :password_hash, :full_name, :employee_code, :email, :phone, :role, :warehouse_id, :status)";
 
         $stmt = $this->conn->prepare($sql);
 
@@ -42,6 +48,7 @@ class User {
         $stmt->bindParam(':username', $this->username);
         $stmt->bindParam(':password_hash', $this->password_hash);
         $stmt->bindParam(':full_name', $this->full_name);
+        $stmt->bindParam(':employee_code', $this->employee_code);
         $stmt->bindParam(':email', $this->email);
         $stmt->bindParam(':phone', $this->phone);
         $stmt->bindParam(':role', $this->role);
@@ -122,6 +129,16 @@ class User {
 
     public static function hashPassword($password) {
         return password_hash($password, PASSWORD_DEFAULT);
+    }
+
+    /**
+     * Generate unique employee code
+     */
+    private function generateEmployeeCode() {
+        $stmt = $this->conn->query("SELECT MAX(CAST(SUBSTRING(employee_code, 4) AS UNSIGNED)) as max_code FROM users WHERE employee_code LIKE 'EMP%'");
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $nextNumber = ($result['max_code'] ?? 0) + 1;
+        return 'EMP' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 }
 ?>

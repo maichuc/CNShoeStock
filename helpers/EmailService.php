@@ -16,14 +16,42 @@ if (file_exists($__ex) && file_exists($__ph) && file_exists($__sm)) {
 class EmailService {
     private $mail;
     private $enabled = true;
+    private $pdo;
     
-    public function __construct() {
+    public function __construct($pdo = null) {
+        $this->pdo = $pdo;
+        
         if (defined('EMAILSERVICE_DISABLED') && EMAILSERVICE_DISABLED === true) {
             $this->enabled = false;
             return;
         }
-    $this->mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        
+        // Load environment variables from .env file
+        $this->loadEnvironmentVariables();
+        
+        $this->mail = new \PHPMailer\PHPMailer\PHPMailer(true);
         $this->configureMailer();
+    }
+    
+    /**
+     * Load environment variables from .env file
+     */
+    private function loadEnvironmentVariables() {
+        $envFile = __DIR__ . '/../.env';
+        if (file_exists($envFile)) {
+            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                if (strpos($line, '#') === 0) continue; // Skip comments
+                if (strpos($line, '=') !== false) {
+                    list($key, $value) = explode('=', $line, 2);
+                    $key = trim($key);
+                    $value = trim($value);
+                    if (!getenv($key)) {
+                        putenv("$key=$value");
+                    }
+                }
+            }
+        }
     }
     
     private function configureMailer() {
@@ -32,31 +60,43 @@ class EmailService {
             return true;
         }
         try {
-            // Cấu hình SMTP với thông tin của bạn
+            // Cấu hình SMTP Gmail với App Password
             $this->mail->isSMTP();
-            $host = getenv('MAIL_HOST') ?: 'smtp.gmail.com';
-            $port = (int)(getenv('MAIL_PORT') ?: 587);
-            $username = getenv('MAIL_USERNAME');
-            $password = getenv('MAIL_PASSWORD');
-            $encryption = getenv('MAIL_ENCRYPTION') ?: \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-
-            $this->mail->Host       = $host;
+            $this->mail->Host       = getenv('MAIL_HOST') ?: 'smtp.gmail.com';
             $this->mail->SMTPAuth   = true;
-            $this->mail->Username   = $username;
-            $this->mail->Password   = $password;
-            $this->mail->SMTPSecure = $encryption;
-            $this->mail->Port       = $port;
+            $this->mail->Username   = getenv('MAIL_USERNAME') ?: 'cnshoestockcompany@gmail.com';
+            $this->mail->Password   = getenv('MAIL_PASSWORD') ?: 'daxa iqfy pxwa voao'; // App Password
+            $this->mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+            $this->mail->Port       = (int)(getenv('MAIL_PORT') ?: 587);
+            
+            // Cấu hình bổ sung cho Gmail
+            $this->mail->SMTPOptions = array(
+                'ssl' => array(
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true
+                )
+            );
+            
+            // Enable verbose debug output (chỉ khi debug)
+            if (getenv('APP_DEBUG') === 'true') {
+                $this->mail->SMTPDebug = \PHPMailer\PHPMailer\SMTP::DEBUG_SERVER;
+                $this->mail->Debugoutput = function($str, $level) {
+                    error_log("PHPMailer: $str");
+                };
+            }
             
             // Cấu hình mã hóa
             $this->mail->CharSet = 'UTF-8';
             $this->mail->Encoding = 'base64';
             
             // Người gửi
-            $fromAddress = getenv('MAIL_FROM_ADDRESS') ?: ($username ?: 'no-reply@example.com');
-            $fromName = getenv('MAIL_FROM_NAME') ?: 'Smart Warehouse System';
+            $fromAddress = getenv('MAIL_FROM_ADDRESS') ?: 'cnshoestockcompany@gmail.com';
+            $fromName = getenv('MAIL_FROM_NAME') ?: 'CN Shoes Stock Company';
             $this->mail->setFrom($fromAddress, $fromName);
             
         } catch (Exception $e) {
+            error_log("Email configuration error: " . $e->getMessage());
             throw new Exception("Không thể cấu hình email: " . $e->getMessage());
         }
     }
@@ -66,11 +106,16 @@ class EmailService {
      */
     public function sendWelcomeEmail($adminEmail, $adminName, $username, $password, $warehouseName) {
         if (!$this->enabled) {
-            return true;
+            return [
+                'success' => false,
+                'message' => 'Email service is disabled (PHPMailer not found)'
+            ];
         }
+        
         try {
-            // Reset recipients
+            // Reset recipients for each send
             $this->mail->clearAddresses();
+            $this->mail->clearAllRecipients();
             
             // Người nhận
             $this->mail->addAddress($adminEmail, $adminName);
@@ -92,20 +137,74 @@ class EmailService {
             $this->mail->Body = $emailBody;
             $this->mail->AltBody = $this->generatePlainTextEmail($adminName, $username, $password, $warehouseName, $loginUrl);
             
-            $this->mail->send();
-            return true;
+            // Send email
+            $sendResult = $this->mail->send();
+            
+            // Log to database if pdo is available
+            if ($this->pdo) {
+                $this->logEmailToDatabase($adminEmail, $adminName, 'welcome_employee', $sendResult ? 'sent' : 'failed');
+            }
+            
+            return [
+                'success' => true,
+                'message' => 'Email sent successfully'
+            ];
             
         } catch (Exception $e) {
-            error_log("Email sending failed: " . $e->getMessage());
-            return false;
+            error_log("Email sending failed: " . $this->mail->ErrorInfo);
+            error_log("Exception: " . $e->getMessage());
+            
+            // Log failure to database if pdo is available
+            if ($this->pdo) {
+                $this->logEmailToDatabase($adminEmail, $adminName, 'welcome_employee', 'failed', $e->getMessage());
+            }
+            
+            return [
+                'success' => false,
+                'message' => 'Mailer Error: ' . $this->mail->ErrorInfo . ' | Exception: ' . $e->getMessage()
+            ];
         }
     }
     
     private function getLoginUrl() {
-        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        // Check if running from web context
+        if (!isset($_SERVER['HTTP_HOST'])) {
+            // Running from CLI or background - use default URL
+            return 'http://localhost/cmix_warehouse23_11/login.html';
+        }
+        
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'];
-        $path = dirname($_SERVER['REQUEST_URI']) . '/../login.html';
-        return $protocol . '://' . $host . $path;
+        
+        // Lấy đường dẫn thư mục gốc của project
+        $scriptPath = $_SERVER['SCRIPT_NAME'];
+        $projectRoot = dirname($scriptPath);
+        
+        // Nếu script ở trong subfolder (như /auth/register_process.php), 
+        // thì cần lùi về root folder
+        $pathParts = explode('/', trim($projectRoot, '/'));
+        
+        // Nếu có nhiều hơn 1 phần (ví dụ: warehouse5/auth), lấy phần đầu
+        if (count($pathParts) > 1) {
+            $projectRoot = '/' . $pathParts[0];
+        } else if ($projectRoot === '' || $projectRoot === '.') {
+            // Nếu ở root, lấy tên folder từ document root
+            $docRoot = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']); // Chuẩn hóa
+            $currentDir = str_replace('\\', '/', dirname(__DIR__)); // c:/xampp/htdocs/warehouse5
+            
+            // Loại bỏ document root để lấy project folder
+            $projectFolder = str_replace($docRoot, '', $currentDir);
+            
+            // Đảm bảo bắt đầu bằng /
+            if (substr($projectFolder, 0, 1) !== '/') {
+                $projectFolder = '/' . $projectFolder;
+            }
+            
+            $projectRoot = $projectFolder;
+        }
+        
+        $loginUrl = $protocol . '://' . $host . $projectRoot . '/login.html';
+        return $loginUrl;
     }
     
     private function generateWelcomeEmailTemplate($adminName, $username, $password, $warehouseName, $loginUrl) {
@@ -234,6 +333,35 @@ Hotline: 1900-xxxx (8:00-18:00, T2-T6)
 CN Shoes Stock Company
 © 2024 All rights reserved.
         ";
+    }
+    
+    /**
+     * Log email activity to database
+     */
+    private function logEmailToDatabase($recipient, $recipientName, $emailType, $status, $errorMessage = null) {
+        if (!$this->pdo) {
+            return;
+        }
+        
+        try {
+            $stmt = $this->pdo->prepare("
+                INSERT INTO email_logs 
+                (recipient_email, recipient_name, email_type, status, error_message, sent_at)
+                VALUES 
+                (:recipient, :name, :type, :status, :error, NOW())
+            ");
+            
+            $stmt->execute([
+                ':recipient' => $recipient,
+                ':name' => $recipientName,
+                ':type' => $emailType,
+                ':status' => $status,
+                ':error' => $errorMessage
+            ]);
+        } catch (PDOException $e) {
+            // Silently fail - don't break email sending if logging fails
+            error_log("Failed to log email to database: " . $e->getMessage());
+        }
     }
 }
 ?>

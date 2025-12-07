@@ -1,0 +1,74 @@
+/* Status Badge Styles - Consistent across all pages */
+.status-badge {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-weight: 600;
+    display: inline-block;
+    white-space: nowrap;
+    text-align: center;
+    min-width: 100px;
+    transition: all 0.3s ease;
+}
+
+/* Status Colors */
+.status-pending { 
+    background-color: #ffeaa7 !important; 
+    color: #d63031 !important; 
+    border: 1px solid #fdcb6e;
+}
+
+.status-processing { 
+    background-color: #74b9ff !important; 
+    color: #ffffff !important; 
+    border: 1px solid #5a9cff;
+}
+
+.status-completed { 
+    background-color: #00b894 !important; 
+    color: #ffffff !important; 
+    border: 1px solid #00a085;
+}
+
+.status-ready { 
+    background-color: #00b894 !important; 
+    color: #ffffff !important;
+    border: 1px solid #00a085;
+}
+
+.status-confirmed { 
+    background-color: #74b9ff !important; 
+    color: #ffffff !important;
+    border: 1px solid #5a9cff;
+}
+
+.status-cancelled { 
+    background-color: #fd79a8 !important; 
+    color: #ffffff !important; 
+    border: 1px solid #e84393;
+}
+
+/* Hover Effects */
+.status-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .status-badge {
+        font-size: 11px;
+        padding: 4px 8px;
+        min-width: 80px;
+    }
+}
+
+/* Animation for status changes */
+.status-badge.animate {
+    animation: statusChange 0.5s ease-in-out;
+}
+
+@keyframes statusChange {
+    0% { opacity: 0.5; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+}
