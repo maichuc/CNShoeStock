@@ -194,15 +194,64 @@
 - [ ] AI Analysis features
 - [ ] Báo cáo dự báo
 
+## Fixed References (Commit: e6f0433)
+### Files Updated:
+1. **js/stock-receipt-manager.js**: add_product_ai.php → them_san_pham_ai.php
+2. **404.html**: add_product_ai.php → them_san_pham_ai.php
+3. **xem_phieu_nhap.php**: create_stock_receipt.php → tao_phieu_nhap_moi.php
+4. **tao_phieu_nhap_moi.php**: 
+   - ADD_PRODUCT_AI.PHP → THEM_SAN_PHAM_AI.PHP (comment)
+   - product_details.php → xem_san_pham.php
+5. **quan_ly_phieu_nhap_kho.php**: create_stock_receipt.php → tao_phieu_nhap_moi.php (2 chỗ)
+6. **includes/thanh_phan_menu.php**: 
+   - create_stock_receipt.php → tao_phieu_nhap_moi.php
+   - inventory.php → quan_ly_kho.php
+7. **san_pham_trong_kho.php**: product_details.php → xem_san_pham.php
+8. **phan_tich_ton_kho_ai.php**: add_test_data.php → disabled (file không tồn tại)
+9. **them_san_pham_ai.php**: create_stock_receipt.php → tao_phieu_nhap_moi.php
+10. **helpers/TroGiupDoTuongDong.php**: create_stock_receipt.php → tao_phieu_nhap_moi.php (comment)
+11. **helpers/TroGiupPhanTichAI.php**: create_stock_receipt.php → tao_phieu_nhap_moi.php (comment)
+
+### Validation Results:
+✅ **0 remaining old file references** found in code
+✅ **All links and references updated**
+✅ **Class names kept unchanged** (Database, Footer, Header - technical terms)
+
+## Known Issues (Not Related to Refactor)
+⚠️ **quan_ly_kho.php**: Missing methods in WarehouseAccessControl class
+  - getWarehouseCategories()
+  - createCategory()
+  - updateCategory()
+  - deleteCategory()
+  
+⚠️ **san_pham_trong_kho.php**: searchProducts() signature mismatch
+  - Expected: 2 params
+  - Provided: 3 params
+
+*These are pre-existing code logic issues, NOT caused by the Vietnamese filename refactor.*
+
 ## Lưu Ý
-- **Entry point mới**: `trang_chu.php` (thay vì index.php)
+- **Entry point mới**: `trang_chu.php` (có index.php redirect)
 - **Database config**: `config/cau_hinh_csdl.php`
+- **Database class**: `classes/CSDuLieu.php` (class name "Database" giữ nguyên - từ chuyên ngành)
 - **Sidebar**: `includes/thanh_ben.php`
+- **Modal logout**: `includes/modal_dang_xuat.php`
 - Nếu cần rollback: `git checkout 9839d1f`
 
+## Git Timeline
+```
+9839d1f - Pre-refactor backup
+3f44fe1 - Vietnamese filename conversion (93 files)
+ddbf8e1 - Cleanup debug/automation files
+b1cdc88 - Add entry point redirect
+34fec23 - Fix remaining file links in JS/HTML
+e6f0433 - Final: Fix all remaining references
+```
+
 ## Khuyến Nghị Tiếp Theo
-1. Test toàn bộ chức năng của hệ thống
-2. Cập nhật documentation
-3. Update .htaccess nếu có redirect từ index.php
-4. Kiểm tra server configuration (Apache/Nginx)
-5. Merge branch vào main sau khi test xong
+1. **Fix known issues** trong quan_ly_kho.php và san_pham_trong_kho.php
+2. Test toàn bộ chức năng của hệ thống
+3. Cập nhật documentation
+4. Update .htaccess nếu có redirect từ index.php
+5. Kiểm tra server configuration (Apache/Nginx)
+6. Merge branch vào main sau khi test xong
