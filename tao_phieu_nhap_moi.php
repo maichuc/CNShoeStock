@@ -8942,7 +8942,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <button type="button" class="btn btn-primary" onclick="resetToNewReceipt()">
                                         <i class="fas fa-plus"></i> Tạo phiếu nhập mới
                                     </button>
-                                    <button type="button" class="btn btn-secondary" onclick="window.location.href='stock_receipts.php'">
+                                    <button type="button" class="btn btn-secondary" onclick="window.location.href='quan_ly_phieu_nhap_kho.php'">
                                         <i class="fas fa-list"></i> Xem danh sách phiếu nhập
                                     </button>
                                 </div>
