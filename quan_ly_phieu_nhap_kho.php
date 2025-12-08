@@ -516,6 +516,12 @@ try {
     <!-- Page level custom scripts -->
     <script>
     $(document).ready(function() {
+        // Check if DataTable is loaded
+        if (typeof $.fn.DataTable === 'undefined') {
+            console.error('DataTables library not loaded!');
+            return;
+        }
+        
         // Khởi tạo DataTable
         var table = $('#dataTable').DataTable({
             "language": {

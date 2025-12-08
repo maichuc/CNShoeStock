@@ -1,5 +1,12 @@
 <?php
 session_start();
+
+// Clean output buffer to prevent JSON corruption
+if (ob_get_level()) {
+    ob_end_clean();
+}
+ob_start();
+
 header('Content-Type: application/json; charset=utf-8');
 
 require_once 'config/database.php';
