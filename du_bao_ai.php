@@ -2440,5 +2440,5 @@ if (!in_array($userRole, ['admin', 'manager'])) {
         
     </script>
 
-<?php include 'includes/chan_trang.php'; ?>
+</body>
 </html>

@@ -976,5 +976,5 @@ $statusColors = [
         }
     </script>
 
-<?php include 'includes/chan_trang.php'; ?>
+</body>
 </html>

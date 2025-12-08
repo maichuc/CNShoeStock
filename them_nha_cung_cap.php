@@ -764,6 +764,5 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
         });
     </script>
 
-<?php include 'includes/chan_trang.php'; ?>
-
+</body>
 </html>

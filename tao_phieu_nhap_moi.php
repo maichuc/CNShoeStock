@@ -11601,4 +11601,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     </script>
 
-<?php include 'includes/chan_trang.php'; ?>
+</body>
+</html>

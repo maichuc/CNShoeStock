@@ -863,6 +863,5 @@ $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
         }
     </script>
 
-<?php include 'includes/chan_trang.php'; ?>
-
+</body>
 </html>
