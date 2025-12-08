@@ -9,6 +9,7 @@
 ## ✅ KẾT QUẢ HOÀN THÀNH
 ✅ **108 files đã được rename thành công** (93 main + 14 API + 1 auth)  
 ✅ **3 API files mới được tạo**  
+✅ **1 API file đã được gộp** (api_phan_tich_ai.php + api_phan_tich_giay_ai.php)  
 ✅ **0 lỗi syntax sau refactor**  
 ✅ **600+ references được cập nhật**  
 ✅ **Đã kiểm tra từng chi tiết - 0 lỗi tham chiếu**  
@@ -75,10 +76,10 @@
 |---------|---------|
 | api_add_product_to_receipt.php | api_them_san_pham_vao_phieu.php |
 | api_add_supplier.php | api_them_nha_cung_cap.php |
-| api_ai_analyze.php | api_phan_tich_ai.php |
+| ~~api_ai_analyze.php~~ | ~~api_phan_tich_ai.php~~ (đã gộp vào api_phan_tich_giay_ai.php) |
 | api_ai_forecast.php | api_du_bao_ai.php |
 | api_ai_inventory_analysis.php | api_phan_tich_ton_kho_ai.php |
-| api_ai_shoe_analysis.php | api_phan_tich_giay_ai.php |
+| api_ai_shoe_analysis.php | api_phan_tich_giay_ai.php (đã gộp api_phan_tich_ai.php) |
 | api_cascading_filters.php | api_bo_loc_theo_tang.php |
 | api_check_duplicates_manual.php | api_kiem_tra_trung_thu_cong.php |
 | api_confirm_delivery.php | api_xac_nhan_giao_hang.php |
@@ -282,6 +283,19 @@ b87a05c - Update final report
 1. **api/xac_nhan_phieu_nhap.php** - Xác nhận phiếu nhập kho
 2. **api/kiem_tra_ncc_trung.php** - Kiểm tra nhà cung cấp trùng
 3. **api/tao_ma_nha_cung_cap.php** - Tạo mã nhà cung cấp tự động
+
+## API Files Merged (Refactor Optimization)
+✅ **api_phan_tich_ai.php** + **api_phan_tich_giay_ai.php** → **api_phan_tich_giay_ai.php**
+- **Lý do gộp**: 2 file có chức năng trùng lặp (phân tích ảnh sản phẩm bằng AI)
+- **Kết quả**: 
+  - File cũ `api_phan_tich_ai.php` đã bị xóa
+  - File mới `api_phan_tich_giay_ai.php` đã tích hợp đầy đủ:
+    - Action-based structure (health_check, analyze_single, analyze_batch, test_api)
+    - Helper functions: `standardizeBrand()`, `normalizeAIOutput()`
+    - Logic chuẩn hóa màu sắc, brand, type từ file cũ
+    - Tích hợp SmartProductMatcher để detect duplicates
+- **References**: Không có file nào tham chiếu đến file cũ (đã kiểm tra)
+- **Lợi ích**: Code sạch hơn, dễ maintain, giảm confusion
 
 ## Lỗi Đã Sửa Trong Quá Trình Kiểm Tra Chi Tiết
 
