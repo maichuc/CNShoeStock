@@ -963,12 +963,6 @@ try {
 
             <?php include 'includes/chan_trang.php'; ?>
 
-        </div>
-        <!-- End of Content Wrapper -->
-
-    </div>
-    <!-- End of Page Wrapper -->
-
     <!-- Logout Modal-->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">

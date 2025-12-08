@@ -1832,12 +1832,6 @@ endif; // End of if ($userWarehouseId)
 
             <?php include 'includes/chan_trang.php'; ?>
 
-        </div>
-        <!-- End of Content Wrapper -->
-
-    </div>
-    <!-- End of Page Wrapper -->
-
     <!-- Scroll to Top Button-->
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
