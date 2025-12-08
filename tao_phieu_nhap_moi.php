@@ -6287,7 +6287,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         image_paths: imagePaths
                     },
                     dataType: 'json',
-                    success: function(response) {
+                    success: async function(response) {
                         $('#loadingSpinner').hide();
                         if (response.success) {
                             aiData = response.ai_data;
@@ -6304,7 +6304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $('#aiResults').prepend('<div class="alert alert-info mb-2 ai-analysis-alert"><i class="fas fa-info-circle"></i> ' + response.limit_message + '</div>');
                             }
                             
-                            displayAIResults(aiData);
+                            await displayAIResults(aiData);
                             // Store image paths with primary image info
                             const orderedImagePaths = [];
                             // Thêm primary image first
@@ -6421,7 +6421,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return productName || 'Sản phẩm chưa có tên';
             }
 
-            function displayAIResults(data) {
+            async function displayAIResults(data) {
                 console.log('🎯 [STOCK_RECEIPT] AI Results from multiple images:', data);
                 
                 // FORMAT TÊN SẢN PHẨM THEO QUY TẮC (giống them_san_pham_ai.php)
@@ -6488,12 +6488,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $('#aiResults').prepend(analysisInfo).show();
                 
                 // Hiển thị thông tin AI đã tự động điền
-                displayAIAutoFilledInfo(data);
+                await displayAIAutoFilledInfo(data);
                 
                 // Tự động kiểm tra trùng lặp sau khi hiển thị kết quả AI
                 console.log('🔍 Starting duplicate check with AI data:', data);
-                setTimeout(() => {
-                    checkForDuplicates(data);
+                setTimeout(async () => {
+                    await checkForDuplicates(data);
                 }, 1000);
             }
             
@@ -6504,7 +6504,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ========================================
             
             // Hàm hiển thị thông tin AI đã tự động điền
-            function displayAIAutoFilledInfo(data) {
+            async function displayAIAutoFilledInfo(data) {
                 console.log('📝 Displaying AI auto-filled information:', data);
                 
                 // Chuyển "Fashion" thành "Unknown" cho thương hiệu
@@ -6516,21 +6516,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // 🎨 CHUẨN HÓA MÀU SẮC - Tránh lỗi nhận diện trùng lặp
                 if (data.colors) {
                     const originalColors = JSON.stringify(data.colors);
-                    data.colors = normalizeColors(data.colors);
+                    data.colors = await normalizeColors(data.colors);
                     console.log(`🎨 Normalized colors: ${originalColors} -> ${JSON.stringify(data.colors)}`);
                 }
                 
                 // Chuẩn hóa tên loại sản phẩm
                 if (data.type) {
                     const originalType = data.type;
-                    data.type = standardizeProductType(data.type);
+                    data.type = await standardizeProductType(data.type);
                     if (originalType !== data.type) {
                         console.log(`📝 Standardized product type: '${originalType}' -> '${data.type}'`);
                     }
                 }
                 if (data.category) {
                     const originalCategory = data.category;
-                    data.category = standardizeProductType(data.category);
+                    data.category = await standardizeProductType(data.category);
                     if (originalCategory !== data.category) {
                         console.log(`📝 Standardized category: '${originalCategory}' -> '${data.category}'`);
                     }
@@ -8530,21 +8530,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // 🎨 CHUẨN HÓA MÀU SẮC - Tránh lỗi nhận diện trùng lặp
                     if (suggestions.colors) {
                         const originalColors = JSON.stringify(suggestions.colors);
-                        suggestions.colors = normalizeColors(suggestions.colors);
+                        suggestions.colors = await normalizeColors(suggestions.colors);
                         console.log(`🎨 Normalized colors in suggestions: ${originalColors} -> ${JSON.stringify(suggestions.colors)}`);
                     }
                     
                     // Chuẩn hóa tên loại sản phẩm
                     if (suggestions.type) {
                         const originalType = suggestions.type;
-                        suggestions.type = standardizeProductType(suggestions.type);
+                        suggestions.type = await standardizeProductType(suggestions.type);
                         if (originalType !== suggestions.type) {
                             console.log(`📝 Standardized product type: '${originalType}' -> '${suggestions.type}'`);
                         }
                     }
                     if (suggestions.category) {
                         const originalCategory = suggestions.category;
-                        suggestions.category = standardizeProductType(suggestions.category);
+                        suggestions.category = await standardizeProductType(suggestions.category);
                         if (originalCategory !== suggestions.category) {
                             console.log(`📝 Standardized category: '${originalCategory}' -> '${suggestions.category}'`);
                         }
