@@ -1,6 +1,16 @@
 <?php
 session_start();
+
+// Clean output buffer to prevent JSON corruption
+if (ob_get_level()) {
+    ob_end_clean();
+}
+ob_start();
+
 header('Content-Type: application/json');
+
+// Suppress warnings/notices that could corrupt JSON
+error_reporting(E_ERROR | E_PARSE);
 
 require_once 'config/database.php';
 require_once 'helpers/GhiNhatKyKiemToan.php';
@@ -64,7 +74,14 @@ try {
         exit();
     }
 
-    $pdo->beginTransaction();
+    // Bắt đầu transaction với error handling
+    try {
+        $pdo->beginTransaction();
+    } catch (Exception $e) {
+        error_log("API ERROR: Cannot begin transaction - " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Database transaction error']);
+        exit();
+    }
 
     // KIỂM TRA DUPLICATE: Tránh tạo phiếu nhập trùng lặp trong vòng 5 giây
     $stmt = $pdo->prepare("
@@ -99,23 +116,40 @@ try {
 
     error_log("API: About to INSERT stock_receipt. user_id=$user_id, warehouse_id=$warehouse_id, supplier_id=$supplier_id, status=$status");
 
-    // 1. Tạo stock receipt chính
-    $stmt = $pdo->prepare("
-        INSERT INTO stock_receipts (user_id, warehouse_id, supplier_id, status, notes, last_modified_by) 
-        VALUES (?, ?, ?, ?, ?, ?)
-    ");
-    
-    $stmt->execute([
-        $user_id, 
-        $warehouse_id, 
-        $supplier_id, 
-        $status, 
-        $notes,
-        $user_id  // last_modified_by
-    ]);
-    
-    $receipt_id = $pdo->lastInsertId();
-    error_log("API: Created receipt_id=$receipt_id");
+    // 1. Tạo stock receipt chính với error handling
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO stock_receipts (user_id, warehouse_id, supplier_id, status, notes, last_modified_by) 
+            VALUES (?, ?, ?, ?, ?, ?)
+        ");
+        
+        $stmt->execute([
+            $user_id, 
+            $warehouse_id, 
+            $supplier_id, 
+            $status, 
+            $notes,
+            $user_id  // last_modified_by
+        ]);
+        
+        $receipt_id = $pdo->lastInsertId();
+        
+        if (!$receipt_id) {
+            throw new Exception("Failed to get last insert ID for stock receipt");
+        }
+        
+        error_log("API: Created receipt_id=$receipt_id");
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        error_log("API ERROR: Failed to create stock receipt - " . $e->getMessage());
+        ob_clean();
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Failed to create stock receipt: ' . $e->getMessage(),
+            'error_code' => $e->getCode()
+        ]);
+        exit();
+    }
 
     // 2. Xử lý từng item
     foreach ($items as $item) {
@@ -343,21 +377,34 @@ try {
             }
         }
 
-        // 3. Tạo stock receipt item
-        $stmt = $pdo->prepare("
-            INSERT INTO stock_receipt_items (receipt_id, variant_id, quantity, unit_price, location_code, location_id, warehouse_id, created_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
-        ");
-        
-        $stmt->execute([
-            $receipt_id,
-            $variant_id,
-            $item['quantity'],
-            $item['unitPrice'],
-            $item['storageLocation'] ?? '',
-            $location_id,
-            $warehouse_id
-        ]);
+        // 3. Tạo stock receipt item với error handling
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO stock_receipt_items (receipt_id, variant_id, quantity, unit_price, location_code, location_id, warehouse_id, created_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+            ");
+            
+            $stmt->execute([
+                $receipt_id,
+                $variant_id,
+                $item['quantity'],
+                $item['unitPrice'],
+                $item['storageLocation'] ?? '',
+                $location_id,
+                $warehouse_id
+            ]);
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            error_log("API ERROR: Failed to create stock receipt item - " . $e->getMessage() . " | Item: " . json_encode($item));
+            ob_clean();
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Failed to add item to receipt: ' . $e->getMessage(),
+                'item' => $item['name'] ?? 'unknown',
+                'error_code' => $e->getCode()
+            ]);
+            exit();
+        }
 
         // 4. Cập nhật inventory nếu status là confirmed (đã hoàn thành)
         if ($status === 'confirmed') {
@@ -478,12 +525,27 @@ try {
     ]);
 
 } catch (Exception $e) {
-    $pdo->rollback();
+    if ($pdo && $pdo->inTransaction()) {
+        $pdo->rollback();
+    }
+    
     error_log("Error saving manual stock receipt: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
+    
+    // Clean any partial output
+    if (ob_get_level()) {
+        ob_clean();
+    }
     
     echo json_encode([
         'success' => false,
-        'message' => 'Database error: ' . $e->getMessage()
+        'message' => 'Database error: ' . $e->getMessage(),
+        'error_detail' => $e->getFile() . ':' . $e->getLine()
     ]);
+}
+
+// Flush output buffer
+if (ob_get_level()) {
+    ob_end_flush();
 }
 ?>

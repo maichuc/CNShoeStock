@@ -545,15 +545,7 @@ $userName = $user['full_name'] ?? 'User';
             </div>
             <!-- End of Main Content -->
 
-            <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Smart Warehouse System 2025</span>
-                    </div>
-                </div>
-            </footer>
-            <!-- End of Footer -->
+            <?php include 'includes/chan_trang.php'; ?>
         </div>
         <!-- End of Content Wrapper -->
     </div>
@@ -586,3 +578,4 @@ $userName = $user['full_name'] ?? 'User';
     </script>
 </body>
 </html>
+

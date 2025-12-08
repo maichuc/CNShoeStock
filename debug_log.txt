@@ -12,3 +12,6 @@
 2025-12-07 16:50:09 - User Role: manager, Warehouse ID: 10
 2025-12-07 16:58:09 - User Role: manager, Warehouse ID: 10
 2025-12-08 11:46:05 - User Role: manager, Warehouse ID: 3
+2025-12-08 12:10:43 - User Role: manager, Warehouse ID: 3
+2025-12-08 12:37:17 - User Role: manager, Warehouse ID: 3
+2025-12-08 12:39:47 - User Role: manager, Warehouse ID: 3

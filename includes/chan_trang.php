@@ -2,11 +2,8 @@
             </div>
             <!-- End of Main Content -->
 
-        </div>
-        <!-- End of Content -->
-
-        <!-- Footer -->
-        <footer class="sticky-footer bg-white border-top">
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white border-top">
                 <div class="container my-auto py-3">
                     <div class="row">
                         <div class="col-md-4 text-center text-md-left mb-3 mb-md-0">

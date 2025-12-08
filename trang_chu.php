@@ -1831,18 +1831,7 @@ endif; // End of if ($userWarehouseId)
         <!-- End of Content Wrapper -->
          
 </div>
-<!-- Footer -->
-        <div>
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Smart Warehouse Management System <?php echo date('Y'); ?></span>
-                    </div>
-                </div>
-            </footer>
-
-        </div>
-            <!-- End of Footer -->
+<?php include 'includes/chan_trang.php'; ?>
     </div>
     <!-- End of Page Wrapper -->
 
@@ -2822,4 +2811,5 @@ endif; // End of if ($userWarehouseId)
 </body>
 
 </html>
+
 
