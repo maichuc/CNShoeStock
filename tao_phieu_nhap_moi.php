@@ -4004,7 +4004,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         };
         
         // Function to continue creating new product (ignore duplicates)
-        window.continueCreateNewProduct = function() {
+        window.continueCreateNewProduct = async function() {
             console.log('✅ User chose to create NEW product despite duplicates');
             
             // Ẩn duplicate check result
@@ -4016,7 +4016,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // If we have AI data, populate the form
             if (window.aiData) {
                 console.log('📝 Populating form with AI data for new product');
-                displaySuggestions();
+                await displaySuggestions();
             }
             
             showToast('Tiếp tục tạo sản phẩm mới', 'info');
@@ -8365,10 +8365,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
             
             // Proceed to edit step
-            $('#proceedToEdit').click(function() {
+            $('#proceedToEdit').click(async function() {
                 console.log('📝 Proceeding to edit step...');
                 moveToStep(4);
-                displaySuggestions();
+                await displaySuggestions();
                 
                 // Kiểm tra if there's pending AI data to populate
                 if (window.pendingAIData) {
@@ -8453,7 +8453,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 moveToStep(2);
             });
 
-            function displaySuggestions() {
+            async function displaySuggestions() {
                 console.log('🎯 displaySuggestions called with useExistingDataOnly =', useExistingDataOnly, 'window.useExistingDataOnly =', window.useExistingDataOnly);
                 
                 // Cập nhật UI for update mode
@@ -8468,7 +8468,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 if (suggestions) {
                     // Tự động áp dụng gợi ý AI ngay khi hiển thị
-                    autoApplySuggestions();
+                    await autoApplySuggestions();
                     
                     // Hiển thị thông tin để người dùng xem
                     let suggestionsHtml = `
@@ -8512,7 +8512,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Tự động áp dụng gợi ý AI
-            function autoApplySuggestions() {
+            async function autoApplySuggestions() {
                 // Chặn auto-apply nếu đang trong update mode với existing data only
                 const shouldBlockAutoApply = useExistingDataOnly || window.useExistingDataOnly;
                 if (shouldBlockAutoApply) {
@@ -8735,14 +8735,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
 
             // Duplicate check modal handlers
-            $('#continueAddNew').click(function() {
+            $('#continueAddNew').click(async function() {
                 console.log('🆕 Continue Add New button clicked');
                 // Đóng modal và tiếp tục thêm sản phẩm mới
                 $('#duplicateCheckModal').modal('hide');
                 // Chuyển đến bước 4 để nhập thông tin
                 console.log('🚀 Moving to step 4 from duplicate modal');
                 moveToStep(4);
-                displaySuggestions();
+                await displaySuggestions();
             });
             
             $('#updateExistingProduct').click(function() {
@@ -9392,7 +9392,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 checkDuplicateSizes();
             });
 
-            function moveToStep(step) {
+            async function moveToStep(step) {
                 console.log('[moveToStep] Switching to step:', step);
                 console.log('[moveToStep] Current receiptItems:', receiptItems);
                 console.log('[moveToStep] Current selectedSupplier:', selectedSupplier);
@@ -9457,7 +9457,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     if (suggestions && !shouldSkipSuggestions) {
                         console.log('🎯 Calling displaySuggestions because useExistingDataOnly is false');
-                        displaySuggestions();
+                        await displaySuggestions();
                     } else {
                         console.log('✅ Skipping displaySuggestions - using existing data or no suggestions. shouldSkipSuggestions =', shouldSkipSuggestions);
                     }
