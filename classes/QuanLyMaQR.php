@@ -1,4 +1,4 @@
-/<?php
+<?php
 /**
  * QR Code Manager Class
  * Quản lý việc đọc và xử lý QR codes
