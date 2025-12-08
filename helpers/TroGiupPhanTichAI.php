@@ -6,6 +6,9 @@
  *                    api_phan_tich_giay_ai.php, api_luu_phieu_ai.php, api_du_bao_ai.php
  */
 
+// Import TroGiupDoTuongDong.php để sử dụng standardizeColor()
+require_once __DIR__ . '/TroGiupDoTuongDong.php';
+
 /**
  * HÀM TẢI ENVIRONMENT VARIABLES
  * 
@@ -52,248 +55,21 @@ if (!function_exists('loadEnvironmentVariables')) {
 /**
  * HÀM DỊCH MÀU TỪ TIẾNG ANH SANG TIẾNG VIỆT
  * 
+ * DEPRECATED: Function này giờ chỉ là wrapper cho standardizeColor()
+ * 
  * Mục đích: Chuẩn hóa tên màu sắc (AI thường trả về tiếng Anh)
  * Ví dụ: "Black" -> "Đen", "Light Blue" -> "Xanh dương nhạt"
  * 
  * @param string $color - Tên màu (tiếng Anh hoặc tiếng Việt)
  * @return string - Tên màu tiếng Việt chuẩn
+ * 
+ * @see standardizeColor() in TroGiupDoTuongDong.php (comprehensive implementation)
  */
 if (!function_exists('translateColorToVietnamese')) {
     function translateColorToVietnamese($color) {
-        /**
-         * BƯỚC 1: CHUẨN HÓA CÁC BIẾN THỂ TIẾNG VIỆT
-         * 
-         * Vấn đề: User có thể nhập "vàng đồng", "đồng", "màu đồng"
-         * Giải pháp: Thống nhất tất cả về "Vàng kim"
-         */
-        $vietnameseNormalization = [
-            'vàng đồng' => 'Vàng kim',
-            'vang dong' => 'Vàng kim',
-            'đồng' => 'Vàng kim',
-            'dong' => 'Vàng kim',
-            'màu đồng' => 'Vàng kim',
-            'mau dong' => 'Vàng kim',
-            'xanh navy' => 'Xanh navy',
-            'xanh lam' => 'Xanh dương',
-            'xanh da trời' => 'Xanh da trời',
-            'xanh lá cây' => 'Xanh lá',
-        ];
-        
-        // Chuyển về chữ thường để so sánh (hỗ trợ UTF-8)
-        $colorLowerViet = mb_strtolower(trim($color), 'UTF-8');
-        
-        // Nếu tìm thấy trong mapping tiếng Việt -> Trả về luôn
-        if (isset($vietnameseNormalization[$colorLowerViet])) {
-            return $vietnameseNormalization[$colorLowerViet];
-        }
-        
-        $colorMap = [
-            // Basic colors
-            'black' => 'Đen',
-            'white' => 'Trắng',
-            'red' => 'Đỏ',
-            'blue' => 'Xanh dương',
-            'green' => 'Xanh lá',
-            'yellow' => 'Vàng',
-            'orange' => 'Cam',
-            'purple' => 'Tím',
-            'pink' => 'Hồng',
-            'brown' => 'Nâu',
-            'gray' => 'Xám',
-            'grey' => 'Xám',
-            'beige' => 'Beige',
-            'cream' => 'Trắng kem',
-            'nude' => 'Nude',
-            'gold' => 'Vàng kim',
-            'silver' => 'Bạc',
-            
-            // Extended basic colors
-            'bronze' => 'Đồng',
-            'copper' => 'Đồng đỏ',
-            'metallic' => 'Kim loại',
-            'glitter' => 'Ánh kim',
-            'iridescent' => 'Ánh sắc cầu vồng',
-            'pearl' => 'Ngọc trai',
-            
-            // Shades
-            'dark' => 'đậm',
-            'light' => 'nhạt',
-            'bright' => 'tươi',
-            'pale' => 'nhạt',
-            'navy' => 'navy',
-            'navy blue' => 'navy',
-            'burgundy' => 'Đỏ burgundy',
-            'maroon' => 'Đỏ nâu',
-            'olive' => 'Xanh ô liu',
-            'mint' => 'Xanh bạc hà',
-            'lavender' => 'Tím nhạt',
-            'coral' => 'San hô',
-            'turquoise' => 'Xanh ngọc',
-            'teal' => 'Xanh lục',
-            'khaki' => 'Kaki',
-            'tan' => 'Nâu nhạt',
-            'ivory' => 'Ngà',
-            'charcoal' => 'Xám đen',
-            
-            // Extended shades
-            'rose' => 'Hồng',
-            'rose gold' => 'Vàng hồng',
-            'champagne' => 'Vàng champagne',
-            'emerald' => 'Xanh lục ngọc',
-            'sapphire' => 'Xanh lam',
-            'ruby' => 'Đỏ ruby',
-            'wine' => 'Đỏ rượu vang',
-            'cherry' => 'Đỏ cherry',
-            'crimson' => 'Đỏ thẫm',
-            'scarlet' => 'Đỏ tươi',
-            'salmon' => 'Hồng cá hồi',
-            'peach' => 'Đào',
-            'lilac' => 'Tím lilac',
-            'violet' => 'Tím violet',
-            'indigo' => 'Xanh chàm',
-            'sky blue' => 'Xanh da trời',
-            'royal blue' => 'Xanh hoàng gia',
-            'cobalt' => 'Xanh cobalt',
-            'lime' => 'Vàng chanh',
-            'lemon' => 'Vàng chanh',
-            'mustard' => 'Vàng mù tạt',
-            'amber' => 'Hổ phách',
-            'caramel' => 'Caramel',
-            'chocolate' => 'Socola',
-            'coffee' => 'Cà phê',
-            'taupe' => 'Xám nâu',
-            'slate' => 'Xám đá phiến',
-            'ash' => 'Xám tro',
-            'dove' => 'Xám bồ câu',
-            'platinum' => 'Bạch kim',
-            'pewter' => 'Thiếc',
-            'rust' => 'Gỉ sắt',
-            'brick' => 'Gạch đỏ',
-            'terracotta' => 'Đất nung',
-            'sand' => 'Cát',
-            'wheat' => 'Lúa mì',
-            'honey' => 'Mật ong',
-            'camel' => 'Lạc đà',
-            'fuchsia' => 'Hồng cánh sen',
-            'magenta' => 'Hồng tía',
-            'plum' => 'Mận',
-            'eggplant' => 'Cà tím',
-            'mauve' => 'Tím nhạt',
-            'periwinkle' => 'Xanh tím',
-            'midnight' => 'Xanh nửa đêm',
-            'denim' => 'Xanh denim',
-            'cyan' => 'Xanh cyan',
-            'aqua' => 'Xanh nước',
-            'seafoam' => 'Xanh biển',
-            'jade' => 'Ngọc bích',
-            'forest' => 'Xanh rừng',
-            'moss' => 'Xanh rêu',
-            'sage' => 'Xanh xám',
-            'pistachio' => 'Xanh hạt dẻ',
-            'chartreuse' => 'Vàng xanh',
-            'neon' => 'Neon',
-            'fluorescent' => 'Huỳnh quang',
-            'pastel' => 'Pastel',
-            'ecru' => 'Kem nhạt',
-            'vanilla' => 'Vani',
-            'bone' => 'Xương',
-            'porcelain' => 'Sứ trắng',
-            'snow' => 'Tuyết trắng',
-            'frost' => 'Sương giá',
-            'smoke' => 'Khói',
-            'graphite' => 'Than chì',
-            'onyx' => 'Đá mã não đen',
-            'ebony' => 'Mun đen',
-            'jet' => 'Đen tuyền',
-            'obsidian' => 'Đá obsidian',
-            
-            // Combinations
-            'off-white' => 'Trắng ngà',
-            'off white' => 'Trắng ngà',
-            'light blue' => 'Xanh dương nhạt',
-            'dark blue' => 'Xanh dương đậm',
-            'light green' => 'Xanh lá nhạt',
-            'dark green' => 'Xanh lá đậm',
-            'bright red' => 'Đỏ tươi',
-            'dark red' => 'Đỏ đậm',
-            'hot pink' => 'Hồng cánh sen',
-            'light pink' => 'Hồng nhạt',
-            'dark brown' => 'Nâu đậm',
-            'light gray' => 'Xám nhạt',
-            'dark gray' => 'Xám đậm',
-            'pale pink' => 'Hồng nhạt',
-            'deep purple' => 'Tím đậm',
-            'bright yellow' => 'Vàng tươi',
-            'dark purple' => 'Tím đậm',
-            'light purple' => 'Tím nhạt',
-            'mint green' => 'Xanh bạc hà',
-            'forest green' => 'Xanh rừng',
-            'olive green' => 'Xanh ô liu',
-            'sea green' => 'Xanh biển',
-            'lime green' => 'Xanh chanh',
-            'emerald green' => 'Xanh lục ngọc',
-            'light orange' => 'Cam nhạt',
-            'dark orange' => 'Cam đậm',
-            'burnt orange' => 'Cam cháy',
-            'golden yellow' => 'Vàng kim',
-            'lemon yellow' => 'Vàng chanh',
-            'pale yellow' => 'Vàng nhạt',
-            'dusty rose' => 'Hồng phấn',
-            'dusty pink' => 'Hồng phấn',
-            'blush pink' => 'Hồng phấn',
-            'baby blue' => 'Xanh baby',
-            'baby pink' => 'Hồng baby',
-            'powder blue' => 'Xanh phấn',
-            'powder pink' => 'Hồng phấn',
-            'steel blue' => 'Xanh thép',
-            'slate blue' => 'Xanh đá phiến',
-            'slate gray' => 'Xám đá phiến'
-        ];
-        
-        // Chuyển về chữ thường để so sánh
-        $colorLower = mb_strtolower(trim($color), 'UTF-8');
-        
-        /**
-         * BƯỚC 2: KIỂM TRA KHỚP CHÍNH XÁC
-         * Tìm trong $colorMap (đã định nghĩa ở trên)
-         * Ví dụ: "black" -> "Đen"
-         */
-        if (isset($colorMap[$colorLower])) {
-            return $colorMap[$colorLower];
-        }
-        
-        /**
-         * BƯỚC 3: XỬ LÝ MÀU NHIỀU TỪ
-         * 
-         * Vấn đề: AI trả về "Light Blue" nhưng không có trong $colorMap
-         * Giải pháp: Tách thành ["light", "blue"] và dịch từng từ
-         * Kết quả: "light" -> "nhạt", "blue" -> "Xanh dương"
-         * Ghép lại: "nhạt Xanh dương" -> "Nhạt xanh dương"
-         */
-        $words = explode(' ', $colorLower);  // Tách thành mảng từ
-        
-        if (count($words) > 1) {  // Nếu có nhiều hơn 1 từ
-            $translatedWords = [];
-            
-            // Dịch từng từ
-            foreach ($words as $word) {
-                // Tìm trong $colorMap, nếu không có giữ nguyên
-                $translatedWords[] = $colorMap[$word] ?? $word;
-            }
-            
-            // Ghép các từ đã dịch lại
-            $result = implode(' ', $translatedWords);
-            
-            // Viết hoa chữ cái đầu (hỗ trợ UTF-8)
-            return mb_strtoupper(mb_substr($result, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($result, 1, null, 'UTF-8');
-        }
-        
-        /**
-         * BƯỚC 4: KHÔNG TÌM THẤY TRONG MAPPING
-         * Trả về màu gốc nhưng viết hoa chữ cái đầu
-         * Ví dụ: "turquoise" -> "Turquoise"
-         */
-        return mb_strtoupper(mb_substr($color, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($color, 1, null, 'UTF-8');
+        // Forward to standardizeColor() để tránh code trùng lặp
+        // standardizeColor() có 150+ color mappings (comprehensive)
+        return standardizeColor($color);
     }
 }
 
