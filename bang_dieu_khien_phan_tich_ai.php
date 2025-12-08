@@ -574,10 +574,17 @@ $warehouseName = $warehouse ? $warehouse['name'] : 'Smart Warehouse';
 
                 </div>
             </div>
+
+            </div>
+            <!-- End of Main Content -->
             
             <?php include 'includes/chan_trang.php'; ?>
+
         </div>
+        <!-- End of Content Wrapper -->
+
     </div>
+    <!-- End of Page Wrapper -->
 
     <!-- JavaScript -->
     <script src="vendor/jquery/jquery.min.js"></script>

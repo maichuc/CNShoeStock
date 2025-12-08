@@ -1827,11 +1827,14 @@ endif; // End of if ($userWarehouseId)
 
             
 
+            </div>
+            <!-- End of Main Content -->
+
+            <?php include 'includes/chan_trang.php'; ?>
+
         </div>
         <!-- End of Content Wrapper -->
-         
-</div>
-<?php include 'includes/chan_trang.php'; ?>
+
     </div>
     <!-- End of Page Wrapper -->
 

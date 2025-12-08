@@ -2979,10 +2979,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
+            </div>
+            <!-- End of Main Content -->
+
             <!-- Footer -->
             <?php include 'includes/chan_trang.php'; ?>
+
         </div>
+        <!-- End of Content Wrapper -->
+
     </div>
+    <!-- End of Page Wrapper -->
 
     <!-- Modal kiểm tra sản phẩm trùng lặp -->
     <div class="modal fade" id="duplicateCheckModal" tabindex="-1" role="dialog" aria-labelledby="duplicateCheckModalLabel" aria-hidden="true">
