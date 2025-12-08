@@ -6318,7 +6318,7 @@ Dữ liệu AI sẽ được merge:
                     } else {
                         // Normal mode: Tự động áp dụng gợi ý AI ngay khi hiển thị (KHÔNG gọi khi update)
                         if (!isAIUpdateMode) {
-                            autoApplySuggestions();
+                            await autoApplySuggestions();
                         }
                         
                         // Chuẩn hóa brand thành "Unknown" nếu trống hoặc không xác định
@@ -6400,7 +6400,7 @@ Dữ liệu AI sẽ được merge:
             }
 
             // Tự động áp dụng gợi ý AI
-            function autoApplySuggestions() {
+            async function autoApplySuggestions() {
                 console.log('🤖 AutoApplySuggestions called with suggestions:', suggestions);
                 
                 // Chặn auto-apply nếu đang trong update mode với existing data only
@@ -6419,21 +6419,21 @@ Dữ liệu AI sẽ được merge:
                     // 🎨 CHUẨN HÓA MÀU SẮC - Tránh lỗi nhận diện trùng lặp
                     if (suggestions.colors) {
                         const originalColors = JSON.stringify(suggestions.colors);
-                        suggestions.colors = normalizeColors(suggestions.colors);
+                        suggestions.colors = await normalizeColors(suggestions.colors);
                         console.log(`🎨 Normalized colors in suggestions: ${originalColors} -> ${JSON.stringify(suggestions.colors)}`);
                     }
                     
                     // Chuẩn hóa tên loại sản phẩm
                     if (suggestions.type) {
                         const originalType = suggestions.type;
-                        suggestions.type = standardizeProductType(suggestions.type);
+                        suggestions.type = await standardizeProductType(suggestions.type);
                         if (originalType !== suggestions.type) {
                             console.log(`📝 Standardized product type: '${originalType}' -> '${suggestions.type}'`);
                         }
                     }
                     if (suggestions.category) {
                         const originalCategory = suggestions.category;
-                        suggestions.category = standardizeProductType(suggestions.category);
+                        suggestions.category = await standardizeProductType(suggestions.category);
                         if (originalCategory !== suggestions.category) {
                             console.log(`📝 Standardized category: '${originalCategory}' -> '${suggestions.category}'`);
                         }
