@@ -1825,11 +1825,6 @@ endif; // End of if ($userWarehouseId)
             </div>
             <!-- End of Main Content -->
 
-            
-
-            </div>
-            <!-- End of Main Content -->
-
             <?php include 'includes/chan_trang.php'; ?>
 
     <!-- Scroll to Top Button-->
