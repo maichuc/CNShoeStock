@@ -2,22 +2,45 @@
 /**
  * AI Analysis Helper
  * Tập hợp các hàm dùng chung cho phân tích AI sản phẩm
- * Được sử dụng bởi: them_san_pham_ai.php, tao_phieu_nhap_moi.php, api_luu_phieu_ai.php
+ * Được sử dụng bởi: them_san_pham_ai.php, tao_phieu_nhap_moi.php, 
+ *                    api_phan_tich_giay_ai.php, api_luu_phieu_ai.php, api_du_bao_ai.php
  */
 
-// Load environment variables
+/**
+ * HÀM TẢI ENVIRONMENT VARIABLES
+ * 
+ * Mục đích: Đọc file .env và load các biến môi trường (API keys)
+ * File .env chứa: GEMINI_API_KEY, CLAUDE_API_KEY, GPT_API_KEY...
+ */
 if (!function_exists('loadEnvironmentVariables')) {
     function loadEnvironmentVariables() {
+        // Lấy đường dẫn file .env (ở thư mục gốc project)
         $envFile = __DIR__ . '/../.env';
+        
+        // Kiểm tra file .env có tồn tại không
         if (file_exists($envFile)) {
+            // Đọc file .env, bỏ qua dòng trống
+            // FILE_IGNORE_NEW_LINES: Bỏ ký tự xuống dòng ở cuối mỗi dòng
+            // FILE_SKIP_EMPTY_LINES: Bỏ qua các dòng trống
             $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            
+            // Duyệt qua từng dòng trong file .env
             foreach ($lines as $line) {
+                // Bỏ qua các dòng comment (bắt đầu bằng #)
                 if (strpos($line, '#') === 0) continue;
+                
+                // Chỉ xử lý dòng có dấu = (format: KEY=VALUE)
                 if (strpos($line, '=') !== false) {
+                    // Tách KEY và VALUE, giới hạn 2 phần (nếu VALUE có dấu =)
                     list($key, $value) = explode('=', $line, 2);
+                    
+                    // Loại bỏ khoảng trắng thừa
                     $key = trim($key);
                     $value = trim($value);
+                    
+                    // Chỉ set nếu chưa tồn tại (không ghi đè)
                     if (!getenv($key)) {
+                        // Lưu vào environment variables của PHP
                         putenv("$key=$value");
                     }
                 }
@@ -26,10 +49,23 @@ if (!function_exists('loadEnvironmentVariables')) {
     }
 }
 
-// Hàm chuyển đổi màu sắc từ tiếng Anh sang tiếng Việt - VERSION 2.0 MỞ RỘNG
+/**
+ * HÀM DỊCH MÀU TỪ TIẾNG ANH SANG TIẾNG VIỆT
+ * 
+ * Mục đích: Chuẩn hóa tên màu sắc (AI thường trả về tiếng Anh)
+ * Ví dụ: "Black" -> "Đen", "Light Blue" -> "Xanh dương nhạt"
+ * 
+ * @param string $color - Tên màu (tiếng Anh hoặc tiếng Việt)
+ * @return string - Tên màu tiếng Việt chuẩn
+ */
 if (!function_exists('translateColorToVietnamese')) {
     function translateColorToVietnamese($color) {
-        // Mapping tiếng Việt -> tiếng Việt chuẩn hóa (để xử lý các biến thể)
+        /**
+         * BƯỚC 1: CHUẨN HÓA CÁC BIẾN THỂ TIẾNG VIỆT
+         * 
+         * Vấn đề: User có thể nhập "vàng đồng", "đồng", "màu đồng"
+         * Giải pháp: Thống nhất tất cả về "Vàng kim"
+         */
         $vietnameseNormalization = [
             'vàng đồng' => 'Vàng kim',
             'vang dong' => 'Vàng kim',
@@ -43,8 +79,10 @@ if (!function_exists('translateColorToVietnamese')) {
             'xanh lá cây' => 'Xanh lá',
         ];
         
-        // Kiểm tra normalize tiếng Việt trước
+        // Chuyển về chữ thường để so sánh (hỗ trợ UTF-8)
         $colorLowerViet = mb_strtolower(trim($color), 'UTF-8');
+        
+        // Nếu tìm thấy trong mapping tiếng Việt -> Trả về luôn
         if (isset($vietnameseNormalization[$colorLowerViet])) {
             return $vietnameseNormalization[$colorLowerViet];
         }
@@ -212,57 +250,113 @@ if (!function_exists('translateColorToVietnamese')) {
             'slate gray' => 'Xám đá phiến'
         ];
         
+        // Chuyển về chữ thường để so sánh
         $colorLower = mb_strtolower(trim($color), 'UTF-8');
         
-        // Check exact match first
+        /**
+         * BƯỚC 2: KIỂM TRA KHỚP CHÍNH XÁC
+         * Tìm trong $colorMap (đã định nghĩa ở trên)
+         * Ví dụ: "black" -> "Đen"
+         */
         if (isset($colorMap[$colorLower])) {
             return $colorMap[$colorLower];
         }
         
-        // Try to translate parts if it contains multiple words
-        $words = explode(' ', $colorLower);
-        if (count($words) > 1) {
+        /**
+         * BƯỚC 3: XỬ LÝ MÀU NHIỀU TỪ
+         * 
+         * Vấn đề: AI trả về "Light Blue" nhưng không có trong $colorMap
+         * Giải pháp: Tách thành ["light", "blue"] và dịch từng từ
+         * Kết quả: "light" -> "nhạt", "blue" -> "Xanh dương"
+         * Ghép lại: "nhạt Xanh dương" -> "Nhạt xanh dương"
+         */
+        $words = explode(' ', $colorLower);  // Tách thành mảng từ
+        
+        if (count($words) > 1) {  // Nếu có nhiều hơn 1 từ
             $translatedWords = [];
+            
+            // Dịch từng từ
             foreach ($words as $word) {
+                // Tìm trong $colorMap, nếu không có giữ nguyên
                 $translatedWords[] = $colorMap[$word] ?? $word;
             }
+            
+            // Ghép các từ đã dịch lại
             $result = implode(' ', $translatedWords);
-            // Ensure first letter is capitalized (UTF-8 safe)
+            
+            // Viết hoa chữ cái đầu (hỗ trợ UTF-8)
             return mb_strtoupper(mb_substr($result, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($result, 1, null, 'UTF-8');
         }
         
-        // If not found, return original with first letter capitalized (UTF-8 safe)
+        /**
+         * BƯỚC 4: KHÔNG TÌM THẤY TRONG MAPPING
+         * Trả về màu gốc nhưng viết hoa chữ cái đầu
+         * Ví dụ: "turquoise" -> "Turquoise"
+         */
         return mb_strtoupper(mb_substr($color, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($color, 1, null, 'UTF-8');
     }
 }
 
-// Hàm chuẩn hóa dữ liệu AI sau khi nhận từ API - VERSION 2.0 CẢI TIẾN
+/**
+ * HÀM CHUẨN HÓA DỮ LIỆU TỪ AI
+ * 
+ * Mục đích: Xử lý và chuẩn hóa dữ liệu sau khi nhận từ AI (Gemini/Claude/GPT)
+ * 
+ * Các bước xử lý:
+ * 1. Chuyển màu sắc từ string sang array
+ * 2. Dịch màu từ tiếng Anh sang tiếng Việt
+ * 3. Xóa màu trùng lặp
+ * 4. Chuẩn hóa loại sản phẩm
+ * 5. Chuẩn hóa tags
+ * 
+ * @param array $aiData - Dữ liệu thô từ AI
+ * @return array - Dữ liệu đã chuẩn hóa
+ */
 if (!function_exists('normalizeAIData')) {
     function normalizeAIData($aiData) {
-        // === BƯỚC 1: CHUẨN BỊ MÀU SẮC - CONVERT TO ARRAY ===
-        // Xử lý cả 'color' (số ít) và 'colors' (số nhiều)
+        /**
+         * BƯỚC 1: CHUẨN BỊ MÀU SẮC - CHUYỂN SANG ARRAY
+         * 
+         * Vấn đề: AI có thể trả về:
+         * - 'color': "Black" (số ít)
+         * - 'colors': "Black, White" (số nhiều, string)
+         * - 'colors': ["Black", "White"] (số nhiều, array)
+         * 
+         * Giải pháp: Thống nhất tất cả về 'colors' dạng array
+         */
+        
+        // Nếu có 'color' mà không có 'colors' -> Copy sang 'colors'
         if (isset($aiData['color']) && !isset($aiData['colors'])) {
-            // Nếu AI trả về 'color' thay vì 'colors', chuyển sang 'colors'
             $aiData['colors'] = $aiData['color'];
         }
         
+        // Nếu 'colors' là string -> Tách thành array
         if (isset($aiData['colors'])) {
             if (is_string($aiData['colors'])) {
-                // Nếu là string, tách ra thành array
+                // Tách bằng dấu phẩy, loại bỏ khoảng trắng thừa
+                // Ví dụ: "Black, White" -> ["Black", "White"]
                 $aiData['colors'] = array_map('trim', explode(',', $aiData['colors']));
             }
         }
         
-        // Đảm bảo colors luôn là array
+        // Đảm bảo 'colors' luôn là array (phòng trường hợp khác)
         if (isset($aiData['colors']) && !is_array($aiData['colors'])) {
             $aiData['colors'] = [$aiData['colors']];
         }
         
-        // === BƯỚC 2: XỬ LÝ VÀ TRANSLATE MÀU SẮC (CHỈ 1 LẦN DUY NHẤT) ===
+        /**
+         * BƯỚC 2: DỊCH MÀU SẮC SANG TIẾNG VIỆT
+         * 
+         * Quy trình:
+         * 1. Kiểm tra màu đã là tiếng Việt chưa (tránh dịch 2 lần)
+         * 2. Nếu là tiếng Anh -> Dịch từng từ sang tiếng Việt
+         * 3. Xóa từ trùng lặp (Ví dụ: "Xanh dương dương" -> "Xanh dương")
+         * 4. Viết hoa chữ cái đầu
+         */
         if (isset($aiData['colors']) && is_array($aiData['colors'])) {
             $processedColors = [];
             
-            // Danh sách các màu tiếng Việt đã được translate - KHÔNG translate lại
+            // Danh sách màu tiếng Việt - Dùng để kiểm tra đã dịch chưa
             $vietnameseColors = [
                 'đen', 'trắng', 'đỏ', 'xanh', 'vàng', 'cam', 'tím', 'hồng', 'nâu', 'xám',
                 'xanh dương', 'xanh lá', 'xanh navy', 'xanh lục', 'xanh bạc hà',
@@ -270,53 +364,75 @@ if (!function_exists('normalizeAIData')) {
                 'đậm', 'nhạt', 'tươi', 'pastel'
             ];
             
+            // Duyệt qua từng màu
             foreach ($aiData['colors'] as $color) {
-                // Loại bỏ nội dung trong ngoặc đơn
+                // Loại bỏ nội dung trong ngoặc đơn: "Black (Matte)" -> "Black"
                 $color = preg_replace('/\s*\([^)]*\)/u', '', $color);
                 $color = trim($color);
                 
+                // Bỏ qua màu rỗng
                 if (empty($color)) continue;
                 
-                // Check xem màu đã là tiếng Việt chưa
+                // Kiểm tra xem màu đã là tiếng Việt chưa
                 $colorLower = mb_strtolower($color, 'UTF-8');
                 $isVietnamese = false;
+                
                 foreach ($vietnameseColors as $vnColor) {
+                    // Nếu chứa bất kỳ từ tiếng Việt nào -> Đánh dấu là tiếng Việt
                     if (strpos($colorLower, $vnColor) !== false) {
                         $isVietnamese = true;
                         break;
                     }
                 }
                 
-                // Nếu chưa phải tiếng Việt, translate từng từ
+                // Nếu CHƯA phải tiếng Việt -> Dịch
                 if (!$isVietnamese) {
+                    // Tách màu thành các từ riêng biệt
+                    // Ví dụ: "Light Blue" -> ["Light", "Blue"]
                     $words = preg_split('/\s+/u', $color);
                     $translatedWords = [];
                     
+                    // Danh sách từ màu tiếng Anh cần dịch
+                    $englishColors = ['black', 'white', 'red', 'blue', 'green', 'yellow', 
+                                     'orange', 'purple', 'pink', 'brown', 'gray', 'grey',
+                                     'beige', 'cream', 'nude', 'gold', 'silver', 'burgundy',
+                                     'navy', 'maroon', 'olive', 'mint', 'lavender', 'coral',
+                                     'dark', 'light', 'bright', 'pale', 'deep'];
+                    
+                    // Dịch từng từ
                     foreach ($words as $word) {
                         $wordLower = mb_strtolower($word, 'UTF-8');
                         
-                        // Chỉ translate nếu là màu tiếng Anh
-                        $englishColors = ['black', 'white', 'red', 'blue', 'green', 'yellow', 
-                                         'orange', 'purple', 'pink', 'brown', 'gray', 'grey',
-                                         'beige', 'cream', 'nude', 'gold', 'silver', 'burgundy',
-                                         'navy', 'maroon', 'olive', 'mint', 'lavender', 'coral',
-                                         'dark', 'light', 'bright', 'pale', 'deep'];
-                        
+                        // Nếu là từ màu tiếng Anh -> Dịch
                         if (in_array($wordLower, $englishColors)) {
                             $translatedWords[] = translateColorToVietnamese($word);
                         } else {
+                            // Không phải từ màu -> Giữ nguyên
                             $translatedWords[] = $word;
                         }
                     }
                     
+                    // Ghép các từ đã dịch lại
+                    // Ví dụ: ["nhạt", "Xanh dương"] -> "nhạt Xanh dương"
                     $color = implode(' ', $translatedWords);
                 }
                 
-                // Xóa từ lặp lại liên tiếp (VÍ DỤ: "Xanh dương dương" -> "Xanh dương")
-                // BƯỚC 1: Xóa duplicate từ đơn
-                $words = preg_split('/\s+/u', $color);
-                $deduped = [];
-                $lastWord = '';
+                /**
+                 * XÓA TỪ TRÙNG LẶP
+                 * 
+                 * Vấn đề: Sau khi dịch có thể bị:
+                 * - "Xanh dương dương" (từ đơn trùng)
+                 * - "Xanh dương Xanh dương" (cụm từ trùng)
+                 * 
+                 * Giải pháp: Xóa các từ/cụm từ lặp liên tiếp
+                 */
+                
+                // BƯỚC 2.1: Xóa từ đơn trùng lặp liên tiếp
+                // Ví dụ: "Xanh dương dương" -> "Xanh dương"
+                $words = preg_split('/\s+/u', $color);  // Tách thành mảng từ
+                $deduped = [];  // Mảng kết quả
+                $lastWord = '';  // Từ trước đó
+                
                 foreach ($words as $word) {
                     $wordLower = mb_strtolower($word, 'UTF-8');
                     $lastWordLower = mb_strtolower($lastWord, 'UTF-8');
@@ -327,61 +443,105 @@ if (!function_exists('normalizeAIData')) {
                         $lastWord = $word;
                     }
                 }
-                $color = implode(' ', $deduped);
+                $color = implode(' ', $deduped);  // Ghép lại thành string
                 
-                // BƯỚC 2: Xóa duplicate cụm từ (VD: "Xanh dương Xanh dương" -> "Xanh dương")
-                // Tìm và xóa cụm 2-3 từ lặp lại liên tiếp
+                // BƯỚC 2.2: Xóa cụm từ trùng lặp liên tiếp
+                // Ví dụ: "Xanh dương Xanh dương" -> "Xanh dương"
+                // Sử dụng regex để tìm và xóa cụm lặp
                 do {
-                    $changed = false;
+                    $changed = false;  // Flag để kiểm tra có thay đổi không
+                    
                     // Thử xóa cụm 3 từ lặp
+                    // Pattern: \b(\p{L}+\s+\p{L}+\s+\p{L}+)\s+\1\b
+                    // Giải thích: Tìm 3 từ, sau đó là khoảng trắng, rồi lại 3 từ giống y hệt
                     $color = preg_replace_callback('/\b(\p{L}+\s+\p{L}+\s+\p{L}+)\s+\1\b/ui', function($matches) use (&$changed) {
                         $changed = true;
-                        return $matches[1];
+                        return $matches[1];  // Giữ lại 1 cụm, xóa cụm trùng
                     }, $color);
+                    
                     // Thử xóa cụm 2 từ lặp
                     $color = preg_replace_callback('/\b(\p{L}+\s+\p{L}+)\s+\1\b/ui', function($matches) use (&$changed) {
                         $changed = true;
                         return $matches[1];
                     }, $color);
+                    
                 } while ($changed); // Lặp lại cho đến khi không còn thay đổi
                 
-                // Capitalize first letter
+                // BƯỚC 2.3: Viết hoa chữ cái đầu
+                // Ví dụ: "xanh dương" -> "Xanh dương"
                 $color = mb_strtoupper(mb_substr($color, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($color, 1, null, 'UTF-8');
                 
+                // Thêm vào danh sách màu đã xử lý (nếu không rỗng)
                 if (!empty($color)) {
                     $processedColors[] = $color;
                 }
             }
+            
+            // Cập nhật lại mảng màu đã xử lý
             $aiData['colors'] = $processedColors;
         }
         
-        // === BƯỚC 3: CHUYỂN ĐỔI DANH SÁCH MÀU THÀNH CHUỖI ===
+        /**
+         * BƯỚC 3: CHUYỂN DANH SÁCH MÀU SANG CHUỖI
+         * 
+         * Từ: ["Đen", "Trắng"] -> "Đen, Trắng"
+         * 
+         * Lý do: Form hiển thị màu dưới dạng string, không phải array
+         * array_unique: Xóa màu trùng lặp (phòng trường hợp có 2 màu giống nhau)
+         */
         if (isset($aiData['colors']) && is_array($aiData['colors'])) {
             $aiData['color'] = implode(', ', array_unique($aiData['colors']));
         }
         
-        // === BƯỚC 4: ƯU TIÊN LOẠI SẢN PHẨM ===
+        /**
+         * BƯỚC 4: TỰ ĐỘNG SỬA LOẠI SẢN PHẨM
+         * 
+         * Vấn đề: AI đôi khi phân loại sai
+         * - AI nói "Giày quai hậu" nhưng thực tế là "Giày cao gót"
+         * 
+         * Giải pháp: Kiểm tra description/features có chứa từ khóa "cao gót" không
+         * Nếu có -> Tự động sửa thành "Giày cao gót"
+         */
         if (isset($aiData['type']) && $aiData['type'] === 'Giày quai hậu') {
-            $description = strtolower($aiData['name'] ?? '') . ' ' . strtolower($aiData['description'] ?? '') . ' ' . strtolower($aiData['features'] ?? '');
+            // Ghép tất cả text để tìm kiếm
+            $description = strtolower($aiData['name'] ?? '') . ' ' . 
+                          strtolower($aiData['description'] ?? '') . ' ' . 
+                          strtolower($aiData['features'] ?? '');
+            
+            // Tìm các từ khóa liên quan đến cao gót
             if (strpos($description, 'cao gót') !== false || 
                 strpos($description, 'heel') !== false || 
                 strpos($description, 'gót cao') !== false ||
                 strpos($description, 'gót nhọn') !== false) {
+                
+                // Sửa lại loại sản phẩm
                 $aiData['type'] = 'Giày cao gót';
                 error_log("✅ Auto-corrected type: 'Giày quai hậu' => 'Giày cao gót' based on description");
             }
         }
         
-        // === BƯỚC 5: CHUẨN HÓA TAGS ===
+        /**
+         * BƯỚC 5: CHUẨN HÓA TAGS
+         * 
+         * AI có thể trả về tags dưới dạng:
+         * - String: "tag1, tag2, tag3"
+         * - Array: ["tag1", "tag2", "tag3"]
+         * 
+         * Chuẩn hóa: Luôn chuyển về array
+         */
         if (isset($aiData['tags']) && !is_array($aiData['tags'])) {
             if (is_string($aiData['tags'])) {
+                // Tách string thành array, loại bỏ khoảng trắng
                 $aiData['tags'] = array_map('trim', explode(',', $aiData['tags']));
             } else {
+                // Nếu không phải string cũng không phải array -> Gán mảng rỗng
                 $aiData['tags'] = [];
             }
         }
         
+        // Log kết quả cuối cùng để debug
         error_log("✅ Normalized AI Data: " . json_encode($aiData, JSON_UNESCAPED_UNICODE));
+        
         return $aiData;
     }
 }
@@ -436,7 +596,7 @@ Chỉ trả về JSON, không thêm text khác.";
                 ]
             ];
 
-            // Retry mechanism
+            // Thử lại mechanism
             $maxRetries = 2;
             $retryDelay = 1;
             
