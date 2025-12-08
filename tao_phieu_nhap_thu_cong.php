@@ -958,16 +958,7 @@ try {
                 </div>
             </div>
 
-            <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Smart Warehouse 2024</span>
-                    </div>
-                </div>
-            </footer>
-        </div>
-    </div>
+            <?php include 'includes/chan_trang.php'; ?>
 
     <!-- Logout Modal-->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog">
