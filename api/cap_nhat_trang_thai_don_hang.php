@@ -17,7 +17,7 @@ try {
     $newStatus = $_POST['status'] ?? null;
     $userId = $_SESSION['user_id'];
     
-    // Debug log
+    // Nhật ký gỡ lỗi
     error_log("Update order status - Order ID: $orderId, New Status: $newStatus, User ID: $userId");
     
     if (!$orderId || !$newStatus) {
@@ -25,14 +25,14 @@ try {
         exit;
     }
     
-    // Validate status  
+    // Kiểm tra trạng thái
     $validStatuses = ['pending', 'accepted', 'canceled', 'waiting_delivery', 'delivered', 'failed'];
     if (!in_array($newStatus, $validStatuses)) {
         echo json_encode(['success' => false, 'message' => 'Invalid status']);
         exit;
     }
     
-    // Get current order info
+    // Lấy thông tin đơn hàng hiện tại
     $getCurrentOrderQuery = "SELECT * FROM orders WHERE order_id = :order_id AND warehouse_id = :warehouse_id";
     $getCurrentOrderStmt = $pdo->prepare($getCurrentOrderQuery);
     $getCurrentOrderStmt->bindParam(':order_id', $orderId);
@@ -46,10 +46,10 @@ try {
         exit;
     }
     
-    // Check if status transition is valid
+    // Kiểm tra xem chuyển trạng thái có hợp lệ không
     $currentStatus = $currentOrder['status'];
     
-    // Debug log
+    // Nhật ký gỡ lỗi
     error_log("Current status from DB: $currentStatus");
     
     $validTransitions = [
@@ -75,7 +75,7 @@ try {
         exit;
     }
     
-    // Start transaction
+    // Bắt đầu giao dịch
     $pdo->beginTransaction();
     
     try {
@@ -157,7 +157,7 @@ try {
             }
         }
         
-        // Log audit trail
+        // Ghi nhật ký audit trail
         $logSql = "INSERT INTO audit_logs (user_id, action, table_name, record_id, old_values, new_values, warehouse_id) 
                   VALUES (:user_id, 'update_order_status', 'orders', :record_id, :old_values, :new_values, :warehouse_id)";
         $logStmt = $pdo->prepare($logSql);
@@ -191,7 +191,7 @@ try {
         ]);
         
     } catch (Exception $e) {
-        // Rollback transaction
+        // Hoàn tác giao dịch
         $pdo->rollback();
         throw $e;
     }

@@ -447,7 +447,7 @@ $stats = [
                     }
                 ],
                 "drawCallback": function() {
-                    // Update STT numbers after each draw (sort, filter, paginate)
+                    // Cập nhật STT numbers after each draw (sort, filter, paginate)
                     this.api().column(0, {search:'applied', order:'applied'}).nodes().each(function(cell, i) {
                         var pageInfo = table.page.info();
                         cell.innerHTML = pageInfo.start + i + 1;
@@ -559,7 +559,7 @@ $stats = [
                         confirmButtonColor: '#28a745',
                         confirmButtonText: 'OK'
                     }).then(() => {
-                        // Remove the row from table
+                        // Xóa the row from table
                         const $row = $('#order-row-' + orderId);
                         if ($row.length) {
                             $row.fadeOut(500, function() {

@@ -815,10 +815,10 @@ if ($userRole === 'admin') {
         const userWarehouseId = <?php echo $userWarehouseId ?? 'null'; ?>;
 
         $(document).ready(function() {
-            // Initialize DataTable
+            // Khởi tạo DataTable
             initializeDataTable();
             
-            // Load statistics
+            // Tải statistics
             loadStatistics();
             
             // Custom file input label
@@ -832,7 +832,7 @@ if ($userRole === 'admin') {
                 generateUsername();
             });
             
-            // Check username availability after generation
+            // Kiểm tra username availability after generation
             let usernameCheckTimeout;
             $('#createUsername').on('input', function() {
                 clearTimeout(usernameCheckTimeout);
@@ -1018,7 +1018,7 @@ if ($userRole === 'admin') {
             // Generate name initials (e.g., "Nguyễn Văn Trí" → "nvtri")
             const nameInitials = generateNameInitials(fullName);
             
-            // Generate warehouse code (e.g., "chuctest" → "chuctest")
+            // Tạo warehouse code (e.g., "chuctest" → "chuctest")
             const warehouseCode = generateWarehouseCode(warehouseName);
             
             // Combine to create username
@@ -1026,7 +1026,7 @@ if ($userRole === 'admin') {
             
             $('#createUsername').val(username.toLowerCase());
             
-            // Check availability after generation
+            // Kiểm tra availability after generation
             if (username) {
                 checkUsernameAvailability(username.toLowerCase());
             }
@@ -1072,7 +1072,7 @@ if ($userRole === 'admin') {
         }
         
         function generateNameInitials(fullName) {
-            // Remove Vietnamese tones and convert to lowercase
+            // Xóa Vietnamese tones and convert to lowercase
             const normalized = removeVietnameseTones(fullName).toLowerCase().trim();
             
             // Split into words
@@ -1082,12 +1082,12 @@ if ($userRole === 'admin') {
             
             let initials = '';
             
-            // Get first letter of first name(s)
+            // Lấy first letter of first name(s)
             for (let i = 0; i < words.length - 1; i++) {
                 initials += words[i].charAt(0);
             }
             
-            // Add full last name (last word)
+            // Thêm full last name (last word)
             if (words.length > 0) {
                 initials += words[words.length - 1];
             }
@@ -1096,7 +1096,7 @@ if ($userRole === 'admin') {
         }
         
         function generateWarehouseCode(warehouseName) {
-            // Remove Vietnamese tones, spaces, and special characters
+            // Xóa Vietnamese tones, spaces, and special characters
             const normalized = removeVietnameseTones(warehouseName).toLowerCase();
             return normalized.replace(/[^a-z0-9]/g, '');
         }
@@ -1162,7 +1162,7 @@ if ($userRole === 'admin') {
                 warehouse_id: parseInt(formData.get('warehouse_id'))
             };
 
-            // Debug logging
+            // Gỡ lỗi logging
             console.log('Creating employee with data:', data);
 
             // Hiển thị loading ngay lập tức
@@ -1203,7 +1203,7 @@ if ($userRole === 'admin') {
                             icon: 'success',
                             confirmButtonText: 'OK'
                         }).then(() => {
-                            // Reload datatable only, faster than full page reload
+                            // Tải lại datatable only, faster than full page reload
                             employeeTable.ajax.reload(null, false);
                         });
                     } else {
@@ -1279,7 +1279,7 @@ if ($userRole === 'admin') {
                 return;
             }
             
-            // Validate email format
+            // Kiểm tra email format
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 Swal.fire('Lỗi!', 'Email không đúng định dạng', 'error');

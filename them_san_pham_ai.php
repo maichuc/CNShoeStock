@@ -3170,7 +3170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Normalization Utilities - Centralized functions -->
-    <script src="js/normalization-utils.js"></script>
+    <script src="js/normalization-api-client.js"></script>
 
     <script>
         // Global function để hiển thị thông báo

@@ -17,7 +17,7 @@ class AuthMiddleware {
         
         $authenticated = false;
         
-        // Check existing simple session (fallback used by current app)
+        // Kiểm tra existing simple session (fallback used by current app)
         if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true && isset($_SESSION['user_id'])) {
             if (method_exists($this->user, 'loadById') && $this->user->loadById((int)$_SESSION['user_id'])) {
                 $authenticated = true;
@@ -25,7 +25,7 @@ class AuthMiddleware {
             }
         }
 
-        // Check token-based session (legacy)
+        // Kiểm tra token-based session (legacy)
         if (!$authenticated && isset($_SESSION['session_token']) && isset($_SESSION['user_id'])) {
             if (method_exists($this->user, 'validateSession') && $this->user->validateSession($_SESSION['session_token'])) {
                 $authenticated = true;
@@ -33,13 +33,13 @@ class AuthMiddleware {
             }
         }
         
-        // Check remember me cookie if session is not valid
+        // Kiểm tra remember me cookie if session is not valid
         if (!$authenticated && isset($_COOKIE['remember_user'])) {
             $cookie_data = json_decode(base64_decode($_COOKIE['remember_user']), true);
             
             if ($cookie_data && isset($cookie_data['session_token'])) {
                 if ($this->user->validateSession($cookie_data['session_token'])) {
-                    // Restore session
+                    // Khôi phục session
                     $_SESSION['user_id'] = $this->user->id;
                     $_SESSION['username'] = $this->user->username;
                     $_SESSION['full_name'] = $this->user->full_name;
@@ -56,7 +56,7 @@ class AuthMiddleware {
             $this->redirectToLogin();
         }
         
-        // Check role if required
+        // Kiểm tra role if required
         if ($required_role) {
             $role = $_SESSION['role'] ?? null;
             if (!$role || ($role !== $required_role && !in_array($role, (array)$required_role))) {
@@ -64,7 +64,7 @@ class AuthMiddleware {
             }
         }
         
-        // Check session timeout (24 hours)
+        // Kiểm tra session timeout (24 hours)
         if (isset($_SESSION['last_activity']) && time() - $_SESSION['last_activity'] > 86400) {
             $this->logout();
         }
@@ -92,7 +92,7 @@ class AuthMiddleware {
     }
     
     public function logout() {
-        // Start session if not already started
+        // Bắt đầu session nếu chưa được khởi động
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -101,11 +101,11 @@ class AuthMiddleware {
             $this->user->logout($_SESSION['session_token']);
         }
         
-        // Clear session
+        // Xóa session
         session_unset();
         session_destroy();
         
-        // Clear remember me cookie
+        // Xóa remember me cookie
         if (isset($_COOKIE['remember_user'])) {
             setcookie('remember_user', '', time() - 3600, '/', '', false, true);
         }

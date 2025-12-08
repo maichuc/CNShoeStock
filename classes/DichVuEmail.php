@@ -283,10 +283,10 @@ class EmailService {
             $failed = 0;
             
             foreach ($emails as $email) {
-                // Update status to sending
+                // Cập nhật status to sending
                 $this->updateEmailStatus($email['queue_id'], 'sending');
                 
-                // Send email
+                // Gửi email
                 $result = $this->sendEmailNow(
                     $email['recipient_email'],
                     $email['recipient_name'],
@@ -304,7 +304,7 @@ class EmailService {
                     $failed++;
                 }
                 
-                // Rate limiting: Sleep between emails
+                // Rate limiting: Ngủ between emails
                 sleep(6); // 10 emails/minute = 1 email/6 seconds
             }
             
@@ -337,7 +337,7 @@ class EmailService {
             
             $this->mailer->send();
             
-            // Log success to database
+            // Ghi nhật ký success vào database
             $this->logEmailToDatabase($to, $toName, 'sent', null);
             
             return [
@@ -345,7 +345,7 @@ class EmailService {
                 'message' => 'Email đã được gửi thành công'
             ];
         } catch (Exception $e) {
-            // Log failure to database
+            // Ghi nhật ký failure vào database
             $this->logEmailToDatabase($to, $toName, 'failed', $this->mailer->ErrorInfo);
             
             return [
@@ -455,7 +455,7 @@ class EmailService {
      * Helper: Lấy login URL động dựa trên cấu hình hiện tại
      */
     private function getLoginUrl() {
-        // Check if running from web context
+        // Kiểm tra if running from web context
         if (!isset($_SERVER['HTTP_HOST'])) {
             // Running from CLI or background - use default URL
             return 'http://localhost/cmix_warehouse23_11/login.html';

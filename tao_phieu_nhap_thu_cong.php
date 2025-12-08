@@ -1061,14 +1061,14 @@ try {
             console.error('Error parsing excluded_locations:', e);
         }
         
-        // Debug: Log user role
+        // Gỡ lỗi: Ghi nhật ký user role
         console.log('Current User Role:', '<?php echo $userRole; ?>');
         console.log('Is Staff (Employee)?', '<?php echo $userRole === "staff" ? "YES" : "NO"; ?>');
 
         // Data is now loaded dynamically via cascading dropdowns
 
         $(document).ready(function() {
-            // Initialize
+            // Khởi tạo
             updateStepDisplay();
             setupCascadingDropdowns();
             setupPriceFormatting();
@@ -1116,7 +1116,7 @@ try {
             });
 
             $('#backToBasic').click(function() {
-                // Check if there's any data filled in the sizes table
+                // Kiểm tra if there's any data filled in the sizes table
                 const hasSizeData = sizesTableData && sizesTableData.length > 0;
                 
                 if (hasSizeData) {
@@ -1134,7 +1134,7 @@ try {
                         cancelButtonColor: '#3085d6'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Clear sizes data when going back
+                            // Xóa sizes data when going back
                             sizesTableData = [];
                             updateSizesTable();
                             moveToStep(1);
@@ -1241,7 +1241,7 @@ try {
 
             // Main back button - goes back to previous page
             $('#mainBackBtn').click(function() {
-                // Check if there's any unsaved data
+                // Kiểm tra if there's any unsaved data
                 const hasUnsavedData = sizesTableData && sizesTableData.length > 0;
                 
                 if (hasUnsavedData) {
@@ -1267,14 +1267,14 @@ try {
         });
 
         function setupCascadingDropdowns() {
-            // Load initial product types
+            // Tải initial product types
             loadDropdownData('type');
             
-            // Setup cascading change handlers
+            // Thiết lập cascading change handlers
             $('#productType').on('change', function() {
                 const selectedType = $(this).val();
                 
-                // Reset and disable subsequent dropdowns
+                // Đặt lại and disable subsequent dropdowns
                 resetDropdown('productBrand', 'Chọn thương hiệu trước để xem thương hiệu');
                 resetDropdown('productColor', 'Chọn thương hiệu trước để xem màu sắc');
                 resetDropdown('productName', 'Chọn màu sắc trước để xem tên sản phẩm');
@@ -1289,7 +1289,7 @@ try {
                     $('#productBrand').siblings('small').text('Chọn loại sản phẩm trước để xem thương hiệu');
                 }
                 
-                // Clear SKU when type changes
+                // Xóa SKU when type changes
                 $('#productSku').val('');
             });
             
@@ -1297,7 +1297,7 @@ try {
                 const selectedBrand = $(this).val();
                 const selectedType = $('#productType').val();
                 
-                // Reset subsequent dropdowns
+                // Đặt lại subsequent dropdowns
                 resetDropdown('productColor', 'Chọn màu sắc trước để xem màu sắc');
                 resetDropdown('productName', 'Chọn màu sắc trước để xem tên sản phẩm');
                 resetDropdown('productSize', 'Chọn tên sản phẩm trước để xem kích thước có sẵn');
@@ -1311,7 +1311,7 @@ try {
                     $('#productColor').siblings('small').text('Chọn thương hiệu trước để xem màu sắc');
                 }
                 
-                // Clear SKU when brand changes
+                // Xóa SKU when brand changes
                 $('#productSku').val('');
             });
             
@@ -1320,7 +1320,7 @@ try {
                 const selectedType = $('#productType').val();
                 const selectedBrand = $('#productBrand').val();
                 
-                // Reset subsequent dropdowns
+                // Đặt lại subsequent dropdowns
                 resetDropdown('productName', 'Chọn tên sản phẩm trước để xem tên sản phẩm');
                 resetDropdown('productSize', 'Chọn tên sản phẩm trước để xem kích thước có sẵn');
                 
@@ -1333,7 +1333,7 @@ try {
                     $('#productName').siblings('small').text('Chọn màu sắc trước để xem tên sản phẩm');
                 }
                 
-                // Clear SKU when color changes
+                // Xóa SKU when color changes
                 $('#productSku').val('');
             });
             
@@ -1343,7 +1343,7 @@ try {
                 const selectedBrand = $('#productBrand').val();
                 const selectedColor = $('#productColor').val();
                 
-                // Reset size dropdown and dependent fields
+                // Đặt lại size dropdown and dependent fields
                 resetDropdown('productSize', 'Chọn kích thước trước để xem kích thước có sẵn');
                 $('#productSku').val('');
                 $('#storageLocation').empty().append('<option value="">-- Chọn vị trí lưu trữ --</option>');
@@ -1356,17 +1356,17 @@ try {
                         name: selectedName
                     });
                     
-                    // Load storage locations for this product type and brand
+                    // Tải storage locations cho sản phẩm này type and brand
                     loadStorageLocations(selectedType, selectedBrand);
                     
-                    // Show multiple sizes section and load all available sizes
+                    // Hiển thị multiple sizes section and load all available sizes
                     $('#multipleSizesSection').show();
                     loadAllAvailableSizes(selectedType, selectedBrand, selectedColor, selectedName);
                     
-                    // Enable multiple sizes functionality
+                    // Bật multiple sizes functionality
                     $('#addAllSizesBtn').prop('disabled', false);
                 } else {
-                    // Hide multiple sizes section if product not fully selected
+                    // Ẩn multiple sizes section if product not fully selected
                     $('#multipleSizesSection').hide();
                     $('#addAllSizesBtn').prop('disabled', true);
                 }
@@ -1507,7 +1507,7 @@ try {
             const productBrand = $('#productBrand').val();
             const productName = $('#productName').val();
             
-            // Check if we have enough product information
+            // Kiểm tra if we have enough product information
             if (!productId && (!productType || !productBrand || !productName)) {
                 Swal.fire({
                     icon: 'warning',
@@ -1948,7 +1948,7 @@ try {
             // Đếm số lượng rows sẽ được cập nhật
             let updatedCount = 0;
             
-            // Apply to all size rows in the table
+            // Áp dụng to all size rows in the table
             $('#sizesTable tbody tr').each(function() {
                 const $locationInput = $(this).find('.size-location');
                 if ($locationInput.length > 0) {
@@ -2006,12 +2006,12 @@ try {
             console.log('=== suggestLocationForSize called ===');
             console.log('Size received:', size);
             
-            // Get product information from various sources
+            // Lấy product information from various sources
             const productType = $('#productType').val() || $('#productTypeText').val() || '';
             const productBrand = $('#productBrand').val() || $('#brandName').val() || '';
             const productName = $('#productName').val() || '';
             
-            // Get variant_id and SKU from row data or sizesTableData
+            // Lấy variant_id and SKU from row data or sizesTableData
             const rowIndex = $targetRow.index();
             let variantId = null;
             let sku = null;
@@ -2085,7 +2085,7 @@ try {
             console.log('=== callStorageSuggestionAPIForSize ===');
             console.log('Request data:', requestData);
             
-            // Show loading on button
+            // Hiển thị loading on button
             const $button = $targetRow.find('.suggestion-btn-for-size');
             const originalHtml = $button.html();
             $button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
@@ -2102,7 +2102,7 @@ try {
                     if (response.success && response.suggestions && response.suggestions.length > 0) {
                         showStorageSuggestionModalForSize(response, $targetRow);
                     } else {
-                        // Show message when no suggestions found
+                        // Hiển thị message when no suggestions found
                         const message = response.message || 'Không tìm thấy vị trí phù hợp';
                         const product = response.product || {};
                         
@@ -2134,7 +2134,7 @@ try {
                     });
                 },
                 complete: function() {
-                    // Restore button
+                    // Khôi phục button
                     $button.prop('disabled', false).html(originalHtml);
                 }
             });
@@ -2278,11 +2278,11 @@ try {
                 </div>
             `;
             
-            // Remove existing modal and add new one
+            // Xóa existing modal and add new one
             $('#storageSuggestionModal').remove();
             $('body').append(modalHtml);
             
-            // Set up click handlers for suggestion cards
+            // Đặt up click handlers for suggestion cards
             $('.suggestion-card').on('click', function() {
                 const locationCode = $(this).data('location-code');
                 const hasConflict = $(this).data('has-conflict') === true || $(this).data('has-conflict') === 'true';
@@ -2326,7 +2326,7 @@ try {
             
             // Function để áp dụng vị trí vào row
             function applyLocationToRow(locationCode, $row) {
-                // Find and update the location input in the target row
+                // Tìm and update the location input in the target row
                 const $locationInput = $row.find('.size-location');
                 $locationInput.val(locationCode);
                 
@@ -2367,11 +2367,11 @@ try {
                 }
             );
             
-            // Show modal
+            // Hiển thị modal
             $('#storageSuggestionModal').modal('show');
         }
 
-        // Track loading state to prevent duplicate calls
+        // Theo dõi loading state to prevent duplicate calls
         let isLoadingSizes = false;
         
         function loadAllAvailableSizes(type, brand, color, name) {
@@ -2420,14 +2420,14 @@ try {
                     if (response.success && response.data && response.data.length > 0) {
                         console.log('=== Found sizes ===', response.data);
                         
-                        // Clear existing sizes table data
+                        // Xóa existing sizes table data
                         sizesTableData = [];
                         availableSizes = [];
                         
-                        // Get product_id from the first size response
+                        // Lấy product_id from the first size response
                         // We'll get it in the SKU API call
                         
-                        // Load each size with its SKU
+                        // Tải each size with its SKU
                         let loadedCount = 0;
                         const totalSizes = response.data.length;
                         console.log('Loading SKU for', totalSizes, 'sizes');
@@ -2435,7 +2435,7 @@ try {
                         response.data.forEach(size => {
                             console.log('Loading SKU for size:', size);
                             
-                            // Get SKU for this size
+                            // Lấy SKU for this size
                             $.ajax({
                                 url: 'api_lay_du_lieu_san_pham.php',
                                 method: 'POST',
@@ -2466,16 +2466,16 @@ try {
                                     if (skuResponse.success && skuResponse.sku) {
                                         console.log('Successfully loaded SKU for size', size, ':', skuResponse.sku);
                                         
-                                        // Set product ID when we get it from the first response
+                                        // Đặt product ID when we get it from the first response
                                         if (skuResponse.product_id && !$('#productId').val()) {
                                             $('#productId').val(skuResponse.product_id);
                                             console.log('Set productId to:', skuResponse.product_id);
                                         }
                                         
-                                        // Check if size already exists in availableSizes to avoid duplicates
+                                        // Kiểm tra if size already exists in availableSizes to avoid duplicates
                                         const existingSize = availableSizes.find(item => item.size === size);
                                         if (!existingSize) {
-                                            // Add to available sizes for selection with prices
+                                            // Thêm to available sizes for selection with prices
                                             availableSizes.push({
                                                 size: size,
                                                 sku: skuResponse.sku,
@@ -2572,7 +2572,7 @@ try {
         }
 
         function updateAvailableSizesDisplay() {
-            // Update both tables
+            // Cập nhật both tables
             updateAvailableSizesTable();
             updateSizesTable();
         }
@@ -2591,7 +2591,7 @@ try {
                 $('#addToReceipt').hide();
                 $('#addAllSizesToReceipt').show();
                 
-                // Clear and reset sizes table
+                // Xóa and reset sizes table
                 sizesTableData = [];
                 updateSizesTable();
             } else {
@@ -2662,10 +2662,10 @@ try {
                 return;
             }
 
-            // Show card with selected sizes
+            // Hiển thị card with selected sizes
             $('#selectedSizesCard').show();
 
-            // Show added sizes with input fields
+            // Hiển thị added sizes with input fields
             sizesTableData.forEach((item, index) => {
                 console.log('Creating row for size:', item.size, 'at index:', index, 'variantId:', item.variantId);
                 
@@ -2733,7 +2733,7 @@ try {
                     tbody.append(row);
                 });
 
-            // Update available sizes table to show selected state
+            // Cập nhật available sizes table to show selected state
             updateAvailableSizesTable();
         }
 
@@ -2743,7 +2743,7 @@ try {
         }
 
         function updateSizeData(index, field, value) {
-            // Handle formatted price values (remove non-digits)
+            // Xử lý formatted price values (remove non-digits)
             if (field === 'unitPrice' || field === 'salePrice') {
                 const rawValue = value.replace ? value.replace(/[^\d]/g, '') : value;
                 value = parseInt(rawValue) || 0;
@@ -2760,7 +2760,7 @@ try {
             } else if (field === 'storageLocation') {
                 sizesTableData[index].storageLocation = value;
                 
-                // Update the input field styling based on whether it has a value
+                // Cập nhật the input field styling based on whether it has a value
                 const $input = $(`input.size-location[onchange*="${index}"]`);
                 if (value && value.trim() !== '') {
                     $input.css('border', '2px solid #28a745'); // Green border when filled
@@ -2773,7 +2773,7 @@ try {
         }
 
         function addSizeFromAvailable(size, sku) {
-            // Check if size already exists
+            // Kiểm tra if size already exists
             const existingIndex = sizesTableData.findIndex(item => item.size === size);
             if (existingIndex !== -1) {
                 Swal.fire({
@@ -2805,7 +2805,7 @@ try {
                 totalPrice: unitPrice * 1
             });
 
-            // Hide the row in available sizes table
+            // Ẩn the row in available sizes table
             $('#availableSizesTable tbody tr').each(function() {
                 const rowSize = $(this).find('td:first strong').text();
                 if (rowSize === size) {
@@ -2815,7 +2815,7 @@ try {
 
             updateSizesTable();
 
-            // Show success message
+            // Hiển thị success message
             Swal.fire({
                 icon: 'success',
                 title: 'Đã thêm kích thước!',
@@ -2953,7 +2953,7 @@ try {
                 return;
             }
 
-            // Validate all sizes have required data
+            // Kiểm tra all sizes have required data
             for (let i = 0; i < sizesTableData.length; i++) {
                 const sizeData = sizesTableData[i];
                 if (!sizeData.quantity || sizeData.quantity <= 0) {
@@ -2994,7 +2994,7 @@ try {
             console.log('✅ Validation passed, adding sizes to receipt #<?php echo $fromReceipt; ?>');
             console.log('📦 Sizes to add:', sizesTableData);
             
-            // Show loading
+            // Hiển thị loading
             Swal.fire({
                 title: 'Đang thêm vào phiếu...',
                 html: `Đang thêm ${sizesTableData.length} size vào phiếu nhập`,
@@ -3082,14 +3082,14 @@ try {
         <?php endif; ?>
 
         function moveToStep(step) {
-            // Hide all steps
+            // Ẩn all steps
             $('.step-content').removeClass('active');
             $('.step').removeClass('active completed');
             
-            // Show target step
+            // Hiển thị target step
             $('#step' + step).addClass('active');
             
-            // Update step indicator
+            // Cập nhật step indicator
             for (let i = 1; i <= step; i++) {
                 if (i < step) {
                     $('.step[data-step="' + i + '"]').addClass('completed');
@@ -3104,7 +3104,7 @@ try {
 
         function updateStepDisplay() {
             if (currentStep === 2) {
-                // Initialize cascading dropdowns when entering product info step
+                // Khởi tạo cascading dropdowns when entering product info step
                 setupCascadingDropdowns();
             } else if (currentStep === 3) {
                 updateReceiptSummary();
@@ -3188,7 +3188,7 @@ try {
             addSizeFromAvailable(size, sku);
             Swal.close();
             
-            // Show success message
+            // Hiển thị success message
             Swal.fire({
                 icon: 'success',
                 title: 'Thành công!',
@@ -3255,7 +3255,7 @@ try {
                 return;
             }
 
-            // Validate all sizes have required data
+            // Kiểm tra all sizes have required data
             for (let i = 0; i < sizesTableData.length; i++) {
                 const sizeData = sizesTableData[i];
                 if (!sizeData.quantity || sizeData.quantity <= 0) {
@@ -3296,7 +3296,7 @@ try {
                 }
             }
 
-            // Add each size as a separate item
+            // Thêm each size as a separate item
             sizesTableData.forEach(sizeData => {
                 const product = {
                     id: Date.now() + Math.random(), // Unique ID for each size
@@ -3317,7 +3317,7 @@ try {
                 receiptItems.push(product);
             });
             
-            // Clear the sizes table for next product
+            // Xóa the sizes table for next product
             sizesTableData = [];
             updateSizesTable();
             
@@ -3333,12 +3333,12 @@ try {
         }
 
         function updateReceiptSummary() {
-            // Update supplier info
+            // Cập nhật supplier info
             $('#supplierInfo').text(currentSupplier ? currentSupplier.name : 'Chưa chọn nhà cung cấp');
             $('#currentDate').text($('#receiptDate').val());
             $('#receiptNotesDisplay').text($('#receiptNotes').val() || 'Không có');
             
-            // Update items list
+            // Cập nhật items list
             let itemsHtml = '';
             let totalAmount = 0;
             
@@ -3375,7 +3375,7 @@ try {
             $('#receiptItemsList').html(itemsHtml);
             $('#totalAmount').text(formatCurrency(totalAmount));
             
-            // Update the "Continue to Step 3" button visibility
+            // Cập nhật the "Tiếp tục to Step 3" button visibility
             updateContinueButton();
         }
 
@@ -3400,23 +3400,23 @@ try {
             $('#productDetailsForm')[0].reset();
             $('#productSku').val('');
             
-            // Reset all cascading dropdowns
+            // Đặt lại all cascading dropdowns
             resetDropdown('productBrand', 'Chọn loại sản phẩm trước để xem thương hiệu');
             resetDropdown('productColor', 'Chọn thương hiệu trước để xem màu sắc');
             resetDropdown('productName', 'Chọn màu sắc trước để xem tên sản phẩm');
             resetDropdown('productSize', 'Chọn tên sản phẩm trước để xem kích thước có sẵn');
             $('#storageLocation').empty().append('<option value="">-- Chọn vị trí lưu trữ --</option>');
             
-            // Reset multiple sizes mode
+            // Đặt lại multiple sizes mode
             if (multipleSizesMode) {
                 toggleMultipleSizesMode();
             }
             sizesTableData = [];
             
-            // Disable multiple sizes functionality
+            // Tắt multiple sizes functionality
             $('#enableMultipleSizes, #addSizeBtn, #addAllSizesBtn').prop('disabled', true);
             
-            // Load initial product types again
+            // Tải initial product types again
             loadDropdownData('type');
         }
 
@@ -3468,7 +3468,7 @@ try {
                             text: 'Đã lưu bản nháp phiếu nhập thành công',
                             confirmButtonText: 'OK'
                         }).then(() => {
-                            // Add timestamp to force refresh and avoid cache
+                            // Thêm timestamp to force refresh and avoid cache
                             window.location.href = 'quan_ly_phieu_nhap_kho.php?t=' + new Date().getTime();
                         });
                     } else {
@@ -3552,7 +3552,7 @@ try {
                                     text: 'Phiếu nhập đã được tạo thành công!',
                                     confirmButtonText: 'OK'
                                 }).then(() => {
-                                    // Add timestamp to force refresh and avoid cache
+                                    // Thêm timestamp to force refresh and avoid cache
                                     window.location.href = 'quan_ly_phieu_nhap_kho.php?t=' + new Date().getTime();
                                 });
                             } else {
@@ -3612,22 +3612,22 @@ try {
                 data: supplierData,
                 success: function(response) {
                     if (response.success) {
-                        // Add new supplier to select dropdown
+                        // Thêm new supplier to select dropdown
                         const option = `<option value="${response.supplier_id}" selected>
                             ${name}${contactName ? ' - ' + contactName : ''}
                         </option>`;
                         $('#supplierSelect').append(option);
                         
-                        // Set current supplier
+                        // Đặt current supplier
                         currentSupplier = {
                             id: response.supplier_id,
                             name: name + (contactName ? ' - ' + contactName : '')
                         };
                         
-                        // Enable next button
+                        // Bật next button
                         $('#nextToEdit').prop('disabled', false);
                         
-                        // Close modal and reset form
+                        // Đóng modal and reset form
                         $('#addSupplierModal').modal('hide');
                         $('#addSupplierForm')[0].reset();
                         
@@ -3665,7 +3665,7 @@ try {
 
         // Function to setup price formatting for input fields
         function setupPriceFormatting() {
-            // Format price on blur only (avoid cursor jumping during typing)
+            // Định dạng price on blur only (avoid cursor jumping during typing)
             $(document).on('blur', '.price-format-input', function() {
                 let input = $(this);
                 let value = input.val().replace(/[^\d]/g, ''); // Remove non-digits
@@ -3687,7 +3687,7 @@ try {
                 if (rawValue && rawValue !== '0') {
                     input.val(rawValue);
                 }
-                // Select all after a short delay
+                // Chọn all after a short delay
                 setTimeout(function() {
                     input.select();
                 }, 50);
@@ -3710,7 +3710,7 @@ try {
                 }
             });
             
-            // Update raw value on input
+            // Cập nhật raw value on input
             $(document).on('input', '.price-format-input', function() {
                 let input = $(this);
                 let value = input.val().replace(/[^\d]/g, '');

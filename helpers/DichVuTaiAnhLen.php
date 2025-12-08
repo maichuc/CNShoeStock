@@ -138,13 +138,13 @@ class ImageUploadService {
             throw new Exception('Could not read image file');
         }
         
-        // Prepare data for Imgur API
+        // Chuẩn bị data for Imgur API
         $data = [
             'image' => base64_encode($imageData),
             'type' => 'base64'
         ];
         
-        // Send to Imgur
+        // Gửi to Imgur
         $ch = curl_init();
         curl_setopt_array($ch, [
             CURLOPT_URL => 'https://api.imgur.com/3/image',
@@ -216,7 +216,7 @@ class ImageUploadService {
      */
     public static function upload($file, $folder = 'temp') {
         try {
-            // Validate file
+            // Kiểm tra file
             if (!isset($file['tmp_name']) || $file['error'] !== UPLOAD_ERR_OK) {
                 return [
                     'success' => false,
@@ -224,7 +224,7 @@ class ImageUploadService {
                 ];
             }
             
-            // Validate file type
+            // Kiểm tra file type
             $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
             $fileType = mime_content_type($file['tmp_name']);
             
@@ -235,7 +235,7 @@ class ImageUploadService {
                 ];
             }
             
-            // Validate file size (max 10MB)
+            // Kiểm tra file size (max 10MB)
             if ($file['size'] > 10 * 1024 * 1024) {
                 return [
                     'success' => false,
@@ -243,18 +243,18 @@ class ImageUploadService {
                 ];
             }
             
-            // Create upload directory
+            // Tạo upload directory
             $uploadDir = __DIR__ . "/../uploads/{$folder}/";
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
             
-            // Generate unique filename
+            // Tạo unique filename
             $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
             $filename = uniqid('img_') . '_' . time() . '.' . $extension;
             $targetPath = $uploadDir . $filename;
             
-            // Move uploaded file
+            // Di chuyển uploaded file
             if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
                 return [
                     'success' => false,

@@ -916,7 +916,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
                                 $('#addLocationModal').modal('hide');
                                 loadLocations();
                                 
-                                // Reset form
+                                // Đặt lại form
                                 $('#bulkRackZone').val('');
                                 $('#bulkRackFrom').val('');
                                 $('#bulkRackTo').val('');
@@ -1017,7 +1017,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
                             loadLocations();
                             // Load danh sách loại sản phẩm của kho đó
                             loadProductTypes(userWarehouseId);
-                            // Load product types cho filter
+                            // Tải product types cho filter
                             if (typeof loadFilterProductTypes === 'function') {
                                 loadFilterProductTypes(userWarehouseId);
                             }
@@ -1028,7 +1028,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
                             $('#addWarehouseDisplay').val(firstWarehouse.name);
                             // Load danh sách loại sản phẩm của kho đầu tiên
                             loadProductTypes(firstWarehouse.warehouse_id);
-                            // Load product types cho filter
+                            // Tải product types cho filter
                             if (typeof loadFilterProductTypes === 'function') {
                                 loadFilterProductTypes(firstWarehouse.warehouse_id);
                             }
@@ -1341,7 +1341,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             const type = $('#locationType').val();
             
             if (type === 'rack') {
-                // Find next rack position
+                // Tìm next rack position
                 const rackPattern = /^([A-Z-]+)-K(\d+)-T(\d+)-P(\d+)$/;
                 const racks = existingCodes.filter(code => rackPattern.test(code));
                 
@@ -1380,7 +1380,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             }
         }
         
-        // Update preview
+        // Cập nhật xem trước
         function updatePreview() {
             const code = $('#addLocationCode').val();
             const desc = $('#addDescription').val();
@@ -1499,7 +1499,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             });
         }
 
-        // Update location
+        // Cập nhật vị trí
         function updateLocation() {
             const form = $('#editLocationForm');
             
@@ -1537,7 +1537,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             });
         }
 
-        // Delete location
+        // Xóa vị trí
         function deleteLocation(locationId, locationCode, warehouseId) {
             // Kiểm tra quyền: Manager chỉ được xóa vị trí của kho mình
             if (userRole === 'manager' && userWarehouseId && warehouseId != userWarehouseId) {
@@ -1600,7 +1600,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
                 return;
             }
             
-            // Parse danh sách
+            // Phân tích danh sách
             const lines = locationList.split('\n');
             const locations = [];
             
@@ -1656,7 +1656,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             });
         }
 
-        // Reset filters
+        // Đặt lại bộ lọc
         function resetFilters() {
             $('#filterWarehouse').val('');
             $('#searchInput').val('');
@@ -1722,7 +1722,7 @@ $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
             });
         }
 
-        // Show alert
+        // Hiển thị alert
         function showAlert(type, message) {
             const alertTypes = {
                 'success': 'alert-success',

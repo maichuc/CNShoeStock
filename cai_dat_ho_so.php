@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         
         $successMessage = "Cập nhật thông tin thành công!";
         
-        // Reload user data
+        // Tải lại user data
         $stmt->execute([$_SESSION['user_id']]);
         $user = $stmt->fetch();
         

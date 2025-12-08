@@ -175,7 +175,7 @@ class EmployeeManager {
      */
     public function bulkImportEmployees($filePath, $warehouseId, $importedBy) {
         try {
-            // 1. Validate file
+            // 1. Kiểm tra file
             $fileValidation = $this->validateImportFile($filePath);
             if (!$fileValidation['valid']) {
                 return [
@@ -184,7 +184,7 @@ class EmployeeManager {
                 ];
             }
             
-            // 2. Parse file
+            // 2. Phân tích cú pháp file
             $parseResult = $this->parseImportFile($filePath);
             if (!$parseResult['success']) {
                 return $parseResult;
@@ -201,7 +201,7 @@ class EmployeeManager {
                 $validation = $this->validateEmployeeData($record, true); // bulk mode
                 
                 if ($validation['valid']) {
-                    // Check duplicates
+                    // Kiểm tra duplicates
                     if ($this->emailExists($record['email']) || $this->usernameExists($record['username'])) {
                         $invalidRecords[] = [
                             'row' => $index + 2, // +2 for header and 0-index
@@ -244,7 +244,7 @@ class EmployeeManager {
                 ];
             }
             
-            // 6. Process valid records
+            // 6. Xử lý valid records
             $successCount = 0;
             $failedCount = 0;
             $emailSentCount = 0;
@@ -253,12 +253,12 @@ class EmployeeManager {
             
             foreach ($validRecords as $record) {
                 try {
-                    // Generate password
+                    // Tạo password
                     $tempPassword = $this->generateTemporaryPassword();
                     $passwordHash = password_hash($tempPassword, PASSWORD_DEFAULT);
                     $employeeCode = $this->generateEmployeeCode();
                     
-                    // Insert
+                    // Thêm
                     $stmt = $this->pdo->prepare("
                         INSERT INTO users 
                         (username, password_hash, full_name, employee_code, email, phone, role, warehouse_id, 
@@ -318,10 +318,10 @@ class EmployeeManager {
                 }
             }
             
-            // 7. Update import log
+            // 7. Cập nhật import log
             $this->updateBulkImportLog($importId, 'completed', $successCount, $failedCount, $emailSentCount, $emailFailedCount);
             
-            // 8. Log audit
+            // 8. Ghi nhật ký audit
             $this->logAction($importedBy, 'bulk_create_employees', 'bulk_import_logs', $importId, null, [
                 'total' => count($records),
                 'success' => $successCount,
@@ -330,11 +330,11 @@ class EmployeeManager {
                 'email_failed' => $emailFailedCount
             ], $warehouseId);
             
-            // 9. Generate result file
+            // 9. Tạo result file
             $resultFilePath = $this->generateResultFile($importId, $resultDetails, $invalidRecords);
             $this->updateBulkImportResultFile($importId, $resultFilePath);
             
-            // 10. Send summary email to manager
+            // 10. Gửi summary email to manager
             $managerInfo = $this->getUserInfo($importedBy);
             if ($managerInfo && $managerInfo['email']) {
                 $this->emailService->sendBulkImportResultEmail(
@@ -594,13 +594,13 @@ class EmployeeManager {
                 ];
             }
             
-            // Get user info
+            // Lấy user info
             $userInfo = $this->getUserInfo($userId);
             if (!$userInfo) {
                 return ['success' => false, 'message' => 'Nhân viên không tồn tại'];
             }
             
-            // Update status
+            // Cập nhật status
             $stmt = $this->pdo->prepare("
                 UPDATE users 
                 SET status = 'inactive', 
@@ -617,7 +617,7 @@ class EmployeeManager {
                 $_SESSION['warehouse_id'] ?? $userInfo['warehouse_id']
             );
             
-            // Send email
+            // Gửi email
             $this->emailService->sendAccountDeactivatedEmail(
                 $userInfo['email'],
                 $userInfo['full_name'],
@@ -889,7 +889,7 @@ class EmployeeManager {
             // Nếu bảng chưa tồn tại, tạo bảng
             if ($e->getCode() == '42S02') { // Table doesn't exist
                 $this->createPasswordHistoryTable();
-                // Retry insert
+                // Thử lại insert
                 $stmt = $this->pdo->prepare("
                     INSERT INTO password_history (user_id, password_hash, changed_at)
                     VALUES (:user_id, :password_hash, NOW())
@@ -1163,14 +1163,14 @@ class EmployeeManager {
                 return ['success' => false, 'message' => 'File không có dữ liệu'];
             }
             
-            // Remove header
+            // Xóa header
             $header = array_shift($rows);
             
             if (count($rows) > $this->max_bulk_import_size) {
                 return ['success' => false, 'message' => "File chứa quá nhiều bản ghi. Giới hạn tối đa {$this->max_bulk_import_size} nhân viên/lần"];
             }
             
-            // Map data
+            // Ánh xạ data
             $data = [];
             foreach ($rows as $row) {
                 if (empty(array_filter($row))) continue; // Skip empty rows

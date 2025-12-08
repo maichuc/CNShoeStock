@@ -117,7 +117,7 @@ try {
         
         $variantId = $pdo->lastInsertId();
         
-        // Log audit
+        // Ghi nhật ký audit
         $auditLogger = new AuditLogger($pdo);
         $auditLogger->log(
             $userId,

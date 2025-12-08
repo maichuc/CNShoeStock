@@ -480,7 +480,7 @@ $stats = [
                     { "orderable": false, "targets": [0, 8] } // Disable sorting for STT and action columns
                 ],
                 "drawCallback": function() {
-                    // Update STT numbers after each draw
+                    // Cập nhật STT numbers after each draw
                     this.api().column(0, {search:'applied', order:'applied'}).nodes().each(function(cell, i) {
                         var pageInfo = $('#exportsTable').DataTable().page.info();
                         cell.innerHTML = pageInfo.start + i + 1;

@@ -41,7 +41,7 @@ function loadLocations() {
     const isActive = $('#filterStatus').val();
     const productType = $('#filterProductType').val();
     
-    // Show loading
+    // Hiển thị loading
     $('#locationsTableBody').html(`
         <tr>
             <td colspan="7" class="text-center py-5">
@@ -68,7 +68,7 @@ function loadLocations() {
                 // Sắp xếp
                 sortLocations();
                 
-                // Update statistics
+                // Cập nhật statistics
                 updateStatistics();
                 
                 // Display với phân trang
@@ -100,7 +100,7 @@ function sortLocations() {
         let valA = a[sortBy];
         let valB = b[sortBy];
         
-        // Convert to string for comparison
+        // Chuyển đổi to string for comparison
         valA = valA ? valA.toString().toLowerCase() : '';
         valB = valB ? valB.toString().toLowerCase() : '';
         
@@ -112,7 +112,7 @@ function sortLocations() {
     });
 }
 
-// Update statistics
+// Cập nhật statistics
 function updateStatistics() {
     const total = filteredLocations.length;
     const active = filteredLocations.filter(loc => loc.is_active == 1).length;
@@ -151,21 +151,21 @@ function displayLocations() {
         const itemsPerPage = parseInt(entriesPerPage);
         const totalPages = Math.ceil(filteredLocations.length / itemsPerPage);
         
-        // Ensure currentPage is valid
+        // Ensure currentPage có hợp lệ không
         if (currentPage > totalPages) currentPage = totalPages;
         if (currentPage < 1) currentPage = 1;
         
         startIndex = (currentPage - 1) * itemsPerPage;
         endIndex = Math.min(startIndex + itemsPerPage, filteredLocations.length);
         
-        // Render pagination
+        // Hiển thị pagination
         renderPagination(totalPages, itemsPerPage);
     } else {
         $('#pagination').html('');
         $('#paginationInfo').html(`Hiển thị tất cả ${filteredLocations.length} vị trí`);
     }
     
-    // Display data
+    // Hiển thị data
     let html = '';
     const displayLocations = filteredLocations.slice(startIndex, endIndex);
     
@@ -213,7 +213,7 @@ function displayLocations() {
     tbody.html(html);
 }
 
-// Render pagination
+// Hiển thị pagination
 function renderPagination(totalPages, itemsPerPage) {
     const startItem = (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, filteredLocations.length);
@@ -287,7 +287,7 @@ function changePage(page) {
     $('html, body').animate({ scrollTop: $('#locationsTable').offset().top - 100 }, 300);
 }
 
-// Reset filters
+// Đặt lại filters
 function resetFilters() {
     $('#filterWarehouse').val('');
     $('#searchInput').val('');
@@ -300,14 +300,14 @@ function resetFilters() {
     loadLocations();
 }
 
-// Export to Excel
+// Xuất to Excel
 function exportToExcel() {
     if (filteredLocations.length === 0) {
         showAlert('warning', 'Không có dữ liệu để xuất');
         return;
     }
     
-    // Prepare data
+    // Chuẩn bị data
     let csvContent = 'STT,Kho,Mã Vị trí,Mô tả,Trạng thái,Ngày tạo\n';
     
     filteredLocations.forEach((loc, index) => {
@@ -316,7 +316,7 @@ function exportToExcel() {
         csvContent += `${index + 1},${loc.warehouse_name},"${loc.location_code}","${description}",${status},${loc.created_at}\n`;
     });
     
-    // Create download
+    // Tạo download
     const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -332,7 +332,7 @@ function exportToExcel() {
     showAlert('success', `Đã xuất ${filteredLocations.length} vị trí ra file ${fileName}`);
 }
 
-// Load product types for filter
+// Tải product types for filter
 function loadFilterProductTypes(warehouseId) {
     if (!warehouseId) {
         $('#filterProductType').html('<option value="">📦 Tất cả loại</option>');

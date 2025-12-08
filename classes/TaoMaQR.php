@@ -52,13 +52,13 @@ class QRCodeGenerator {
      */
     public static function saveQRToLocal($qrData, $uuid) {
         try {
-            // Create uploads/qr directory if not exists
+            // Tạo uploads/qr directory if not exists
             $uploadDir = __DIR__ . '/../uploads/qr/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
             
-            // Generate filename
+            // Tạo filename
             $filename = "qr_" . $uuid . ".png";
             $filePath = $uploadDir . $filename;
             
@@ -67,11 +67,11 @@ class QRCodeGenerator {
                 try {
                     require_once __DIR__ . '/phpqrcode/qrlib.php';
                     
-                    // Generate QR code using phpqrcode library
+                    // Tạo QR code using phpqrcode library
                     // QRcode::png($text, $file, $ecc, $size, $margin, $saveandprint)
                     QRcode::png($qrData, $filePath, QR_ECLEVEL_L, 4, 2);
                     
-                    // Verify file was created and has content
+                    // Xác minh file was created and has content
                     if (file_exists($filePath) && filesize($filePath) > 100) {
                         error_log("QR code created using phpqrcode: $filePath");
                         return "uploads/qr/" . $filename;
@@ -106,7 +106,7 @@ class QRCodeGenerator {
                     curl_close($ch);
                     
                     if ($imageData !== false && $httpCode == 200 && strlen($imageData) > 100) {
-                        // Save to local file
+                        // Lưu to local file
                         if (file_put_contents($filePath, $imageData) !== false) {
                             error_log("QR code created using external API: $filePath (service: $qrUrl)");
                             return "uploads/qr/" . $filename;

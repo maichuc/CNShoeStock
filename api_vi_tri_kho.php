@@ -315,7 +315,7 @@ function createLocation($pdo, $data) {
     $userRole = $_SESSION['role'] ?? '';
     $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
     
-    // Validate
+    // Kiểm tra
     if (empty($data['warehouse_id']) || empty($data['location_code'])) {
         throw new Exception('Thiếu thông tin bắt buộc');
     }
@@ -340,7 +340,7 @@ function createLocation($pdo, $data) {
         throw new Exception('Mã vị trí đã tồn tại trong kho này');
     }
     
-    // Insert
+    // Thêm
     $sql = "INSERT INTO locations (warehouse_id, shelf_code, type, description, is_active)
             VALUES (:warehouse_id, :location_code, :type, :description, :is_active)";
     
@@ -393,7 +393,7 @@ function bulkCreateLocations($pdo, $data) {
         
         foreach ($data['locations'] as $location) {
             try {
-                // Validate
+                // Kiểm tra
                 if (empty($location['location_code'])) {
                     $failed++;
                     $errors[] = "Thiếu thông tin: " . ($location['location_code'] ?? 'N/A');

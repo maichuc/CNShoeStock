@@ -579,7 +579,7 @@ $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
         console.log('User role:', userRole, '| Can activate suppliers:', canActivateSuppliers);
         
         $(document).ready(function() {
-            // Initialize DataTable
+            // Khởi tạo DataTable
             var table = $('#suppliersTable').DataTable({
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
@@ -590,7 +590,7 @@ $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
                     { "orderable": false, "targets": [0, 1, 9] } // Disable sorting for checkbox, STT and action column
                 ],
                 "drawCallback": function() {
-                    // Update STT numbers after each draw (sort, filter, paginate)
+                    // Cập nhật STT numbers after each draw (sort, filter, paginate)
                     this.api().column(1, {search:'applied', order:'applied'}).nodes().each(function(cell, i) {
                         var pageInfo = table.page.info();
                         cell.innerHTML = pageInfo.start + i + 1;
@@ -608,7 +608,7 @@ $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
                 allowOutsideClick: false
             });
 
-            // Load supplier details via AJAX
+            // Tải supplier details via AJAX
             $.ajax({
                 url: 'api/lay_nha_cung_cap.php',
                 method: 'GET',
@@ -667,7 +667,7 @@ $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
             window.location.href = `them_nha_cung_cap.php?edit=${supplierId}`;
         }
 
-        // Toggle supplier status
+        // Bật/tắt supplier status
         function toggleStatus(supplierId, currentStatus) {
             const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
             const actionText = newStatus === 'active' ? 'kích hoạt' : 'tạm ngưng';
@@ -696,7 +696,7 @@ $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
                 cancelButtonText: '❌ Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Update status via AJAX
+                    // Cập nhật status via AJAX
                     $.ajax({
                         url: 'api/chuyen_doi_trang_thai_ncc.php',
                         method: 'POST',
@@ -725,7 +725,7 @@ $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
             });
         }
 
-        // Export supplier info function
+        // Xuất supplier info function
         function exportSupplierInfo(supplierId) {
             Swal.fire({
                 title: '📤 Xuất thông tin',
@@ -741,10 +741,10 @@ $stats = $statsStmt->fetch(PDO::FETCH_ASSOC);
                 denyButtonColor: '#6c757d'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Export to PDF
+                    // Xuất to PDF
                     exportToPDF(supplierId);
                 } else if (result.dismiss === Swal.DismissReason.cancel) {
-                    // Export to Excel
+                    // Xuất to Excel
                     exportToExcel(supplierId);
                 }
             });

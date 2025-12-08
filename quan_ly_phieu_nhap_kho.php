@@ -516,7 +516,7 @@ try {
     <!-- Page level custom scripts -->
     <script>
     $(document).ready(function() {
-        // Initialize DataTable
+        // Khởi tạo DataTable
         var table = $('#dataTable').DataTable({
             "language": {
                 "url": "https://cdn.datatables.net/plug-ins/1.10.24/i18n/Vietnamese.json"
@@ -528,7 +528,7 @@ try {
                 { "orderable": false, "targets": [0, 5] } // Disable sorting for STT and action column
             ],
             "drawCallback": function() {
-                // Update STT numbers after each draw (sort, filter, paginate)
+                // Cập nhật STT numbers after each draw (sort, filter, paginate)
                 this.api().column(0, {search:'applied', order:'applied'}).nodes().each(function(cell, i) {
                     var pageInfo = table.page.info();
                     cell.innerHTML = pageInfo.start + i + 1;
@@ -544,37 +544,37 @@ try {
                 var filterDateFrom = $('#filterDateFrom').val();
                 var filterDateTo = $('#filterDateTo').val();
                 
-                // Get data from table columns
+                // Lấy data from table columns
                 var supplier = data[2] || ''; // Column index 2: Nhà cung cấp
                 var statusHtml = data[3] || ''; // Column index 3: Trạng thái
                 var dateStr = data[4] || ''; // Column index 4: Ngày tạo
                 
-                // Extract status from badge HTML
+                // Trích xuất status from badge HTML
                 var status = '';
                 if (statusHtml.includes('Bản nháp')) status = 'draft';
                 else if (statusHtml.includes('Đã xác nhận')) status = 'confirmed';
                 else if (statusHtml.includes('Hoàn thành')) status = 'completed';
                 else if (statusHtml.includes('Đã từ chối')) status = 'rejected';
                 
-                // Parse date from format "dd/mm/yyyy HH:ii"
+                // Phân tích cú pháp date from format "dd/mm/yyyy HH:ii"
                 var dateParts = dateStr.split(' ')[0].split('/');
                 var rowDate = null;
                 if (dateParts.length === 3) {
-                    // Convert dd/mm/yyyy to yyyy-mm-dd for comparison
+                    // Chuyển đổi dd/mm/yyyy to yyyy-mm-dd for comparison
                     rowDate = dateParts[2] + '-' + dateParts[1].padStart(2, '0') + '-' + dateParts[0].padStart(2, '0');
                 }
                 
-                // Check status filter
+                // Kiểm tra status filter
                 if (filterStatus && status !== filterStatus) {
                     return false;
                 }
                 
-                // Check supplier filter
+                // Kiểm tra supplier filter
                 if (filterSupplier && supplier !== filterSupplier) {
                     return false;
                 }
                 
-                // Check date range filter
+                // Kiểm tra date range filter
                 if (filterDateFrom && rowDate && rowDate < filterDateFrom) {
                     return false;
                 }
@@ -592,7 +592,7 @@ try {
             table.draw();
         });
 
-        // Reset filters button
+        // Đặt lại filters button
         $('#resetFilters').on('click', function() {
             $('#filterStatus').val('');
             $('#filterSupplier').val('');
@@ -1758,7 +1758,7 @@ try {
     function generateAllQRsForReceipt(receiptId) {
         if (!confirm('Bạn có chắc muốn tạo QR code cho tất cả sản phẩm trong phiếu nhập này?')) return;
 
-        // Disable button
+        // Tắt button
         const btn = event.target;
         const originalText = btn.innerHTML;
         btn.disabled = true;
@@ -1851,7 +1851,7 @@ try {
         $('body').append(modalHtml);
         $('#qrManagementModal').modal('show');
 
-        // Load QR statistics
+        // Tải QR statistics
         loadQRStatistics();
     }
 
@@ -1986,12 +1986,12 @@ try {
     // Function to download QR code
     function downloadQR(qrUrl, sku) {
         try {
-            // Handle local file paths vs full URLs
+            // Xử lý local file paths vs full URLs
             let downloadUrl = qrUrl;
             if (!qrUrl.startsWith('http')) {
                 downloadUrl = window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + qrUrl;
             }
-            // Fetch the image as blob and trigger download via object URL (no navigation)
+            // Lấy the image as blob and trigger download via object URL (no navigation)
             fetch(downloadUrl, { mode: 'cors' })
                 .then(resp => {
                     if (!resp.ok) throw new Error('Network response was not ok');

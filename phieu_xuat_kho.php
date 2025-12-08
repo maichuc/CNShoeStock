@@ -17,7 +17,7 @@ if (!$orderId) {
     die('Order ID is required');
 }
 
-// Get export slip details with all products
+// Lấy export slip details with all products
 $sql = "
     SELECT 
         we.export_id,
@@ -48,18 +48,18 @@ if (!$exportData) {
     die('Order not found');
 }
 
-// Get current logged-in user for signature
+// Lấy current logged-in user for signature
 $currentUserSql = "SELECT COALESCE(full_name, username) as full_name FROM users WHERE user_id = :user_id";
 $currentUserStmt = $pdo->prepare($currentUserSql);
 $currentUserStmt->execute(['user_id' => $_SESSION['user_id']]);
 $currentUser = $currentUserStmt->fetch(PDO::FETCH_ASSOC);
 $createdByName = $currentUser['full_name'] ?? '';
 
-// Get export details (products) - try from warehouse_export_details first, fallback to order_details
+// Lấy export details (products) - try from warehouse_export_details first, fallback to order_details
 $exportDetails = [];
 
 if ($exportData['export_id']) {
-    // Get from warehouse_export_details if export exists
+    // Lấy from warehouse_export_details if export exists
     $detailsSql = "
         SELECT 
             wed.variant_id,
@@ -110,11 +110,11 @@ if (empty($exportDetails)) {
     $exportDetails = $detailsStmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Calculate totals
+// Tính toán totals
 $totalQuantity = array_sum(array_column($exportDetails, 'quantity'));
 $subtotalAmount = array_sum(array_column($exportDetails, 'total_price'));
 
-// Calculate discount and final total
+// Tính toán discount and final total
 $discountPercent = $exportData['discount'] ?? 0;
 $discountAmount = 0;
 $totalAmount = $subtotalAmount;

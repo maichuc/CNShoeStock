@@ -55,7 +55,7 @@ try {
     $warehouse->address = $warehouseAddress;
     $warehouse->status = 'active';
 
-    // Validate warehouse
+    // Kiểm tra warehouse
     $warehouseErrors = $warehouse->validate();
     if (!empty($warehouseErrors)) {
         throw new Exception(implode(', ', $warehouseErrors));
@@ -80,7 +80,7 @@ try {
     $user->warehouse_id = $warehouse->warehouse_id;
     $user->status = 'active';
 
-    // Validate user
+    // Kiểm tra user
     $userErrors = $user->validate();
     if (!empty($userErrors)) {
         throw new Exception(implode(', ', $userErrors));
@@ -111,7 +111,7 @@ try {
         error_log("Email error: " . $emailError);
     }
 
-    // Log audit
+    // Ghi nhật ký audit
     try {
         $auditLogger = new AuditLogger($db);
         $auditLogger->log($user->user_id, 'register', 'users', $user->user_id, null, [

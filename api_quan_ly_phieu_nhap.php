@@ -209,7 +209,7 @@ function getReceiptDetails($pdo, $receiptId) {
  */
 function updateReceiptDraft($pdo, $historyManager, $data, $userId) {
     try {
-        // Log input data
+        // Ghi nhật ký input data
         error_log("updateReceiptDraft called with data: " . print_r($data, true));
         error_log("updateReceiptDraft userId: " . $userId);
         

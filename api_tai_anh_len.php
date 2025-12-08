@@ -34,23 +34,23 @@ try {
             $fileSize = $files['size'][$i];
             $fileType = $files['type'][$i];
             
-            // Validate file type
+            // Kiểm tra file type
             $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
             if (!in_array($fileType, $allowedTypes)) {
                 throw new Exception('File ' . $originalName . ' không phải là ảnh hợp lệ');
             }
             
-            // Validate file size (5MB max)
+            // Kiểm tra file size (5MB max)
             if ($fileSize > 5 * 1024 * 1024) {
                 throw new Exception('File ' . $originalName . ' quá lớn (tối đa 5MB)');
             }
             
-            // Generate unique filename
+            // Tạo unique filename
             $extension = pathinfo($originalName, PATHINFO_EXTENSION);
             $filename = 'product_' . uniqid() . '.' . $extension;
             $filepath = $uploadDir . $filename;
             
-            // Move uploaded file
+            // Di chuyển uploaded file
             if (move_uploaded_file($tmpName, $filepath)) {
                 // Resize and optimize image
                 $optimizedPath = optimizeImage($filepath);

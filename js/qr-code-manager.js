@@ -25,7 +25,7 @@ class QRCodeManager {
      * Preload QR scanner library for instant access like Zalo
      */
     preloadQRLibrary() {
-        // Start preloading immediately when class is instantiated
+        // Bắt đầu preloading immediately when class is instantiated
         setTimeout(() => {
             if (typeof Html5QrcodeScanner === 'undefined') {
                 console.log('🚀 Preloading QR scanner library for Zalo-like speed...');
@@ -99,7 +99,7 @@ class QRCodeManager {
             this.createQRListModal();
         }
         
-        // QR Display Modal
+        // QR Hiển thị Modal
         if (!$('#qrDisplayModal').length) {
             this.createQRDisplayModal();
         }
@@ -229,12 +229,12 @@ class QRCodeManager {
                 return;
             }
 
-            // Show modal with loading state
+            // Hiển thị modal with loading state
             const modal = $('#qrScannerModal');
             modal.removeAttr('aria-hidden');
             modal.modal('show');
 
-            // Show instant loading state like Zalo
+            // Hiển thị instant loading state like Zalo
             $('#qr-reader').html(`
                 <div style="
                     display: flex;
@@ -258,7 +258,7 @@ class QRCodeManager {
                 </div>
             `);
 
-            // Import QR scanner library if not loaded
+            // Nhập QR scanner library if not loaded
             if (typeof Html5QrcodeScanner === 'undefined') {
                 try {
                     await this.loadQRScannerLibrary();
@@ -269,7 +269,7 @@ class QRCodeManager {
                 }
             }
 
-            // Initialize with slight delay for smooth UX
+            // Khởi tạo with slight delay for smooth UX
             setTimeout(() => {
                 this.initializeQRScanner();
             }, 500);
@@ -333,7 +333,7 @@ class QRCodeManager {
         this.scanner = new Html5QrcodeScanner('qr-reader', config);
         
         this.scanner.render(
-            // Success callback
+            // Thành công callback
             (decodedText, decodedResult) => {
                 console.log('🎉 QR Code detected successfully:', decodedText);
                 console.log('📊 Detection result:', decodedResult);
@@ -346,14 +346,14 @@ class QRCodeManager {
                     navigator.vibrate([100, 50, 100]);
                 }
                 
-                // Process the QR code
+                // Xử lý the QR code
                 this.onQRCodeScanned(decodedText);
             },
-            // Error callback with detailed logging for debugging
+            // Lỗi callback with detailed logging for debugging
             (error) => {
                 const errorString = error.toString();
                 
-                // Log all errors for debugging but don't show to user
+                // Ghi nhật ký all errors for debugging but don't show to user
                 if (this.debugMode) {
                     console.log('🔍 QR Scan Debug:', {
                         error: errorString,
@@ -407,10 +407,10 @@ class QRCodeManager {
     showInstantSuccess() {
         const qrReader = $('#qr-reader');
         if (qrReader.length) {
-            // Remove any existing feedback
+            // Xóa any existing feedback
             qrReader.find('.qr-success-feedback').remove();
             
-            // Add instant success overlay like Zalo
+            // Thêm instant success overlay like Zalo
             const successOverlay = $(`
                 <div class="qr-success-feedback" style="
                     position: absolute;
@@ -449,7 +449,7 @@ class QRCodeManager {
             }, 1500);
         }
         
-        // Add CSS animations if not already present
+        // Thêm CSS animations if not already present
         if (!$('#qr-animations').length) {
             $('head').append(`
                 <style id="qr-animations">
@@ -481,19 +481,19 @@ class QRCodeManager {
         }
 
         try {  
-            // Show loading
+            // Hiển thị loading
             const scanBtn = $('#scan-image-btn');
             const originalText = scanBtn.html();
             scanBtn.html('<i class="fas fa-spinner fa-spin"></i> Đang quét...').prop('disabled', true);
 
             console.log('📁 Scanning QR from image:', file.name, 'Size:', file.size, 'bytes');
 
-            // Import Html5Qrcode if not available
+            // Nhập Html5Qrcode if not available
             if (typeof Html5Qrcode === 'undefined') {
                 await this.loadQRScannerLibrary();
             }
 
-            // Create temporary div for scanning
+            // Tạo temporary div for scanning
             let tempDiv = document.getElementById('temp-qr-scan');
             if (!tempDiv) {
                 tempDiv = document.createElement('div');
@@ -502,7 +502,7 @@ class QRCodeManager {
                 document.body.appendChild(tempDiv);
             }
 
-            // Create Html5Qrcode instance for file scanning
+            // Tạo Html5Qrcode instance for file scanning
             const html5QrCode = new Html5Qrcode("temp-qr-scan");
             
             // Enhanced scan configuration for image files
@@ -519,7 +519,7 @@ class QRCodeManager {
                 ]
             };
             
-            // Scan the image file with enhanced settings
+            // Quét the image file with enhanced settings
             const qrCodeResult = await html5QrCode.scanFile(file, true);
             
             // Clean up
@@ -527,13 +527,13 @@ class QRCodeManager {
             
             console.log('✅ QR Code detected from image:', qrCodeResult);
             
-            // Reset button first
+            // Đặt lại button first
             scanBtn.html('<i class="fas fa-check"></i> Quét thành công!').removeClass('btn-primary').addClass('btn-success');
             
-            // Process the detected QR code
+            // Xử lý the detected QR code
             await this.onQRCodeScanned(qrCodeResult);
             
-            // Reset button after processing
+            // Đặt lại button after processing
             setTimeout(() => {
                 scanBtn.html('<i class="fas fa-search"></i> Quét hình đã chọn').removeClass('btn-success').addClass('btn-primary').prop('disabled', false);
             }, 3000);
@@ -554,7 +554,7 @@ class QRCodeManager {
             
             this.showError(errorMessage);
             
-            // Reset button
+            // Đặt lại button
             const scanBtn = $('#scan-image-btn');
             scanBtn.html('<i class="fas fa-search"></i> Quét hình đã chọn').removeClass('btn-success').addClass('btn-primary').prop('disabled', false);
         }
@@ -581,11 +581,11 @@ class QRCodeManager {
                 console.log('[QR Manager] 🔤 QR Type:', typeof qrCode);
                 console.log('[QR Manager] 🔢 QR as hex:', qrCode.split('').map(c => c.charCodeAt(0).toString(16)).join(' '));
 
-                // Check if it's UUID format
+                // Kiểm tra if it's UUID format
                 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
                 console.log('[QR Manager] 🆔 Is UUID format:', uuidRegex.test(qrCode));
 
-                // Check for common QR formats
+                // Kiểm tra for common QR formats
                 if (qrCode.startsWith('http')) {
                     console.log('[QR Manager] 🌐 Detected URL QR');
                 } else if (qrCode.match(/^\d+$/)) {
@@ -902,7 +902,7 @@ class QRCodeManager {
             
             if (response.success) {
                 this.showSuccess(response.message);
-                // Refresh QR list if modal is open
+                // Làm mới QR list if modal is open
                 if ($('#qrListModal').hasClass('show')) {
                     const productId = $('#qrListModal').data('product-id');
                     if (productId) {
@@ -1033,13 +1033,13 @@ class QRCodeManager {
         
         $('body').append(modalHtml);
         
-        // Add event handlers for accessibility
+        // Thêm event handlers for accessibility
         $('#qrScannerModal').on('shown.bs.modal', function() {
             // Focus on the manual input when modal opens
             $('#manual-qr-input').focus();
         });
         
-        // Handle QR image upload
+        // Xử lý QR image upload
         $('#qr-image-upload').on('change', function() {
             const scanBtn = $('#scan-image-btn');
             if (this.files && this.files[0]) {
@@ -1051,12 +1051,12 @@ class QRCodeManager {
             }
         });
         
-        // Handle scan image button
+        // Xử lý scan image button
         $('#scan-image-btn').on('click', () => {
             this.scanQRFromImage();
         });
         
-        // Handle manual QR input
+        // Xử lý manual QR input
         $('#manual-qr-input').on('input', function() {
             const scanBtn = $('#scan-manual-btn');
             const value = $(this).val().trim();
@@ -1078,7 +1078,7 @@ class QRCodeManager {
             }
         });
         
-        // Handle manual scan button
+        // Xử lý manual scan button
         $('#scan-manual-btn').on('click', () => {
             const qrCode = $('#manual-qr-input').val().trim();
             if (qrCode) {
@@ -1086,7 +1086,7 @@ class QRCodeManager {
             }
         });
         
-        // Handle stop scan button
+        // Xử lý stop scan button
         $('.btn-stop-scan').on('click', () => {
             this.stopQRScanner();
         });
@@ -1353,7 +1353,7 @@ class QRCodeManager {
     }
     
     showLoading(message = 'Đang xử lý...') {
-        // Show loading spinner or message
+        // Hiển thị loading spinner or message
         if ($('#loadingModal').length === 0) {
             $('body').append(`
                 <div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" data-backdrop="static">
@@ -1435,11 +1435,11 @@ class QRCodeManager {
     }
 }
 
-// Initialize QR Manager khi document ready
+// Khởi tạo QR Manager khi document ready
 let qrManager;
 $(document).ready(function() {
     qrManager = new QRCodeManager();
     
-    // Export to global scope for easy access
+    // Xuất to global scope for easy access
     window.qrManager = qrManager;
 });

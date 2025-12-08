@@ -27,7 +27,7 @@ try {
         throw new Exception('Chỉ Admin và Quản lý mới có thể kích hoạt nhà cung cấp');
     }
     
-    // Get current supplier info
+    // Lấy thông tin nhà cung cấp hiện tại
     $stmt = $pdo->prepare("SELECT name, status FROM suppliers WHERE supplier_id = ?");
     $stmt->execute([$supplierId]);
     $supplier = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -40,7 +40,7 @@ try {
         throw new Exception('Trạng thái đã được cập nhật');
     }
     
-    // Update status
+    // Cập nhật trạng thái
     $updateStmt = $pdo->prepare("
         UPDATE suppliers 
         SET status = ?, updated_at = CURRENT_TIMESTAMP, updated_by = ?

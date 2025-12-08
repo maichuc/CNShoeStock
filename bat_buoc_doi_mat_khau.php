@@ -278,7 +278,7 @@ $userName = $_SESSION['full_name'] ?? 'User';
             const password = document.getElementById('newPassword').value;
             const strengthBar = document.getElementById('passwordStrength');
             
-            // Check requirements
+            // Kiểm tra requirements
             const requirements = {
                 length: password.length >= 8,
                 uppercase: /[A-Z]/.test(password),
@@ -287,14 +287,14 @@ $userName = $_SESSION['full_name'] ?? 'User';
                 special: /[@$!%*?&#]/.test(password)
             };
             
-            // Update requirement checks
+            // Cập nhật requirement checks
             updateRequirement('req-length', requirements.length);
             updateRequirement('req-uppercase', requirements.uppercase);
             updateRequirement('req-lowercase', requirements.lowercase);
             updateRequirement('req-number', requirements.number);
             updateRequirement('req-special', requirements.special);
             
-            // Calculate strength
+            // Tính toán strength
             const validCount = Object.values(requirements).filter(v => v).length;
             
             strengthBar.className = 'password-strength';
@@ -351,13 +351,13 @@ $userName = $_SESSION['full_name'] ?? 'User';
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             
-            // Validate
+            // Kiểm tra
             if (newPassword !== confirmPassword) {
                 Swal.fire('Lỗi!', 'Mật khẩu mới và xác nhận không khớp', 'error');
                 return;
             }
             
-            // Check password requirements
+            // Kiểm tra password requirements
             const requirements = {
                 length: newPassword.length >= 8,
                 uppercase: /[A-Z]/.test(newPassword),
@@ -376,7 +376,7 @@ $userName = $_SESSION['full_name'] ?? 'User';
                 return;
             }
             
-            // Send AJAX request
+            // Gửi AJAX request
             $.ajax({
                 url: 'api_quan_ly_nhan_vien.php',
                 method: 'POST',

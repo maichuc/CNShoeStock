@@ -494,7 +494,7 @@ $completedCount = $completedStmt->fetch(PDO::FETCH_ASSOC)['completed_count'];
                     { "orderable": false, "targets": [0, 8] } // Disable sorting for STT and action column
                 ],
                 "drawCallback": function() {
-                    // Update STT numbers after each draw (sort, filter, paginate)
+                    // Cập nhật STT numbers after each draw (sort, filter, paginate)
                     this.api().column(0, {search:'applied', order:'applied'}).nodes().each(function(cell, i) {
                         var pageInfo = table.page.info();
                         cell.innerHTML = pageInfo.start + i + 1;

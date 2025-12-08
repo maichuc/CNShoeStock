@@ -24,7 +24,7 @@ try {
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
 
-    // Debug logging
+    // Gỡ lỗi logging
     error_log('API Input: ' . $input);
     error_log('Decoded data: ' . print_r($data, true));
     error_log('JSON last error: ' . json_last_error_msg());
@@ -44,7 +44,7 @@ try {
     $items = $data['items'] ?? [];
     $status = $data['status'] ?? 'draft'; // draft, completed, or pending
     
-    // Map frontend status to database ENUM values
+    // Ánh xạ frontend status vào database ENUM values
     // Frontend sends: 'draft' or 'completed'
     // Database expects: 'draft', 'pending', 'confirmed', 'completed', 'rejected'
     // For manual receipt:
@@ -58,7 +58,7 @@ try {
     
     $manual_entry = $data['manual_entry'] ?? false;
 
-    // Validate required fields
+    // Kiểm tra required fields
     if (!$supplier_id || !$receipt_date || empty($items)) {
         echo json_encode(['success' => false, 'message' => 'Missing required fields']);
         exit();
@@ -123,7 +123,7 @@ try {
         $variant_id = null;
         $location_id = null;
         
-        // Get location_id from storageLocation (shelf_code)
+        // Lấy location_id from storageLocation (shelf_code)
         if (!empty($item['storageLocation'])) {
             $stmt = $pdo->prepare("
                 SELECT location_id 
@@ -400,7 +400,7 @@ try {
 
         // 5. Tạo QR code cho variant
         try {
-            // Get product_id from variant
+            // Lấy product_id from variant
             $stmt = $pdo->prepare("SELECT product_id FROM product_variants WHERE variant_id = ?");
             $stmt->execute([$variant_id]);
             $variant_data = $stmt->fetch();
@@ -410,11 +410,11 @@ try {
                 
                 $qrManager = new QRCodeManager($pdo);
                 
-                // Check if QR already exists
+                // Kiểm tra if QR already exists
                 $existing_qr = $qrManager->getQRCode($product_id, $variant_id);
                 
                 if (!$existing_qr) {
-                    // Generate new QR code
+                    // Tạo new QR code
                     error_log("Generating QR code for variant_id: $variant_id, product_id: $product_id");
                     
                     $qr_result = $qrManager->generateQRCode($product_id, $variant_id, $user_id);

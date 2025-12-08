@@ -454,7 +454,7 @@ $categories = $stmt->fetchAll();
             this.form.submit();
         });
         
-        // Search on Enter
+        // Tìm kiếm on Enter
         document.getElementById('search').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();

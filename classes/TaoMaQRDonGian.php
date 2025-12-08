@@ -6,7 +6,7 @@ class SimpleQRGenerator {
      */
     public static function generateQRCodeFallback($data, $filePath, $size = 200) {
         try {
-            // Create directory if not exists
+            // Tạo directory if not exists
             $dir = dirname($filePath);
             if (!is_dir($dir)) {
                 mkdir($dir, 0777, true);
@@ -15,7 +15,7 @@ class SimpleQRGenerator {
             // Use QR Server API
             $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$size}x{$size}&data=" . urlencode($data);
             
-            // Download QR code
+            // Tải xuống QR code
             $context = stream_context_create([
                 'http' => [
                     'timeout' => 10,
@@ -54,7 +54,7 @@ class SimpleQRGenerator {
                 mkdir($dir, 0777, true);
             }
             
-            // Create a simple text representation
+            // Tạo a simple text representation
             $textQR = "QR Code Data: " . $data . "\n";
             $textQR .= "Generated: " . date('Y-m-d H:i:s') . "\n";
             $textQR .= "Note: Install PHP GD extension for proper QR images\n";

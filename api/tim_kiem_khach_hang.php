@@ -20,7 +20,7 @@ try {
         exit;
     }
     
-    // Search customers by name or phone (only in current warehouse)
+    // Tìm kiếm customers by name or phone (only in current warehouse)
     $sql = "SELECT customer_id, full_name, phone, email, address, note 
             FROM customers 
             WHERE (full_name LIKE :query OR phone LIKE :query) AND warehouse_id = :warehouse_id

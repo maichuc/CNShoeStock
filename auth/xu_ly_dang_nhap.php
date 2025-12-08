@@ -6,17 +6,17 @@ header('Content-Type: application/json');
 require_once '../config/database.php';
 
 try {
-    // Get input data
+    // Lấy input data
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    // Validate input
+    // Kiểm tra input
     if (empty($username) || empty($password)) {
         echo json_encode(['success' => false, 'message' => 'Vui lòng nhập đầy đủ thông tin!']);
         exit;
     }
 
-    // Connect to database
+    // Kết nối vào database
     $database = new Database();
     $db = $database->getConnection();
 
@@ -33,7 +33,7 @@ try {
     if ($stmt->rowCount() > 0) {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        // Check if account is locked
+        // Kiểm tra if account is locked
         if (isset($user['locked_until']) && $user['locked_until']) {
             $lockedUntil = new DateTime($user['locked_until']);
             $now = new DateTime();
@@ -50,7 +50,7 @@ try {
         }
         
         if (password_verify($password, $user['password_hash'])) {
-            // Reset failed login attempts on successful login
+            // Đặt lại failed login attempts on successful login
             $reset_query = "UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE user_id = :user_id";
             $reset_stmt = $db->prepare($reset_query);
             $reset_stmt->bindParam(':user_id', $user['user_id']);
@@ -71,7 +71,7 @@ try {
             $update_stmt->bindParam(':user_id', $user['user_id']);
             $update_stmt->execute();
             
-            // UC-NV-02: Check if user must change password
+            // UC-NV-02: Kiểm tra if user must change password
             // Use relative path from web root (not from this file location)
             $redirectUrl = 'trang_chu.php';
             if (isset($user['must_change_password']) && $user['must_change_password'] == 1) {

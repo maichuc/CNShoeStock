@@ -290,7 +290,7 @@ $isCustom = !empty($product['type']) && !in_array($product['type'], $product_typ
         });
         <?php endif; ?>
         
-        // Handle custom type input
+        // Xử lý custom type input
         $('#type').on('change', function() {
             const selectedValue = $(this).val();
             console.log('Type changed to:', selectedValue);
@@ -319,7 +319,7 @@ $isCustom = !empty($product['type']) && !in_array($product['type'], $product_typ
                 return false;
             }
             
-            // Handle custom type - set the custom value as the select value
+            // Xử lý custom type - set the custom value as the select value
             if ($('#type').val() === '__custom__') {
                 const customType = $('#type_custom').val().trim();
                 console.log('Custom type:', customType);

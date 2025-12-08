@@ -17,13 +17,13 @@ class StockReceiptManager {
     }
 
     bindEvents() {
-        // Save draft button
+        // Lưu draft button
         $(document).on('click', '#saveDraftBtn', () => this.saveDraft());
         
-        // Update draft button
+        // Cập nhật draft button
         $(document).on('click', '#updateDraftBtn', () => this.updateDraft());
         
-        // Confirm receipt button
+        // Xác nhận receipt button
         $(document).on('click', '#confirmReceiptBtn', () => this.confirmReceipt());
         
         // AI Analysis button
@@ -71,7 +71,7 @@ class StockReceiptManager {
         // Populate items
         this.populateItems(items);
         
-        // Update UI labels
+        // Cập nhật UI labels
         $('#receiptCodeDisplay').text(receipt.receipt_code || 'Chưa có mã');
         $('#statusDisplay').html(`<span class="badge badge-${this.getStatusColor(receipt.status)}">${this.getStatusLabel(receipt.status)}</span>`);
     }
@@ -267,7 +267,7 @@ class StockReceiptManager {
     addNewProduct(analysisIndex) {
         const analysis = this.aiAnalysisResults[analysisIndex];
         
-        // Redirect to add product page with pre-filled data
+        // Chuyển hướng to add product page with pre-filled data
         const params = new URLSearchParams({
             from_receipt: 'true',
             name: analysis.product_name,
@@ -534,7 +534,7 @@ class StockReceiptManager {
     }
 }
 
-// Initialize when document is ready
+// Khởi tạo when document is ready
 $(document).ready(function() {
     window.stockReceiptManager = new StockReceiptManager();
 });

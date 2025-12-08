@@ -484,7 +484,7 @@
             return $words;
         }
 
-        // Error correction code -----------------------------------------------
+        // Lỗi correction code -----------------------------------------------
         // Table of the error correction code (Reed-Solomon block)
         // See Table 12-16 (pp.30-36), JIS X0510:2004.
 
@@ -669,7 +669,7 @@
             return self::$versionPattern[$version -7];
         }
 
-        // Format information --------------------------------------------------
+        // Định dạng information --------------------------------------------------
         // See calcFormatInfo in tests/test_qrspec.c (orginal qrencode c lib)
         
         public static $formatInfo = array(
@@ -746,7 +746,7 @@
             QRstr::set($frame, $width-8, 7, $setPattern);
             QRstr::set($frame, 0, $width - 8, $setPattern);
         
-            // Format info
+            // Định dạng info
             $setPattern = str_repeat("\x84", 9);
             QRstr::set($frame, 0, 8, $setPattern);
             QRstr::set($frame, $width - 8, 8, $setPattern, 8);
@@ -2317,7 +2317,7 @@
 
             $rs = null;
             
-            // Check parameter ranges
+            // Kiểm tra parameter ranges
             if($symsize < 0 || $symsize > 8)                     return $rs;
             if($fcr < 0 || $fcr >= (1<<$symsize))                return $rs;
             if($prim <= 0 || $prim >= (1<<$symsize))             return $rs;
@@ -2336,7 +2336,7 @@
             $NN =& $rs->nn;
             $A0 =& $NN;
             
-            // Generate Galois field lookup tables
+            // Tạo Galois field lookup tables
             $rs->index_of[0] = $A0; // log(zero) = -inf
             $rs->alpha_to[$A0] = 0; // alpha**-inf = 0
             $sr = 1;

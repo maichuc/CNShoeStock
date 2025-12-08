@@ -233,7 +233,7 @@ $userName = $_SESSION['full_name'] ?? 'User';
                 const newPassword = $('#newPassword').val();
                 const confirmPassword = $('#confirmPassword').val();
 
-                // Validate
+                // Kiểm tra
                 if (newPassword !== confirmPassword) {
                     Swal.fire('Lỗi!', 'Mật khẩu xác nhận không khớp', 'error');
                     return;

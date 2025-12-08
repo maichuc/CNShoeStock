@@ -36,7 +36,7 @@ try {
         throw new Exception('Không tìm thấy nhà cung cấp');
     }
     
-    // Format phone number for display
+    // Định dạng phone number để hiển thị
     $phone = $supplier['phone'];
     if (strlen($phone) == 10) {
         $phone = substr($phone, 0, 4) . '.' . substr($phone, 4, 3) . '.' . substr($phone, 7);

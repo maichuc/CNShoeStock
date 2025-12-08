@@ -26,7 +26,7 @@ try {
 
     $suggestions = [];
     
-    // Build query based on available filters
+    // Xây dựng query based on available filters
     $whereConditions = ['p.warehouse_id = ?'];
     $params = [$warehouse_id];
     

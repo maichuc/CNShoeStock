@@ -4,7 +4,7 @@
  * File: api_lay_chi_tiet_san_pham.php
  */
 
-// Start output buffering to prevent any output before JSON
+// Bắt đầu output buffering to prevent any output before JSON
 ob_start();
 
 // Tắt PHP notices để không làm hỏng JSON output
@@ -15,7 +15,7 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 require_once 'config/database.php';
 
-// Clear any output that might have been generated
+// Xóa any output that might have been generated
 ob_end_clean();
 
 header('Content-Type: application/json');
@@ -151,7 +151,7 @@ try {
     }
     unset($variant); // Phá vỡ reference
     
-    // Debug log
+    // Gỡ lỗi log
     error_log("API GET PRODUCT DETAILS - Product ID: $productId, Warehouse: $userWarehouseId");
     error_log("API GET PRODUCT DETAILS - Found " . count($variants) . " variants");
     if (!empty($variants)) {

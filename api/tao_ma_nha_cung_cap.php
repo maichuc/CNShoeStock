@@ -22,14 +22,14 @@ try {
     $lastCode = $stmt->fetchColumn();
     
     if ($lastCode) {
-        // Extract number from NCC001 -> 001
+        // Trích xuất number from NCC001 -> 001
         $number = intval(substr($lastCode, 3));
         $newNumber = $number + 1;
     } else {
         $newNumber = 1;
     }
     
-    // Format: NCC001, NCC002, ...
+    // Định dạng: NCC001, NCC002, ...
     $newCode = 'NCC' . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
     
     echo json_encode([

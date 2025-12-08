@@ -22,7 +22,7 @@ if ($userWarehouseId) {
     }
 }
 
-// Debug (commented out for production)
+// Gỡ lỗi ((commented out for production))
 // error_log("DEBUG tao_don_hang.php - User ID: " . ($_SESSION['user_id'] ?? 'null') . ", Warehouse ID: " . ($userWarehouseId ?? 'null'));
 
 // Lấy danh sách types cho dropdown sản phẩm (chỉ types có products trong warehouse hiện tại)
@@ -970,10 +970,10 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
         let cartItems = [];
         
         $(document).ready(function() {
-            // Generate order ID
+            // Tạo order ID
             generateOrderId();
             
-            // Initialize Select2
+            // Khởi tạo Select2
             $('#product_type').select2({
                 placeholder: '-- Chọn phân loại --',
                 allowClear: true
@@ -1001,7 +1001,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                 goToStep(2);
             });
 
-            // Add product to cart
+            // Thêm sản phẩm vào giỏ hàng
             $('#addProductBtn').click(function() {
                 addToCart();
             });
@@ -1029,7 +1029,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                 if (productType) {
                     loadProductsByType(productType);
                 } else {
-                    // Clear product selection when no type selected
+                    // Xóa product selection when no type selected
                     clearProductSelection();
                 }
             });
@@ -1039,7 +1039,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                 const selectedOption = $(this).find('option:selected');
                 
                 if (selectedOption.val()) {
-                    // Get product data from data attributes
+                    // Lấy product data from data attributes
                     const productData = {
                         sku: selectedOption.attr('data-product-sku') || '',
                         color: selectedOption.attr('data-product-color') || '',
@@ -1049,10 +1049,10 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                         product_name: selectedOption.attr('data-product-name') || ''
                     };
                     
-                    // console.log('Debug: Selected product data:', productData);
+                    // console.log('Gỡ lỗi: Selected product data:', productData);
                     selectProduct(productData);
                 } else {
-                    // Clear product details when no product selected
+                    // Xóa product details when no product selected
                     $('#product_size').empty().append('<option value="">-- Chọn size --</option>').prop('disabled', true);
                     $('#product_color').val('');
                     $('#product_sku').val('');
@@ -1073,7 +1073,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                 submitOrder();
             });
 
-            // Hide suggestions when clicking outside
+            // Ẩn suggestions when clicking outside
             $(document).click(function(e) {
                 if (!$(e.target).closest('.customer-search').length) {
                     $('#customerSuggestions').hide();
@@ -1093,7 +1093,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         function goToStep(step) {
-            // Update step wizard
+            // Cập nhật bước tiến trình
             $('.step-wizard li').removeClass('active completed');
             $('.step-wizard li[data-step="' + step + '"]').addClass('active');
             
@@ -1101,7 +1101,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                 $('.step-wizard li[data-step="' + i + '"]').addClass('completed');
             }
 
-            // Show/hide step content
+            // Hiển thị/hide step content
             $('.step-content').removeClass('active');
             $('#step-' + step).addClass('active');
 
@@ -1182,11 +1182,11 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                 return;
             }
 
-            // Check if product already in cart
+            // Kiểm tra if product already in cart
             const existingIndex = cartItems.findIndex(item => item.variant_id === productVariantId);
             
             if (existingIndex !== -1) {
-                // Update quantity if product already exists
+                // Cập nhật số lượng nếu sản phẩm đã tồn tại
                 const newQuantity = cartItems[existingIndex].quantity + quantity;
                 if (newQuantity > availableStock) {
                     showAlert('danger', 'Tổng số lượng vượt quá tồn kho! Chỉ còn ' + availableStock + ' sản phẩm');
@@ -1195,7 +1195,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                 cartItems[existingIndex].quantity = newQuantity;
                 cartItems[existingIndex].total_price = newQuantity * price;
             } else {
-                // Add new item to cart
+                // Thêm mặt hàng mới vào giỏ hàng
                 cartItems.push({
                     variant_id: productVariantId,
                     product_name: productName,
@@ -1209,10 +1209,10 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                 });
             }
 
-            // Update cart display
+            // Cập nhật hiển thị giỏ hàng
             updateCartDisplay();
             
-            // Clear product selection
+            // Xóa product selection
             $('#product_type').val('').trigger('change');
             clearProductSelection();
             $('#product_quantity').val('1');
@@ -1245,10 +1245,10 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                 });
             }
             
-            // Update cart count
+            // Cập nhật số lượng giỏ hàng
             $('#cart_count').text(cartItems.length);
             
-            // Calculate total
+            // Tính tổng
             calculateCartTotal();
         }
 
@@ -1342,7 +1342,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
             const productSelect = $('#product_name');
             const warehouseId = <?php echo $userWarehouseId ?? 'null'; ?>;
             
-            // console.log('Debug: Loading products for type:', productType, 'warehouse:', warehouseId);
+            // console.log('Gỡ lỗi: Loading products for type:', productType, 'warehouse:', warehouseId);
             
             productSelect.empty().append('<option value="">-- Đang tải sản phẩm... --</option>').prop('disabled', true);
             
@@ -1356,7 +1356,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                 },
                 dataType: 'json',
                 success: function(response) {
-                    // console.log('Debug: API Response:', response);
+                    // console.log('Gỡ lỗi: API Response:', response);
                     
                     if (response.success && response.data.length > 0) {
                         productSelect.empty().append('<option value="">-- Chọn sản phẩm --</option>');
@@ -1382,12 +1382,12 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
                             productSelect.append(option);
                         });
                         
-                        // Enable product selection
+                        // Bật product selection
                         productSelect.prop('disabled', false);
                     } else {
                         productSelect.empty().append('<option value="">-- Không có sản phẩm nào --</option>');
                         productSelect.prop('disabled', true);
-                        // console.log('Debug: No products found');
+                        // console.log('Gỡ lỗi: No products found');
                     }
                 },
                 error: function(xhr, status, error) {
@@ -1410,7 +1410,7 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         function selectProduct(product) {
-            // console.log('Debug: selectProduct called with:', product);
+            // console.log('Gỡ lỗi: selectProduct called with:', product);
             
             $('#product_sku').val(product.sku || '');
             $('#product_color').val(product.color || '');
@@ -1418,13 +1418,13 @@ $productTypes = $typesStmt->fetchAll(PDO::FETCH_ASSOC);
             $('#product_price_display').text(formatCurrency(product.price || 0) + ' VNĐ');
             $('#available_stock').text(product.stock || 0);
             
-            // Update size options
+            // Cập nhật tùy chọn size
             const sizeSelect = $('#product_size');
             sizeSelect.empty().append('<option value="' + (product.size || '') + '">' + (product.size || 'N/A') + '</option>');
             sizeSelect.val(product.size || '');
             sizeSelect.prop('disabled', false);
             
-            // console.log('Debug: Updated fields - Price:', product.price, 'Stock:', product.stock);
+            // console.log('Gỡ lỗi: Updated fields - Price:', product.price, 'Stock:', product.stock);
         }
 
         function showConfirmation() {

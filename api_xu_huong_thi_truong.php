@@ -155,7 +155,7 @@ function getSalesTrendAnalysis($pdo, $warehouseId) {
     
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Calculate growth rates and trends
+    // Tính toán growth rates and trends
     foreach ($results as &$row) {
         // Month-over-month growth
         if ($row['prev_month_revenue'] > 0) {
@@ -757,7 +757,7 @@ function getDemandForecastAnalysis($pdo, $warehouseId) {
     
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Add risk classification
+    // Thêm risk classification
     foreach ($results as &$product) {
         if ($product['days_of_stock_remaining'] <= 7) {
             $product['stock_risk'] = 'critical';
@@ -1057,7 +1057,7 @@ function generateMarketPredictions($salesTrends, $productLifecycle, $demandForec
 function formatTrendChartData($salesTrends) {
     $monthlyData = [];
     
-    // Group by month
+    // Nhóm by month
     foreach ($salesTrends as $trend) {
         $month = $trend['month_year'];
         if (!isset($monthlyData[$month])) {

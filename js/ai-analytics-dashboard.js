@@ -876,7 +876,7 @@ class AIAnalyticsDashboard {
     }
 
     startRealTimeUpdates() {
-        // Update every 5 minutes
+        // Cập nhật every 5 minutes
         setInterval(() => {
             if (this.currentModule) {
                 this.loadModule(this.currentModule);
@@ -884,7 +884,7 @@ class AIAnalyticsDashboard {
         }, 300000);
     }
 
-    // Display functions for all modules
+    // Hiển thị functions for all modules
     displayInventoryTurnover(data) {
         $('#inventory-turnover-content').html(`
             <div class="row">
@@ -1294,7 +1294,7 @@ class AIAnalyticsDashboard {
     }
 }
 
-// Initialize dashboard when DOM is ready
+// Khởi tạo dashboard when DOM is ready
 $(document).ready(function() {
     window.aiDashboard = new AIAnalyticsDashboard();
 });

@@ -50,7 +50,7 @@ try {
     
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Debug log
+    // Gỡ lỗi log
     error_log("API GET SIZE PRICE - Product ID: $productId, Size: $size, Warehouse: $userWarehouseId");
     error_log("API GET SIZE PRICE - Result: " . json_encode($result));
     

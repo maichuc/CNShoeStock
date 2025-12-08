@@ -28,7 +28,7 @@ $statusFilter = $_GET['status'] ?? '';
 $dateFrom = $_GET['date_from'] ?? '';
 $dateTo = $_GET['date_to'] ?? '';
 
-// Build query conditions
+// Xây dựng query conditions
 $whereConditions = ['o.warehouse_id = :warehouse_id'];
 $queryParams = [':warehouse_id' => $userWarehouseId];
 
@@ -49,7 +49,7 @@ if ($dateTo) {
 
 $whereClause = implode(' AND ', $whereConditions);
 
-// Get orders with customer and product info
+// Lấy orders with customer and product info
 $ordersQuery = "
     SELECT 
         o.order_id,
@@ -81,7 +81,7 @@ foreach ($queryParams as $key => $value) {
 $ordersStmt->execute();
 $orders = $ordersStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get statistics
+// Lấy statistics
 $statsQuery = "
     SELECT 
         COUNT(*) as total_orders,
@@ -611,7 +611,7 @@ $statusColors = [
                 pageLength: 25,
                 responsive: true,
                 drawCallback: function() {
-                    // Update STT numbers after each draw (sort, filter, paginate)
+                    // Cập nhật STT numbers after each draw (sort, filter, paginate)
                     this.api().column(0, {search:'applied', order:'applied'}).nodes().each(function(cell, i) {
                         var pageInfo = table.page.info();
                         cell.innerHTML = pageInfo.start + i + 1;
@@ -790,7 +790,7 @@ $statusColors = [
                 'failed': 'xác nhận giao hàng thất bại'
             };
 
-            // Show confirmation modal for critical actions
+            // Hiển thị confirmation modal for critical actions
             if (newStatus === 'confirmed' || newStatus === 'cancelled') {
                 showConfirmModal(orderId, newStatus === 'confirmed' ? 'accept' : 'reject');
                 return;
@@ -836,7 +836,7 @@ $statusColors = [
             const actionColor = action === 'accepted' ? 'success' : 'danger';
             const actionIcon = action === 'accepted' ? 'fa-check' : 'fa-times';
             
-            // Set modal content
+            // Đặt modal content
             $('#confirmModalLabel').text('Xác nhận ' + actionText.toLowerCase() + ' đơn hàng');
             $('#confirmModalBody').html(`
                 <div class="text-center">
@@ -859,7 +859,7 @@ $statusColors = [
 
         // Function thực hiện xác nhận đơn hàng theo UC_DH_XN
         function executeConfirmOrder(orderId, status) {
-            // Show loading
+            // Hiển thị loading
             $('#confirmModalFooter').html(`
                 <div class="text-center">
                     <i class="fas fa-spinner fa-spin"></i> Đang xử lý...

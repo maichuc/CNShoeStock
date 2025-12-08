@@ -1,4 +1,4 @@
-<?php
+/<?php
 /**
  * QR Code Manager Class
  * Quản lý việc đọc và xử lý QR codes
@@ -167,7 +167,7 @@ class QRCodeManager {
         // nếu không có variant/product trả null để frontend hiện thông báo
         if (empty($result['variant_id']) && empty($result['product_id'])) return null;
 
-        // --- Add compatibility aliases used by frontend ---
+        // --- Thêm compatibility aliases used by frontend ---
         // map old keys to what frontend likely expects
         // LUÔN ưu tiên total_inventory_quantity (tổng tồn kho) thay vì last_receipt_quantity
         if (!isset($result['quantity'])) {

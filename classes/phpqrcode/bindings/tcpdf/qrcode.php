@@ -2,7 +2,7 @@
 //============================================================+
 // File name   : qrcode.php
 // Begin       : 2010-03-22
-// Last Update : 2010-03-29
+// Last Cập nhật : 2010-03-29
 // Version     : 1.0.002
 // License     : GNU LGPL v.3 (http://www.gnu.org/copyleft/lesser.html)
 // 	----------------------------------------------------------------------------
@@ -136,7 +136,7 @@ if (!defined('QRCODEDEFS')) {
 
 	// Levels of error correction.
 	// QRcode has a function of an error correcting for miss reading that white is black.
-	// Error correcting is defined in 4 level as below.
+	// Lỗi correcting is defined in 4 level as below.
 
 	/**
 	 * Error correction level L : About 7% or less errors can be corrected.
@@ -2554,7 +2554,7 @@ if (!class_exists('QRcode', false)) {
 			$frame = $this->qrstrset($frame, 0, 7, $setPattern);
 			$frame = $this->qrstrset($frame, $width-8, 7, $setPattern);
 			$frame = $this->qrstrset($frame, 0, $width - 8, $setPattern);
-			// Format info
+			// Định dạng info
 			$setPattern = str_repeat("\x84", 9);
 			$frame = $this->qrstrset($frame, 0, 8, $setPattern);
 			$frame = $this->qrstrset($frame, $width - 8, 8, $setPattern, 8);
@@ -2751,7 +2751,7 @@ if (!class_exists('QRcode', false)) {
 		protected function init_rs_char($symsize, $gfpoly, $fcr, $prim, $nroots, $pad) {
 			// Based on Reed solomon encoder by Phil Karn, KA9Q (GNU-LGPLv2)
 			$rs = null;
-			// Check parameter ranges
+			// Kiểm tra parameter ranges
 			if (($symsize < 0) OR ($symsize > 8)) {
 				return $rs;
 			}
@@ -2776,7 +2776,7 @@ if (!class_exists('QRcode', false)) {
 			// PHP style macro replacement ;)
 			$NN =& $rs['nn'];
 			$A0 =& $NN;
-			// Generate Galois field lookup tables
+			// Tạo Galois field lookup tables
 			$rs['index_of'][0] = $A0; // log(zero) = -inf
 			$rs['alpha_to'][$A0] = 0; // alpha**-inf = 0
 			$sr = 1;
@@ -2799,7 +2799,7 @@ if (!class_exists('QRcode', false)) {
 			$rs['prim'] = $prim;
 			$rs['nroots'] = $nroots;
 			$rs['gfpoly'] = $gfpoly;
-			// Find prim-th root of 1, used in decoding
+			// Tìm prim-th root of 1, used in decoding
 			for ($iprim=1; ($iprim % $prim) != 0; $iprim += $rs['nn']) {
 				; // intentional empty-body loop!
 			}

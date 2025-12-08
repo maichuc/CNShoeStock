@@ -262,7 +262,7 @@ function getPurchasePatternAnalysis($pdo, $warehouseId) {
     
     $rawResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Process and structure the data
+    // Xử lý and structure the data
     $patterns = [
         'time_patterns' => [],
         'day_patterns' => [],
@@ -271,7 +271,7 @@ function getPurchasePatternAnalysis($pdo, $warehouseId) {
         'geographic_patterns' => []
     ];
     
-    // Group by different dimensions
+    // Nhóm by different dimensions
     foreach ($rawResults as $row) {
         // Time patterns (hourly)
         if (!isset($patterns['time_patterns'][$row['hour_of_day']])) {

@@ -692,8 +692,8 @@ if (!function_exists('standardizeBrand')) {
 }
 
 /**
- * Chuẩn hóa màu sắc - Version tổng hợp
- * Gộp logic từ nhiều file
+ * Chuẩn hóa màu sắc - COMPREHENSIVE VERSION
+ * Migrated từ normalization-utils.js với 150+ mappings
  */
 if (!function_exists('standardizeColor')) {
     function standardizeColor($color) {
@@ -701,58 +701,122 @@ if (!function_exists('standardizeColor')) {
             return '';
         }
         
-        $colorMap = [
-            'black' => 'Đen', 'den' => 'Đen',
-            'white' => 'Trắng', 'trang' => 'Trắng', 'off white' => 'Trắng ngà',
-            'red' => 'Đỏ', 'do' => 'Đỏ',
-            'blue' => 'Xanh dương', 'xanh duong' => 'Xanh dương',
-            'green' => 'Xanh lá', 'xanh la' => 'Xanh lá',
-            'yellow' => 'Vàng', 'vang' => 'Vàng',
-            'orange' => 'Cam', 'cam' => 'Cam',
-            'purple' => 'Tím', 'tim' => 'Tím',
-            'pink' => 'Hồng', 'hong' => 'Hồng',
-            'brown' => 'Nâu', 'nau' => 'Nâu',
-            'gray' => 'Xám', 'grey' => 'Xám', 'xam' => 'Xám',
-            'beige' => 'Be',
-            'navy' => 'Xanh navy', 'navy blue' => 'Xanh navy',
-            'burgundy' => 'Đỏ burgundy',
-            'gold' => 'Vàng kim', 'vang kim' => 'Vàng kim',
-            'silver' => 'Bạc', 'bac' => 'Bạc',
-            'bronze' => 'Đồng', 'dong' => 'Vàng kim',
-            'rose gold' => 'Vàng hồng',
-            'light blue' => 'Xanh dương nhạt',
-            'dark blue' => 'Xanh dương đậm',
-            'mint' => 'Xanh bạc hà',
-            'coral' => 'San hô',
-            'turquoise' => 'Xanh lam',
+        // Kiểm tra nếu đã là tiếng Việt thì không translate lại
+        $vietnameseColors = [
+            'đen', 'trắng', 'đỏ', 'xanh', 'vàng', 'cam', 'tím', 'hồng', 'nâu', 'xám',
+            'xanh dương', 'xanh lá', 'xanh navy', 'xanh lục', 'xanh bạc hà',
+            'trắng kem', 'vàng kim', 'đỏ burgundy', 'bạc', 'đồng', 'beige', 'nude',
+            'đậm', 'nhạt', 'tươi', 'pastel', 'kem'
         ];
         
         $colorLower = mb_strtolower(trim($color), 'UTF-8');
+        
+        // Check if already in Vietnamese
+        foreach ($vietnameseColors as $vnColor) {
+            if (mb_strpos($colorLower, $vnColor, 0, 'UTF-8') !== false) {
+                error_log("Color already in Vietnamese: '$color' - Keeping as is");
+                return mb_strtoupper(mb_substr($color, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($color, 1);
+            }
+        }
+        
+        $colorMap = [
+            // Basic colors
+            'black' => 'Đen', 'white' => 'Trắng', 'red' => 'Đỏ',
+            'blue' => 'Xanh dương', 'green' => 'Xanh lá', 'yellow' => 'Vàng',
+            'orange' => 'Cam', 'purple' => 'Tím', 'pink' => 'Hồng',
+            'brown' => 'Nâu', 'gray' => 'Xám', 'grey' => 'Xám',
+            
+            // Special colors
+            'beige' => 'Beige', 'cream' => 'Trắng kem', 'nude' => 'Nude',
+            'gold' => 'Vàng kim', 'silver' => 'Bạc', 'bronze' => 'Đồng',
+            'copper' => 'Đồng đỏ', 'rose gold' => 'Vàng hồng', 'rosegold' => 'Vàng hồng',
+            
+            // Vietnamese variations
+            'đen' => 'Đen', 'den' => 'Đen', 'trắng' => 'Trắng', 'trang' => 'Trắng',
+            'đỏ' => 'Đỏ', 'do' => 'Đỏ', 'xanh' => 'Xanh dương',
+            'xanh dương' => 'Xanh dương', 'xanh duong' => 'Xanh dương',
+            'xanh lá' => 'Xanh lá', 'xanh la' => 'Xanh lá', 'xanh lá cây' => 'Xanh lá',
+            'vàng' => 'Vàng', 'vang' => 'Vàng', 'cam' => 'Cam',
+            'tím' => 'Tím', 'tim' => 'Tím', 'hồng' => 'Hồng', 'hong' => 'Hồng',
+            'nâu' => 'Nâu', 'nau' => 'Nâu', 'xám' => 'Xám', 'xam' => 'Xám',
+            
+            // Blue family
+            'navy' => 'Xanh navy', 'navy blue' => 'Xanh navy',
+            'royal blue' => 'Xanh hoàng gia', 'sky blue' => 'Xanh da trời',
+            'baby blue' => 'Xanh baby', 'powder blue' => 'Xanh phấn',
+            'turquoise' => 'Xanh ngọc', 'teal' => 'Xanh lục',
+            'cyan' => 'Xanh cyan', 'aqua' => 'Xanh nước biển',
+            
+            // Green family
+            'lime' => 'Xanh chanh', 'lime green' => 'Xanh chanh',
+            'olive' => 'Xanh ô liu', 'olive green' => 'Xanh ô liu',
+            'mint' => 'Xanh bạc hà', 'mint green' => 'Xanh bạc hà',
+            'emerald' => 'Xanh lục bảo', 'forest green' => 'Xanh rừng',
+            
+            // Red family
+            'burgundy' => 'Đỏ burgundy', 'wine' => 'Đỏ rượu',
+            'wine red' => 'Đỏ rượu', 'maroon' => 'Đỏ nâu',
+            'crimson' => 'Đỏ thẫm', 'scarlet' => 'Đỏ tươi',
+            'cherry' => 'Đỏ cherry', 'cherry red' => 'Đỏ cherry',
+            
+            // Pink family
+            'hot pink' => 'Hồng cánh sen', 'fuchsia' => 'Hồng fuchsia',
+            'magenta' => 'Hồng magenta', 'rose' => 'Hồng rose',
+            'blush' => 'Hồng phấn', 'blush pink' => 'Hồng phấn',
+            'baby pink' => 'Hồng baby', 'salmon' => 'Hồng cam',
+            'coral' => 'San hô', 'peach' => 'Hồng đào',
+            
+            // Purple family
+            'lavender' => 'Tím lavender', 'lilac' => 'Tím lilac',
+            'violet' => 'Tím violet', 'plum' => 'Tím mận',
+            
+            // Brown family
+            'tan' => 'Nâu nhạt', 'taupe' => 'Nâu xám',
+            'khaki' => 'Kaki', 'camel' => 'Nâu lạc đà',
+            'chocolate' => 'Nâu sô cô la', 'coffee' => 'Nâu cà phê',
+            
+            // Neutrals
+            'ivory' => 'Ngà', 'champagne' => 'Champagne',
+            'charcoal' => 'Xám đen', 'slate' => 'Xám đá phiến',
+            'off white' => 'Trắng ngà',
+            
+            // Combinations
+            'light blue' => 'Xanh dương nhạt', 'dark blue' => 'Xanh dương đậm',
+            'light pink' => 'Hồng nhạt', 'dark pink' => 'Hồng đậm',
+            'light gray' => 'Xám nhạt', 'dark gray' => 'Xám đậm',
+            'light grey' => 'Xám nhạt', 'dark grey' => 'Xám đậm',
+            
+            // Multicolor
+            'multicolor' => 'Nhiều màu', 'multi-color' => 'Nhiều màu',
+            'rainbow' => 'Cầu vồng', 'colorful' => 'Nhiều màu',
+            
+            // Transparent
+            'transparent' => 'Trong suốt', 'clear' => 'Trong',
+        ];
         
         // Exact match
         if (isset($colorMap[$colorLower])) {
             return $colorMap[$colorLower];
         }
         
-        // Multi-word color
-        $words = explode(' ', $colorLower);
+        // Multi-word translation
+        $words = preg_split('/\s+/', $colorLower);
         if (count($words) > 1) {
             $translatedWords = [];
             foreach ($words as $word) {
-                $translatedWords[] = $colorMap[$word] ?? $word;
+                $translatedWords[] = isset($colorMap[$word]) ? $colorMap[$word] : (mb_strtoupper(mb_substr($word, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($word, 1));
             }
-            $result = implode(' ', $translatedWords);
-            return mb_strtoupper(mb_substr($result, 0, 1, 'UTF-8'), 'UTF-8') . 
-                   mb_substr($result, 1, null, 'UTF-8');
+            return implode(' ', $translatedWords);
         }
         
-        return ucfirst($color);
+        // Capitalize if not found
+        return mb_strtoupper(mb_substr($color, 0, 1, 'UTF-8'), 'UTF-8') . mb_substr($color, 1);
     }
 }
 
 /**
- * Chuẩn hóa loại sản phẩm
- * Từ api_phan_tich_giay_ai.php
+ * Chuẩn hóa loại sản phẩm - COMPREHENSIVE VERSION
+ * Migrated từ normalization-utils.js với 360+ mappings
  */
 if (!function_exists('standardizeProductType')) {
     function standardizeProductType($type) {
@@ -761,22 +825,312 @@ if (!function_exists('standardizeProductType')) {
         }
         
         $typeMapping = [
-            'sneaker' => 'Sneaker', 'sneakers' => 'Sneaker',
-            'running shoe' => 'Sneaker', 'sport shoe' => 'Sneaker',
-            'high heel' => 'Giày cao gót', 'high heels' => 'Giày cao gót',
-            'pump' => 'Giày cao gót', 'pumps' => 'Giày cao gót',
-            'wedge' => 'Giày đế xuồng', 'wedges' => 'Giày đế xuồng',
-            'sandal' => 'Sandal', 'sandals' => 'Sandal',
-            'boot' => 'Giày boot', 'boots' => 'Giày boot',
-            'oxford' => 'Giày tây', 'dress shoe' => 'Giày tây',
-            'loafer' => 'Giày lười', 'slip-on' => 'Giày lười',
-            'flat' => 'Giày bệt', 'flats' => 'Giày bệt',
-            'mule' => 'Giày mules', 'mules' => 'Giày mules',
+            // Giày thể thao - Giữ nguyên "Sneaker"
+            'sneaker' => 'Sneaker',
+            'sneakers' => 'Sneaker',
+            'giày thể thao' => 'Sneaker',
+            'giay the thao' => 'Sneaker',
+            'running' => 'Sneaker',
+            'running shoe' => 'Sneaker',
+            'running shoes' => 'Sneaker',
+            'training' => 'Sneaker',
+            'training shoe' => 'Sneaker',
+            'training shoes' => 'Sneaker',
+            'casual' => 'Sneaker',
+            'casual shoe' => 'Sneaker',
+            'casual shoes' => 'Sneaker',
+            'lifestyle' => 'Sneaker',
+            'basketball' => 'Sneaker',
+            'basketball shoe' => 'Sneaker',
+            'basketball shoes' => 'Sneaker',
+            'tennis' => 'Sneaker',
+            'tennis shoe' => 'Sneaker',
+            'tennis shoes' => 'Sneaker',
+            'walking shoe' => 'Sneaker',
+            'walking shoes' => 'Sneaker',
+            'gym shoe' => 'Sneaker',
+            'gym shoes' => 'Sneaker',
+            'athletic shoe' => 'Sneaker',
+            'athletic shoes' => 'Sneaker',
+            'sport shoe' => 'Sneaker',
+            'sport shoes' => 'Sneaker',
+            'sports shoe' => 'Sneaker',
+            'sports shoes' => 'Sneaker',
+            'giày chạy bộ' => 'Sneaker',
+            'giay chay bo' => 'Sneaker',
+            'giày tập gym' => 'Sneaker',
+            'giay tap gym' => 'Sneaker',
+            'giày tập luyện' => 'Sneaker',
+            'giay tap luyen' => 'Sneaker',
+            'giày vải' => 'Sneaker',
+            'giay vai' => 'Sneaker',
+            'giày canvas' => 'Sneaker',
+            'giay canvas' => 'Sneaker',
+            'converse' => 'Sneaker',
+            'vans' => 'Sneaker',
+            'giày thời trang' => 'Sneaker',
+            'giay thoi trang' => 'Sneaker',
+            'giày casual nữ' => 'Sneaker',
+            'giay casual nu' => 'Sneaker',
+            'giày casual nam' => 'Sneaker',
+            'giay casual nam' => 'Sneaker',
+            
+            // Sandal - Giữ nguyên "Sandal"
+            'sandal' => 'Sandal',
+            'sandals' => 'Sandal',
+            'dép' => 'Sandal',
+            'dep' => 'Sandal',
+            'slide' => 'Sandal',
+            'flip-flop' => 'Sandal',
+            'flipflop' => 'Sandal',
+            'sandal quai' => 'Sandal',
+            'sandal nữ' => 'Sandal',
+            'sandal nu' => 'Sandal',
+            'sandal nam' => 'Sandal',
+            'sandal trẻ em' => 'Sandal',
+            'sandal tre em' => 'Sandal',
+            'sandal bít mũi' => 'Sandal',
+            'sandal bit mui' => 'Sandal',
+            'sandal hở mũi' => 'Sandal',
+            'sandal ho mui' => 'Sandal',
+            
+            // Giày cao gót
+            'high heels' => 'Giày cao gót',
+            'high heel' => 'Giày cao gót',
+            'cao gót' => 'Giày cao gót',
+            'cao got' => 'Giày cao gót',
+            'giày cao gót' => 'Giày cao gót',
+            'giay cao got' => 'Giày cao gót',
+            'pump' => 'Giày cao gót',
+            'pumps' => 'Giày cao gót',
+            'stiletto' => 'Giày cao gót',
+            'stilettos' => 'Giày cao gót',
+            'block heel' => 'Giày cao gót',
+            'kitten heels' => 'Giày cao gót',
+            'kitten heel' => 'Giày cao gót',
+            'slingback' => 'Giày cao gót',
+            'slingbacks' => 'Giày cao gót',
+            'giày gót nhọn' => 'Giày cao gót',
+            'giay got nhon' => 'Giày cao gót',
+            'giày gót vuông' => 'Giày cao gót',
+            'giay got vuong' => 'Giày cao gót',
+            'giày gót thấp' => 'Giày cao gót',
+            'giay got thap' => 'Giày cao gót',
+            'giày cao cổ' => 'Giày cao gót',
+            'giay cao co' => 'Giày cao gót',
+            'platform' => 'Giày cao gót',
+            'platform shoe' => 'Giày cao gót',
+            'platform shoes' => 'Giày cao gót',
+            'giày đế cao' => 'Giày cao gót',
+            'giay de cao' => 'Giày cao gót',
+            
+            // Giày đế xuồng (QUAN TRỌNG - phải match trước sandal)
+            'wedge' => 'Giày đế xuồng',
+            'wedges' => 'Giày đế xuồng',
+            'đế xuồng' => 'Giày đế xuồng',
+            'de xuong' => 'Giày đế xuồng',
+            'giày đế xuồng' => 'Giày đế xuồng',
+            'sandal đế xuồng' => 'Giày đế xuồng',
+            'sandal de xuong' => 'Giày đế xuồng',
+            'sandal bịt mũi đế xuồng' => 'Giày đế xuồng',
+            'sandal bit mui de xuong' => 'Giày đế xuồng',
+            'wedge sandal' => 'Giày đế xuồng',
+            'wedge sandals' => 'Giày đế xuồng',
+            'giày sandal đế xuồng' => 'Giày đế xuồng',
+            'giay sandal de xuong' => 'Giày đế xuồng',
+            'sandal nữ đế xuồng' => 'Giày đế xuồng',
+            'sandal nu de xuong' => 'Giày đế xuồng',
+            'giày đế bằng xuồng' => 'Giày đế xuồng',
+            'giay de bang xuong' => 'Giày đế xuồng',
+            'giày nữ đế xuồng' => 'Giày đế xuồng',
+            'giay nu de xuong' => 'Giày đế xuồng',
+            'giày cao gót đế xuồng' => 'Giày đế xuồng',
+            'giay cao got de xuong' => 'Giày đế xuồng',
+            'wedge heel' => 'Giày đế xuồng',
+            'wedge heel sandal' => 'Giày đế xuồng',
+            'wedge heel shoe' => 'Giày đế xuồng',
+            'platform wedge' => 'Giày đế xuồng',
+            
+            // Giày bệt
+            'flat' => 'Giày bệt',
+            'flats' => 'Giày bệt',
+            'giày bệt' => 'Giày bệt',
+            'giay bet' => 'Giày bệt',
+            'ballet flat' => 'Giày bệt',
+            'ballet flats' => 'Giày bệt',
+            'giày búp bê' => 'Giày bệt',
+            'bệt' => 'Giày bệt',
+            'bet' => 'Giày bệt',
+            'giày đế bằng' => 'Giày bệt',
+            'giay de bang' => 'Giày bệt',
+            'giày búp bê nữ' => 'Giày bệt',
+            'giay bup be nu' => 'Giày bệt',
+            'giày ballerina' => 'Giày bệt',
+            'giay ballerina' => 'Giày bệt',
+            'giày êm chân' => 'Giày bệt',
+            'giay em chan' => 'Giày bệt',
+            'mary jane' => 'Giày bệt',
+            'mary janes' => 'Giày bệt',
+            'giày mary jane' => 'Giày bệt',
+            'espadrille' => 'Giày bệt',
+            'espadrilles' => 'Giày bệt',
+            'giày cói' => 'Giày bệt',
+            'giay coi' => 'Giày bệt',
+            
+            // Giày lười
+            'loafer' => 'Giày lười',
+            'loafers' => 'Giày lười',
+            'giày lười' => 'Giày lười',
+            'giay luoi' => 'Giày lười',
+            'slip-on' => 'Giày lười',
+            'slip on' => 'Giày lười',
+            'slipon' => 'Giày lười',
+            'moccasin' => 'Giày lười',
+            'moccasins' => 'Giày lười',
+            'boat shoe' => 'Giày lười',
+            'boat shoes' => 'Giày lười',
+            'giày không dây' => 'Giày lười',
+            'giay khong day' => 'Giày lười',
+            'giày slip on' => 'Giày lười',
+            'giay slip on' => 'Giày lười',
+            'giày lười nam' => 'Giày lười',
+            'giay luoi nam' => 'Giày lười',
+            'giày lười nữ' => 'Giày lười',
+            'giay luoi nu' => 'Giày lười',
+            'giày da lười' => 'Giày lười',
+            'giay da luoi' => 'Giày lười',
+            'penny loafer' => 'Giày lười',
+            'penny loafers' => 'Giày lười',
+            'driving shoe' => 'Giày lười',
+            'driving shoes' => 'Giày lười',
+            'giày lái xe' => 'Giày lười',
+            'giay lai xe' => 'Giày lười',
+            
+            // Giày tây
+            'oxford' => 'Giày tây',
+            'oxfords' => 'Giày tây',
+            'giày tây' => 'Giày tây',
+            'giay tay' => 'Giày tây',
+            'dress shoe' => 'Giày tây',
+            'dress shoes' => 'Giày tây',
+            'formal shoe' => 'Giày tây',
+            'formal shoes' => 'Giày tây',
+            'business shoe' => 'Giày tây',
+            'derby' => 'Giày tây',
+            'brogue' => 'Giày tây',
+            'giày da nam' => 'Giày tây',
+            'giay da nam' => 'Giày tây',
+            'giày công sở' => 'Giày tây',
+            'giay cong so' => 'Giày tây',
+            'giày công sở nam' => 'Giày tây',
+            'giay cong so nam' => 'Giày tây',
+            'giày dây' => 'Giày tây',
+            'giay day' => 'Giày tây',
+            'giày buộc dây' => 'Giày tây',
+            'giay buoc day' => 'Giày tây',
+            'giày oxford' => 'Giày tây',
+            'giay oxford' => 'Giày tây',
+            'giày oxford nam' => 'Giày tây',
+            'giay oxford nam' => 'Giày tây',
+            'monk strap' => 'Giày tây',
+            'monk straps' => 'Giày tây',
+            'giày monk' => 'Giày tây',
+            
+            // Boot
+            'boot' => 'Boot',
+            'boots' => 'Boot',
+            'giày boot' => 'Boot',
+            'giay boot' => 'Boot',
+            'ankle boot' => 'Boot',
+            'ankle boots' => 'Boot',
+            'chelsea boot' => 'Boot',
+            'chelsea boots' => 'Boot',
+            'combat boot' => 'Boot',
+            'combat boots' => 'Boot',
+            'knee boot' => 'Boot',
+            'knee boots' => 'Boot',
+            'bốt' => 'Boot',
+            'bot' => 'Boot',
+            'giày bốt' => 'Boot',
+            'giay bot' => 'Boot',
+            'boot cao cổ' => 'Boot',
+            'boot cao co' => 'Boot',
+            'boot cổ ngắn' => 'Boot',
+            'boot co ngan' => 'Boot',
+            'boot da' => 'Boot',
+            'boot cao gót' => 'Boot',
+            'boot cao got' => 'Boot',
+            'martin' => 'Boot',
+            'dr martens' => 'Boot',
+            'dr. martens' => 'Boot',
+            
+            // Giày mules
+            'mule' => 'Giày mules',
+            'mules' => 'Giày mules',
+            'giày mules' => 'Giày mules',
+            'giày không gót' => 'Giày mules',
+            'giay khong got' => 'Giày mules',
+            'giày hở gót' => 'Giày mules',
+            'giay ho got' => 'Giày mules',
+            'giày sục' => 'Giày mules',
+            'giay suc' => 'Giày mules',
+            
+            // Giày quai hậu
+            'quai hậu' => 'Giày quai hậu',
+            'quai hau' => 'Giày quai hậu',
+            'giày quai hậu' => 'Giày quai hậu',
+            'giày có quai hậu' => 'Giày quai hậu',
+            'giay co quai hau' => 'Giày quai hậu',
+            'giày quai sau' => 'Giày quai hậu',
+            'giay quai sau' => 'Giày quai hậu',
+            'slingback heels' => 'Giày quai hậu',
+            'slingback pumps' => 'Giày quai hậu',
+            
+            // Dép (các biến thể)
+            'dép lê' => 'Dép',
+            'dep le' => 'Dép',
+            'dép đi trong nhà' => 'Dép',
+            'dep di trong nha' => 'Dép',
+            'dép xỏ ngón' => 'Dép',
+            'dep xo ngon' => 'Dép',
+            'dép quai ngang' => 'Dép',
+            'dep quai ngang' => 'Dép',
+            'slipper' => 'Dép',
+            'slippers' => 'Dép',
+            'house slipper' => 'Dép',
+            'indoor slipper' => 'Dép',
+            
+            // Giày thể thao chuyên dụng
+            'football boot' => 'Giày thể thao chuyên dụng',
+            'football boots' => 'Giày thể thao chuyên dụng',
+            'soccer cleat' => 'Giày thể thao chuyên dụng',
+            'golf shoe' => 'Giày thể thao chuyên dụng',
+            'golf shoes' => 'Giày thể thao chuyên dụng',
+            'giày đá bóng' => 'Giày thể thao chuyên dụng',
+            'giay da bong' => 'Giày thể thao chuyên dụng',
         ];
         
-        $typeLower = strtolower(trim($type));
+        $typeLower = mb_strtolower(trim($type), 'UTF-8');
         
-        return $typeMapping[$typeLower] ?? ucfirst($type);
+        // Exact match
+        if (isset($typeMapping[$typeLower])) {
+            return $typeMapping[$typeLower];
+        }
+        
+        // Partial match - sắp xếp keys theo độ dài giảm dần
+        $sortedKeys = array_keys($typeMapping);
+        usort($sortedKeys, function($a, $b) {
+            return mb_strlen($b, 'UTF-8') - mb_strlen($a, 'UTF-8');
+        });
+        
+        foreach ($sortedKeys as $key) {
+            if (mb_strpos($typeLower, $key, 0, 'UTF-8') !== false) {
+                error_log("Partial match: '$typeLower' contains '$key' → '{$typeMapping[$key]}'");
+                return $typeMapping[$key];
+            }
+        }
+        
+        return ucfirst($type);
     }
 }
 

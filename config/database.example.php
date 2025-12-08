@@ -1,5 +1,5 @@
 <?php
-// Copy this file to database.php and fill credentials or use .env variables
+// Sao chép this file vào database.php and fill credentials or use .env variables
 
 class Database {
     private $host;

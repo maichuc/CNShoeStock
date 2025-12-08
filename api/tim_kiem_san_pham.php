@@ -11,8 +11,8 @@ try {
     $productType = $_GET['product_type'] ?? null;
     $warehouseId = $_GET['warehouse_id'] ?? null;
     
-    // Debug log (commented out for production)
-    // error_log("DEBUG search_products.php - Query: $query, Category: $categoryId, Type: $productType, Warehouse: $warehouseId");
+    // Gỡ lỗi log ((commented out for production))
+    // error_log("DEBUG search_products.php - Truy vấn: $query, Category: $categoryId, Type: $productType, Warehouse: $warehouseId");
     
     // Xây dựng truy vấn SQL - CHỈ hiển thị products có trong warehouse hiện tại
     $sql = "SELECT 
@@ -37,19 +37,19 @@ try {
         $params[':query'] = '%' . $query . '%';
     }
     
-    // Add category filter if provided
+    // Thêm category filter nếu có
     if ($categoryId) {
         $sql .= " AND p.category_id = :category_id";
         $params[':category_id'] = $categoryId;
     }
     
-    // Add product type filter if provided
+    // Thêm product type filter nếu có
     if ($productType) {
         $sql .= " AND p.type = :product_type";
         $params[':product_type'] = $productType;
     }
     
-    // Show all products (comment out stock filter for now)
+    // Hiển thị all products (comment out stock filter for now)
     // $sql .= " AND COALESCE(i.quantity, 0) > 0";
     
     $sql .= " ORDER BY p.name, pv.size LIMIT 20";
@@ -63,7 +63,7 @@ try {
     $stmt->execute();
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Debug log (commented out for production)
+    // Gỡ lỗi log ((commented out for production))
     // error_log("DEBUG search_products.php - Found " . count($products) . " products");
     
     echo json_encode([

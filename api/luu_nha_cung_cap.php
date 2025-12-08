@@ -61,7 +61,7 @@ try {
         throw new Exception('Địa chỉ email không hợp lệ');
     }
 
-    // Check duplicate tax code
+    // Kiểm tra mã số thuế trùng lặp
     $checkSql = "SELECT supplier_id, name FROM suppliers WHERE tax_code = ?";
     $params = [$taxCode];
     
@@ -81,7 +81,7 @@ try {
     $pdo->beginTransaction();
 
     if ($supplierId) {
-        // Update existing supplier
+        // Cập nhật nhà cung cấp hiện có
         $sql = "UPDATE suppliers SET 
                 name = ?, short_name = ?, tax_code = ?, type = ?, 
                 address = ?, province = ?, district = ?, phone = ?, 
@@ -100,7 +100,7 @@ try {
         $message = 'Cập nhật nhà cung cấp thành công';
         $resultId = $supplierId;
     } else {
-        // Insert new supplier
+        // Thêm nhà cung cấp mới
         $sql = "INSERT INTO suppliers (
                 supplier_code, name, short_name, tax_code, type,
                 address, province, district, phone, email, website,
@@ -120,7 +120,7 @@ try {
         $message = 'Thêm nhà cung cấp thành công';
     }
 
-    // Get the saved data
+    // Lấy dữ liệu đã lưu
     $getStmt = $pdo->prepare("SELECT * FROM suppliers WHERE supplier_id = ?");
     $getStmt->execute([$resultId]);
     $savedData = $getStmt->fetch(PDO::FETCH_ASSOC);

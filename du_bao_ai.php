@@ -1,14 +1,14 @@
 <?php
-// Start session and check authentication
+// Bắt đầu session and check authentication
 session_start();
 
-// Check if user is logged in
+// Kiểm tra if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.html');
     exit();
 }
 
-// Check role permission (only admin and manager can access AI features)
+// Kiểm tra role permission (only admin and manager can access AI features)
 $userRole = $_SESSION['role'] ?? 'staff';
 if (!in_array($userRole, ['admin', 'manager'])) {
     header('Location: trang_chu.php');
@@ -945,7 +945,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
         };
 
         $(document).ready(function() {
-            // Initialize Bootstrap tooltips
+            // Khởi tạo Bootstrap tooltips
             $('[data-toggle="tooltip"]').tooltip({
                 trigger: 'hover',
                 html: true,
@@ -953,11 +953,11 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                 template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner" style="max-width: 350px; text-align: left;"></div></div>'
             });
             
-            // Set current month
+            // Đặt current month
             const currentMonth = new Date().getMonth() + 1;
             $('#monthSelect').val(currentMonth);
             
-            // Show initial loading
+            // Hiển thị initial loading
             showNotification('🔄 Đang khởi tạo dữ liệu AI...', 'info');
             
             // Only load dashboard data on page load - other tabs load when clicked
@@ -965,7 +965,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                 loadDashboardSummary();
             }, 500);
             
-            // Load data when tabs are clicked - unbind first to prevent duplicates
+            // Tải data when tabs are clicked - unbind first to prevent duplicates
             $('#trend-tab').off('shown.bs.tab').on('shown.bs.tab', function() {
                 if ($('#trendContent').find('.loading-spinner').length > 0) {
                     showNotification('📊 Đang tải xu hướng...', 'info');
@@ -998,7 +998,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
         }
 
         function loadDashboardSummary() {
-            // Show loading state - simplified to reduce jitter
+            // Hiển thị loading state - simplified to reduce jitter
             $('#totalProducts, #totalOrders, #totalStock, #totalRevenue').html('<i class="fas fa-spinner fa-spin"></i>');
             
             $.ajax({
@@ -1037,7 +1037,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                                 boundary: 'window'
                             });
                             
-                            // Load real AI insights from inventory data
+                            // Tải real AI insights from inventory data
                             loadRealAIInsights();
                         } else {
                             console.error('Dashboard Summary Error:', response ? response.message : 'No response');
@@ -1191,7 +1191,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                     return;
                 }
                 
-                // Initialize default summary if not exists
+                // Khởi tạo default summary if not exists
                 const summary = data.summary || {
                     fast_moving_count: 0,
                     normal_count: 0,
@@ -1227,7 +1227,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                     </div>
                 `;
                 
-                // Check if we have any detailed data
+                // Kiểm tra if we have any detailed data
                 const hasFastMoving = data.fast_moving && Array.isArray(data.fast_moving) && data.fast_moving.length > 0;
                 const hasSlowMoving = data.slow_moving && Array.isArray(data.slow_moving) && data.slow_moving.length > 0;
                 
@@ -1455,7 +1455,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
             return false;
         };
         
-        // Handle unhandled promise rejections
+        // Xử lý unhandled promise rejections
         window.addEventListener('unhandledrejection', function(event) {
             console.error('Unhandled promise rejection:', event.reason);
             showNotification('⚠️ Lỗi bất đồng bộ. Vui lòng thử lại.', 'error');
@@ -1470,7 +1470,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                 '<div class="text-center"><div class="loading-spinner"></div></div>'
             );
             
-            // Load climate data
+            // Tải climate data
             $.ajax({
                 url: 'api_du_bao_ai.php',
                 method: 'GET',
@@ -1497,7 +1497,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
             loadClimateRestockSuggestions(month, 'central', '#restockClimateCentral', '#countClimateCentral');
             loadClimateRestockSuggestions(month, 'south', '#restockClimateSouth', '#countClimateSouth');
             
-            // Load restock suggestions - TỒN KHO (theo priority)
+            // Tải restock suggestions - TỒN KHO (theo priority)
             loadLowStockSuggestions('#restockCritical', '#countCritical', 'CRITICAL');
             loadLowStockSuggestions('#restockHigh', '#countHigh', 'HIGH');
             loadLowStockSuggestions('#restockMedium', '#countMedium', 'MEDIUM');
@@ -1588,7 +1588,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                 return;
             }
             
-            // Update count badge - without pulse to reduce jitter
+            // Cập nhật count badge - without pulse to reduce jitter
             if (badgeElement) {
                 $(badgeElement).text(data.suggestions.length);
             }
@@ -1680,7 +1680,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                 return;
             }
             
-            // Update count - without pulse to reduce jitter
+            // Cập nhật count - without pulse to reduce jitter
             $(badgeElement).text(data.suggestions.length);
             
             let html = '';
@@ -1754,7 +1754,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
         function createRestockOrder(productId, quantity) {
             showNotification(`Đang tạo đơn nhập ${quantity} sản phẩm ID: ${productId}...`, 'info');
             // CẦN LÀM: Triển khai chức năng tạo đơn nhập hàng
-            // Redirect to stock receipt page with pre-filled data
+            // Chuyển hướng to stock receipt page with pre-filled data
             window.location.href = `api_phieu_nhap_don_gian.php?product_id=${productId}&quantity=${quantity}`;
         }
 
@@ -1791,7 +1791,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
             
             regions.forEach((region) => {
                 const regionData = data[region];
-                // Get data for selected month, or fallback to first available month
+                // Lấy data for selected month, or fallback to first available month
                 const monthData = regionData.monthly_analysis[selectedMonth] || Object.values(regionData.monthly_analysis)[0];
                 const seasonInfo = seasonalInfo[region];
                 
@@ -1971,7 +1971,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
         
         // Combined Market Trends Function
         function loadMarketTrends() {
-            // Load all market trend components
+            // Tải all market trend components
             loadSocialTrends();
             loadVietnamClimate();
             // Load event với tháng hiện tại khi lần đầu vào tab
@@ -1979,7 +1979,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
             loadEventForecast(currentMonth);
         }
 
-        // Load Real AI Insights from inventory data (same as trang_chu.php)
+        // Tải Real AI Insights from inventory data (same as trang_chu.php)
         function loadRealAIInsights() {
             $.ajax({
                 url: 'api_du_bao_ai.php',
@@ -2036,7 +2036,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                     
                     const data = response.data;
                     
-                    // Display business insights
+                    // Hiển thị business insights
                     let insightsHtml = '';
                     
                     // Tạo insights từ fast_moving products
@@ -2152,7 +2152,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                         $('[data-toggle="tooltip"]').tooltip();
                     }
                     
-                    // Display next month forecast
+                    // Hiển thị next month forecast
                     let totalDailyRevenue = 0;
                     if (data.fast_moving && data.fast_moving.length > 0) {
                         data.fast_moving.forEach(item => {
@@ -2223,7 +2223,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
             });
         }
 
-        // AI Insights Display Function
+        // AI Insights Hiển thị Function
         function displayAIInsights(insights) {
             if (!insights) {
                 console.log('No AI insights data available');
@@ -2232,7 +2232,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
             
             console.log('Displaying AI insights:', insights);
             
-            // Update warehouse health score
+            // Cập nhật warehouse health score
             if (insights.warehouse_health_score) {
                 const score = insights.warehouse_health_score;
                 const scoreElement = $('#warehouseHealthScore');
@@ -2254,7 +2254,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                 }
             }
             
-            // Display risk alerts
+            // Hiển thị risk alerts
             if (insights.risk_alerts && insights.risk_alerts.length > 0) {
                 let alertsHtml = '';
                 insights.risk_alerts.forEach(alert => {
@@ -2275,7 +2275,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                 $('#riskAlertsContainer').html(alertsHtml);
             }
             
-            // Display business insights
+            // Hiển thị business insights
             if (insights.business_insights && insights.business_insights.length > 0) {
                 let insightsHtml = '';
                 insights.business_insights.forEach(insight => {
@@ -2292,7 +2292,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                 $('#businessInsightsContainer').html(insightsHtml);
             }
             
-            // Display next month forecast
+            // Hiển thị next month forecast
             if (insights.next_month_forecast) {
                 const forecast = insights.next_month_forecast;
                 
@@ -2328,7 +2328,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                 }
             }
             
-            // Display recommendations
+            // Hiển thị recommendations
             if (insights.recommendations && insights.recommendations.length > 0) {
                 let recommendationsHtml = '';
                 insights.recommendations.forEach((rec, index) => {
@@ -2357,7 +2357,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
                 $('#recommendationsContainer').html(recommendationsHtml);
             }
             
-            // Show success notification
+            // Hiển thị success notification
             showNotification('🤖 AI insights đã được cập nhật!', 'success');
         }
 
@@ -2367,10 +2367,10 @@ if (!in_array($userRole, ['admin', 'manager'])) {
         function exportForecastToExcel() {
             const month = $('#climateMonthSelect').val() || new Date().getMonth() + 1;
             
-            // Show loading
+            // Hiển thị loading
             showNotification('📊 Đang tạo file Excel...', 'info');
             
-            // Create form and submit
+            // Tạo form and submit
             const form = document.createElement('form');
             form.method = 'GET';
             form.action = 'api_du_bao_xuat.php';
@@ -2386,7 +2386,7 @@ if (!in_array($userRole, ['admin', 'manager'])) {
             form.submit();
             document.body.removeChild(form);
             
-            // Show success after delay
+            // Hiển thị success after delay
             setTimeout(() => {
                 showNotification('✅ File Excel đã được tạo! Vui lòng kiểm tra download.', 'success');
             }, 1000);
@@ -2430,11 +2430,11 @@ if (!in_array($userRole, ['admin', 'manager'])) {
             }
         }
 
-        // Initialize
+        // Khởi tạo
         $(document).ready(function() {
             $('#climateMonthSelect').val(new Date().getMonth() + 1);
             
-            // Load default tab content (Market Trends)
+            // Tải default tab content (Market Trends)
             loadMarketTrends();
         });
         

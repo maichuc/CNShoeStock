@@ -16,7 +16,7 @@ $database = new Database();
 $pdo = $database->getConnection();
 $warehouseId = $_SESSION['warehouse_id'];
 
-// Get warehouse info
+// Lấy warehouse info
 $stmt = $pdo->prepare("SELECT name FROM warehouses WHERE warehouse_id = ?");
 $stmt->execute([$warehouseId]);
 $warehouse = $stmt->fetch(PDO::FETCH_ASSOC);

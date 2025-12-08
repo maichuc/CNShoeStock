@@ -17,7 +17,7 @@ function generateBulkImportTemplate() {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
     
-    // Set sheet name
+    // Đặt sheet name
     $sheet->setTitle('Employee Import');
     
     // ==================== HEADER ROW ====================
@@ -243,14 +243,14 @@ function generateBulkImportTemplate() {
     ];
 }
 
-// Generate template when accessed directly
+// Tạo template when accessed directly
 if (php_sapi_name() === 'cli' || (isset($_GET['generate']) && $_GET['generate'] === 'template')) {
     $result = generateBulkImportTemplate();
     
     if (php_sapi_name() === 'cli') {
         echo "Template generated: " . $result['filepath'] . "\n";
     } else {
-        // Download file
+        // Tải xuống file
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="' . $result['filename'] . '"');
         header('Cache-Control: max-age=0');

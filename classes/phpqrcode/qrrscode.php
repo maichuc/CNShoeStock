@@ -62,7 +62,7 @@
 
             $rs = null;
             
-            // Check parameter ranges
+            // Kiểm tra parameter ranges
             if($symsize < 0 || $symsize > 8)                     return $rs;
             if($fcr < 0 || $fcr >= (1<<$symsize))                return $rs;
             if($prim <= 0 || $prim >= (1<<$symsize))             return $rs;
@@ -81,7 +81,7 @@
             $NN =& $rs->nn;
             $A0 =& $NN;
             
-            // Generate Galois field lookup tables
+            // Tạo Galois field lookup tables
             $rs->index_of[0] = $A0; // log(zero) = -inf
             $rs->alpha_to[$A0] = 0; // alpha**-inf = 0
             $sr = 1;

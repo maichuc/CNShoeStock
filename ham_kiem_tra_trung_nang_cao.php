@@ -1,92 +1,205 @@
 <?php
 
 /**
- * Enhanced Duplicate Detection Functions
- * Handles different wordings for the same product using multiple algorithms
+ * FILE: KIỂM TRA TRÙNG LẶP NÂNG CAO
+ * 
+ * Mục đích: Phát hiện sản phẩm trùng lặp với độ chính xác cao
+ * Xử lý: Các cách mô tả khác nhau của cùng 1 sản phẩm
+ * 
+ * Ví dụ:
+ * - "Nike Air Max 90" và "Nike Air Max Sneaker" -> Có thể là cùng sản phẩm
+ * - "Giày thể thao Nike" và "Nike Sport Shoes" -> Cùng sản phẩm
  */
 
 /**
- * Calculate text similarity using Levenshtein distance
- * Only declare if not already defined elsewhere
+ * HÀM TÍNH ĐỘ TƯƠNG ĐỒNG VĂN BẢN (LEVENSHTEIN DISTANCE)
+ * 
+ * Thuật toán Levenshtein:
+ * - Đếm số thao tác tối thiểu để biến text1 thành text2
+ * - Thao tác: Thêm, xóa, thay thế 1 ký tự
+ * 
+ * Công thức: Similarity = (1 - Distance / MaxLength) × 100
+ * 
+ * Ví dụ:
+ * "kitten" vs "sitting"
+ * - Distance = 3 (k->s, e->i, thêm g)
+ * - MaxLength = 7
+ * - Similarity = (1 - 3/7) × 100 = 57.14%
+ * 
+ * @param string $text1 - Văn bản 1
+ * @param string $text2 - Văn bản 2
+ * @return float - Độ tương đồng (0-100)
  */
 if (!function_exists('calculateTextSimilarity')) {
     function calculateTextSimilarity($text1, $text2) {
+        // Nếu 1 trong 2 rỗng -> Không giống (0%)
         if (empty($text1) || empty($text2)) {
             return 0;
         }
         
+        // Chuẩn hóa: Chuyển về chữ thường, loại bỏ khoảng trắng thừa
         $text1 = strtolower(trim($text1));
         $text2 = strtolower(trim($text2));
         
+        // Nếu giống y hệt sau khi chuẩn hóa -> 100%
         if ($text1 === $text2) {
             return 100;
         }
         
-        // Calculate Levenshtein distance
+        // Tính độ dài text dài hơn (dùng làm mẫu số)
         $maxLen = max(strlen($text1), strlen($text2));
+        
+        // Nếu cả 2 đều rỗng -> 100%
         if ($maxLen == 0) return 100;
         
+        // Tính Levenshtein Distance (số thao tác cần thiết)
         $distance = levenshtein($text1, $text2);
+        
+        // Chuyển thành % tương đồng
+        // Công thức: (1 - distance/maxLen) × 100
         $similarity = (1 - $distance / $maxLen) * 100;
         
+        // Đảm bảo không âm
         return max(0, $similarity);
     }
 }
 
 /**
- * Enhanced similarity calculation for products
- * UNIFIED FORMULA: Uses same weights as Manual system (Brand 30%, Name 25%, Color 25%, Type 20%)
- * Only declare if not already defined elsewhere
+ * HÀM TÍNH ĐỘ TƯƠNG ĐỒNG NÂNG CAO (ENHANCED SIMILARITY)
+ * 
+ * Mục đích: Tính độ giống nhau giữa sản phẩm mới (AI) và sản phẩm trong DB
+ * 
+ * Công thức trọng số (Weighted Score):
+ * - Thương hiệu (Brand): 30% (quan trọng nhất)
+ * - Tên sản phẩm (Name): 25%
+ * - Màu sắc (Color): 25%
+ * - Loại sản phẩm (Type): 20%
+ * 
+ * Tổng = 100%
+ * 
+ * Ví dụ:
+ * Sản phẩm mới: "Giày Nike Air Max Đen"
+ * Sản phẩm DB: "Nike Air Max 90 Black"
+ * 
+ * Tính toán:
+ * - Brand: "Nike" vs "Nike" = 100% → 100% × 30% = 30 điểm
+ * - Name: "Air Max" vs "Air Max 90" = 85% → 85% × 25% = 21.25 điểm
+ * - Color: "Đen" vs "Black" = 100% (sau dịch) → 100% × 25% = 25 điểm
+ * - Type: "Giày" vs "Giày" = 100% → 100% × 20% = 20 điểm
+ * 
+ * Tổng = 96.25% → Rất có thể trùng!
+ * 
+ * @param array $aiData - Dữ liệu từ AI
+ * @param array $dbProduct - Dữ liệu từ database
+ * @return float - Độ tương đồng (0-100)
  */
 if (!function_exists('calculateEnhancedSimilarity')) {
     function calculateEnhancedSimilarity($aiData, $dbProduct) {
-        $score = 0;
-        $maxScore = 0;
+        $score = 0;        // Điểm tích lũy
+        $maxScore = 0;     // Điểm tối đa có thể đạt được
         
-        // Brand comparison (30% weight) - Most important
+        /**
+         * SO SÁNH THƯƠNG HIỆU (30% trọng số) - QUAN TRỌNG NHẤT
+         * 
+         * Lý do: Cùng brand mới có khả năng là cùng sản phẩm
+         * Nike ≠ Adidas -> Chắc chắn khác sản phẩm
+         */
         $maxScore += 30;
         if (!empty($aiData['brand']) && !empty($dbProduct['brand'])) {
             $brandSimilarity = calculateTextSimilarity($aiData['brand'], $dbProduct['brand']);
-            $score += $brandSimilarity * 30 / 100;
+            $score += $brandSimilarity * 30 / 100;  // Quy đổi về 30 điểm tối đa
         }
         
-        // Name comparison (25% weight)
+        /**
+         * SO SÁNH TÊN SẢN PHẨM (25% trọng số)
+         * 
+         * Ví dụ:
+         * "Air Max 90" vs "Air Max" -> ~85% tương đồng
+         * "Air Max" vs "Free Run" -> ~20% tương đồng
+         */
         $maxScore += 25;
         if (!empty($aiData['name']) && !empty($dbProduct['name'])) {
             $nameSimilarity = calculateTextSimilarity($aiData['name'], $dbProduct['name']);
-            $score += $nameSimilarity * 25 / 100;
+            $score += $nameSimilarity * 25 / 100;  // Quy đổi về 25 điểm
         }
         
-        // Color comparison (25% weight) - NEW: Added for consistency with Manual system
+        /**
+         * SO SÁNH MÀU SẮC (25% trọng số)
+         * 
+         * Xử lý:
+         * - Chuyển array colors thành string
+         * - Dùng hàm chuyên biệt so sánh màu (xử lý đồng nghĩa)
+         * 
+         * Ví dụ:
+         * "Đen" vs "Black" -> 100% (sau dịch)
+         * "Đỏ" vs "Xanh" -> 0%
+         */
         $maxScore += 25;
         if (!empty($aiData['colors']) && !empty($dbProduct['color'])) {
-            // Convert AI colors array to comma-separated string if needed
+            // Chuyển array sang string nếu cần
             $aiColors = is_array($aiData['colors']) ? implode(',', $aiData['colors']) : $aiData['colors'];
+            
+            // Dùng hàm so sánh màu chuyên biệt
             $colorSimilarity = calculateColorSimilarityEnhanced($aiColors, $dbProduct['color']);
-            $score += $colorSimilarity * 25 / 100;
+            $score += $colorSimilarity * 25 / 100;  // Quy đổi về 25 điểm
         }
         
-        // Type comparison (20% weight)
+        /**
+         * SO SÁNH LOẠI SẢN PHẨM (20% trọng số)
+         * 
+         * Ví dụ:
+         * "Giày thể thao" vs "Sneaker" -> ~90% (đồng nghĩa)
+         * "Giày cao gót" vs "Dép" -> ~10%
+         */
         $maxScore += 20;
         if (!empty($aiData['type']) && !empty($dbProduct['type'])) {
             $typeSimilarity = calculateTextSimilarity($aiData['type'], $dbProduct['type']);
-            $score += $typeSimilarity * 20 / 100;
+            $score += $typeSimilarity * 20 / 100;  // Quy đổi về 20 điểm
         }
         
+        /**
+         * TÍNH ĐIỂM CUỐI CÙNG
+         * 
+         * Công thức: (Tổng điểm / Tổng điểm tối đa) × 100
+         * 
+         * maxScore có thể < 100 nếu thiếu thông tin
+         * Ví dụ: Chỉ có brand và name -> maxScore = 55
+         */
         return $maxScore > 0 ? ($score / $maxScore) * 100 : 0;
     }
 }
 
 /**
- * Enhanced duplicate product detection with multiple algorithms
- * Uses NLP-powered analysis and warehouse isolation
+ * HÀM KIỂM TRA TRÙNG LẶP SẢN PHẨM NÂNG CAO
+ * 
+ * Mục đích: Tìm các sản phẩm tương tự trong database
+ * 
+ * Quy trình:
+ * 1. Lấy warehouse_id của user hiện tại
+ * 2. Trích xuất thông tin từ AI (name, brand, color, type...)
+ * 3. Query database tìm sản phẩm candidates
+ * 4. Tính độ tương đồng cho từng candidate
+ * 5. Lọc những sản phẩm có độ tương đồng > 70%
+ * 6. Sắp xếp theo độ tương đồng giảm dần
+ * 7. Trả về danh sách sản phẩm trùng
+ * 
+ * @param array $aiData - Dữ liệu sản phẩm từ AI
+ * @param PDO $pdo - Kết nối database
+ * @return array - Danh sách sản phẩm trùng lặp
  */
 function checkDuplicateProductsEnhanced($aiData, $pdo) {
     error_log("🔍 ENHANCED checkDuplicateProductsEnhanced called with data: " . json_encode($aiData));
     
-    // Get user's warehouse_id from session
+    /**
+     * BƯỚC 1: LẤY WAREHOUSE_ID CỦA USER
+     * 
+     * Lý do: Chỉ kiểm tra trùng trong KHO CỦA USER
+     * Không kiểm tra sản phẩm của kho khác
+     */
     $userWarehouseId = null;
+    
     if (isset($_SESSION['user_id'])) {
+        // Query lấy warehouse_id từ bảng users
         $userSql = "SELECT warehouse_id FROM users WHERE user_id = ?";
         $userStmt = $pdo->prepare($userSql);
         $userStmt->execute([$_SESSION['user_id']]);
@@ -99,20 +212,24 @@ function checkDuplicateProductsEnhanced($aiData, $pdo) {
     }
 
     try {
-        // 🧠 ENHANCED: Sử dụng multiple algorithms để xử lý các mô tả khác nhau của cùng sản phẩm
+        /**
+         * BƯỚC 2: TRÍCH XUẤT THÔNG TIN TỪ AI
+         * 
+         * Lấy tất cả thông tin có thể để so sánh
+         * Sử dụng ?? (null coalescing) để tránh lỗi nếu thiếu field
+         */
+        $productName = $aiData['name'] ?? '';              // Tên sản phẩm
+        $brand = $aiData['brand'] ?? '';                    // Thương hiệu
+        $colors = isset($aiData['colors']) && is_array($aiData['colors']) ? $aiData['colors'] : [];  // Màu sắc
+        $type = $aiData['type'] ?? '';                      // Loại (Giày thể thao, Dép...)
+        $material = $aiData['material'] ?? '';              // Chất liệu
+        $features = $aiData['features'] ?? '';              // Tính năng
+        $description = $aiData['description'] ?? '';        // Mô tả
+        $category = $aiData['category'] ?? '';              // Danh mục
+        $tags = isset($aiData['tags']) && is_array($aiData['tags']) ? $aiData['tags'] : [];  // Tags
+        $confidence = $aiData['confidence'] ?? 0.5;         // Độ tin cậy AI
         
-        // Lấy thông tin từ AI analysis
-        $productName = $aiData['name'] ?? '';
-        $brand = $aiData['brand'] ?? '';
-        $colors = isset($aiData['colors']) && is_array($aiData['colors']) ? $aiData['colors'] : [];
-        $type = $aiData['type'] ?? '';
-        $material = $aiData['material'] ?? '';
-        $features = $aiData['features'] ?? '';
-        $description = $aiData['description'] ?? '';
-        $category = $aiData['category'] ?? '';
-        $tags = isset($aiData['tags']) && is_array($aiData['tags']) ? $aiData['tags'] : [];
-        $confidence = $aiData['confidence'] ?? 0.5;
-        
+        // Log để debug
         error_log("🔍 ENHANCED checkDuplicateProducts called with:");
         error_log("Product Name: '$productName', Brand: '$brand', Type: '$type'");
         error_log("Features: '$features'");
@@ -120,11 +237,23 @@ function checkDuplicateProductsEnhanced($aiData, $pdo) {
         error_log("User Warehouse ID: '$userWarehouseId'");
         error_log("Confidence: $confidence, Images analyzed: " . ($aiData['analyzed_images_count'] ?? 'unknown'));
         
+        /**
+         * VALIDATE DỮ LIỆU ĐẦU VÀO
+         * 
+         * Điều kiện tối thiểu: Phải có (Tên SẢN HOẶC Thương hiệu)
+         * Nếu không có cả 2 -> Không thể kiểm tra trùng
+         */
         if (empty($productName) && empty($brand)) {
             error_log("⚠️ No product name or brand provided - skipping duplicate check");
-            return [];
+            return [];  // Trả về mảng rỗng (không có trùng)
         }
         
+        /**
+         * KIỂM TRA WAREHOUSE_ID
+         * 
+         * Nếu không có warehouse_id -> Không thể xác định kho
+         * -> Không thể kiểm tra trùng
+         */
         if (empty($userWarehouseId)) {
             error_log("⚠️ No warehouse_id for current user - skipping duplicate check");
             return [];
@@ -365,7 +494,7 @@ function checkDuplicateProductsEnhanced($aiData, $pdo) {
                 }
             }
             
-            // 5. Price range analysis (if available)
+            // 5. Price range analysis (nếu có sẵn)
             if (!empty($aiData['price']) && !empty($product['price'])) {
                 $aiPrice = floatval($aiData['price']);
                 $dbPrice = floatval($product['price']);
@@ -446,14 +575,14 @@ function calculateSemanticDescriptionSimilarity($aiData, $dbProduct) {
     $aiText = '';
     $dbText = '';
     
-    // Build comprehensive text from AI data
+    // Xây dựng comprehensive text from AI data
     $aiParts = [];
     if (!empty($aiData['description'])) $aiParts[] = $aiData['description'];
     if (!empty($aiData['features'])) $aiParts[] = $aiData['features'];
     if (!empty($aiData['name'])) $aiParts[] = $aiData['name'];
     $aiText = implode(' ', $aiParts);
     
-    // Build comprehensive text from DB product
+    // Xây dựng comprehensive text from DB product
     $dbParts = [];
     if (!empty($dbProduct['description'])) $dbParts[] = $dbProduct['description'];
     if (!empty($dbProduct['name'])) $dbParts[] = $dbProduct['name'];

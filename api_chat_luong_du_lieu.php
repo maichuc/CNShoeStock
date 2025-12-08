@@ -29,7 +29,7 @@ try {
     // 2. Customer Data Quality Assessment
     $customerDataQuality = getCustomerDataQualityAnalysis($pdo, $warehouseId);
     
-    // 3. Order Data Integrity Check
+    // 3. Order Data Integrity Kiểm tra
     $orderDataIntegrity = getOrderDataIntegrityAnalysis($pdo, $warehouseId);
     
     // 4. Inventory Data Accuracy
@@ -130,7 +130,7 @@ function getProductDataQualityAnalysis($pdo, $warehouseId) {
     
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Calculate overall product data quality score
+    // Tính toán overall product data quality score
     $productMetrics = $results[0];
     $imageMetrics = $results[1] ?? ['image_completeness_score' => 0];
     
@@ -203,7 +203,7 @@ function getCustomerDataQualityAnalysis($pdo, $warehouseId) {
     
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Calculate quality scores
+    // Tính toán quality scores
     $totalCustomers = $result['total_customers'];
     $qualityScores = [
         'name_completeness' => $totalCustomers > 0 ? (1 - $result['missing_names'] / $totalCustomers) * 100 : 100,
@@ -282,7 +282,7 @@ function getOrderDataIntegrityAnalysis($pdo, $warehouseId) {
     
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Calculate integrity scores
+    // Tính toán integrity scores
     $totalOrders = $result['total_orders'];
     $integrityScores = [
         'status_validity' => $totalOrders > 0 ? (1 - $result['invalid_statuses'] / $totalOrders) * 100 : 100,
@@ -358,7 +358,7 @@ function getInventoryDataAccuracyAnalysis($pdo, $warehouseId) {
     
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Calculate accuracy scores
+    // Tính toán accuracy scores
     $totalRecords = $result['total_inventory_records'];
     $accuracyScores = [
         'quantity_validity' => $totalRecords > 0 ? (1 - ($result['negative_quantities'] + $result['missing_quantities']) / $totalRecords) * 100 : 100,
@@ -451,7 +451,7 @@ function getSKUPricingConsistencyAnalysis($pdo, $warehouseId) {
     
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Calculate consistency scores
+    // Tính toán consistency scores
     $totalSKUs = $result['total_skus'];
     $consistencyScores = [
         'sku_format_consistency' => $totalSKUs > 0 ? ($result['standard_format_skus'] / $totalSKUs) * 100 : 100,

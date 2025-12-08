@@ -20,7 +20,7 @@ try {
         exit;
     }
     
-    // Get order with customer info
+    // Lấy đơn hàng với thông tin khách hàng
     $orderQuery = "
         SELECT 
             o.*,
@@ -48,7 +48,7 @@ try {
         exit;
     }
     
-    // Get order details with product info
+    // Lấy chi tiết đơn hàng với thông tin sản phẩm
     $detailsQuery = "
         SELECT 
             od.*,
@@ -68,7 +68,7 @@ try {
     
     $details = $detailsStmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Prepare response data
+    // Chuẩn bị response data
     $responseData = [
         'order' => [
             'order_id' => $order['order_id'],

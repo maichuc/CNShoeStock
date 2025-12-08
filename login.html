@@ -127,7 +127,7 @@
                         console.log('======================');
                         
                         if (response.success) {
-                            // Check if user must change password
+                            // Kiểm tra if user must change password
                             if (response.must_change_password) {
                                 showAlert('Đăng nhập thành công! Bạn cần đổi mật khẩu...', 'warning');
                                 console.log('→ Will redirect to force change password page');

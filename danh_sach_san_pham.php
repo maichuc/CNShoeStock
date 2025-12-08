@@ -908,12 +908,12 @@ if ($filter === 'low_stock') {
                 var windowWidth = $(window).width();
                 var tableContainer = $('.table-responsive');
                 
-                // Add scroll indicators for mobile
+                // Thêm scroll indicators for mobile
                 if (windowWidth <= 768) {
                     if (!tableContainer.hasClass('mobile-scroll-enabled')) {
                         tableContainer.addClass('mobile-scroll-enabled');
                         
-                        // Add touch scroll hint
+                        // Thêm touch scroll hint
                         if (!$('.scroll-hint').length) {
                             tableContainer.append('<div class="scroll-hint">← Vuốt để xem thêm →</div>');
                         }
@@ -936,7 +936,7 @@ if ($filter === 'low_stock') {
             // Initial responsive check
             handleResponsive();
             
-            // Handle window resize
+            // Xử lý window resize
             $(window).on('resize', function() {
                 clearTimeout(window.resizeTimer);
                 window.resizeTimer = setTimeout(handleResponsive, 100);
@@ -948,17 +948,17 @@ if ($filter === 'low_stock') {
                 var scrollWidth = $(this)[0].scrollWidth;
                 var clientWidth = $(this)[0].clientWidth;
                 
-                // Hide scroll hint when user starts scrolling
+                // Ẩn scroll hint when user starts scrolling
                 if (scrollLeft > 10) {
                     $('.scroll-hint').fadeOut();
                 }
             });
             
-            // Add custom styles for mobile
+            // Thêm custom styles for mobile
             if ($(window).width() <= 768) {
                 $('body').addClass('mobile-view');
                 
-                // Add swipe gesture hint CSS
+                // Thêm swipe gesture hint CSS
                 $('<style>')
                     .prop('type', 'text/css')
                     .html(`
@@ -1026,7 +1026,7 @@ if ($filter === 'low_stock') {
                 buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Show loading
+                    // Hiển thị loading
                     Swal.fire({
                         title: 'Đang tạm ngừng...',
                         text: 'Vui lòng chờ',
@@ -1038,7 +1038,7 @@ if ($filter === 'low_stock') {
                         }
                     });
                     
-                    // Redirect to deactivate
+                    // Chuyển hướng to deactivate
                     window.location.href = `xoa_san_pham.php?id=${productId}`;
                 }
             });

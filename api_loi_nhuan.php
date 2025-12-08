@@ -281,7 +281,7 @@ function getMonthlyProfitTrends($pdo, $warehouseId) {
     
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Calculate growth rates
+    // Tính toán growth rates
     foreach ($results as &$month) {
         if ($month['revenue_same_month_last_year'] > 0) {
             $month['revenue_growth_yoy'] = round(

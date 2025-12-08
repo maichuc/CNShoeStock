@@ -482,7 +482,7 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
                 $(this).val(value);
                 validateField('tax_code', value);
                 
-                // Check duplicate
+                // Kiểm tra duplicate
                 if (value.length >= 10) {
                     checkDuplicateTaxCode(value);
                 }
@@ -497,7 +497,7 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
                     if (value.startsWith('84')) {
                         value = '0' + value.substring(2);
                     }
-                    // Format: 0987.654.321
+                    // Định dạng: 0987.654.321
                     if (value.length == 10) {
                         value = value.replace(/(\d{4})(\d{3})(\d{3})/, '$1.$2.$3');
                     }
@@ -592,7 +592,7 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
             return isValid;
         }
 
-        // Check duplicate tax code
+        // Kiểm tra duplicate tax code
         function checkDuplicateTaxCode(taxCode) {
             const supplierId = $('#supplier_id').val();
             
@@ -614,9 +614,9 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
             });
         }
 
-        // Save supplier function
+        // Lưu supplier function
         function saveSupplier(addNew = false) {
-            // Validate all required fields
+            // Kiểm tra all required fields
             const name = $('#name').val().trim();
             const taxCode = $('#tax_code').val().trim();
             const phone = $('#phone').val().replace(/\./g, '').trim();
@@ -628,7 +628,7 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
             isValid &= validateField('phone', phone);
             isValid &= validateField('address', address);
 
-            // Validate email if provided
+            // Kiểm tra email nếu có
             const email = $('#email').val().trim();
             if (email) {
                 isValid &= validateField('email', email);
@@ -644,7 +644,7 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
                 return;
             }
 
-            // Prepare data
+            // Chuẩn bị data
             const formData = {
                 supplier_id: $('#supplier_id').val() || null,
                 supplier_code: $('#supplier_code').val(),
@@ -664,7 +664,7 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
                 status: $('input[name="status"]:checked').val()
             };
 
-            // Show loading
+            // Hiển thị loading
             Swal.fire({
                 title: '⏳ Đang xử lý...',
                 text: 'Vui lòng chờ trong giây lát',
@@ -675,7 +675,7 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
                 }
             });
 
-            // Send AJAX request
+            // Gửi AJAX request
             $.ajax({
                 url: 'api/luu_nha_cung_cap.php',
                 method: 'POST',
@@ -704,7 +704,7 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
                             confirmButtonColor: '#28a745'
                         }).then((result) => {
                             if (addNew && result.isConfirmed) {
-                                // Reset form for new entry
+                                // Đặt lại form for new entry
                                 resetForm();
                             } else {
                                 // Go back to supplier list
@@ -731,12 +731,12 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
             });
         }
 
-        // Reset form for new entry
+        // Đặt lại form for new entry
         function resetForm() {
             $('#supplierForm')[0].reset();
             $('#supplier_id').val('');
             
-            // Generate new supplier code
+            // Tạo new supplier code
             $.ajax({
                 url: 'api/tao_ma_nha_cung_cap.php',
                 method: 'GET',
@@ -747,17 +747,17 @@ $newSupplierCode = $editMode ? $supplier['supplier_code'] : generateSupplierCode
                 }
             });
             
-            // Clear validation feedback
+            // Xóa validation feedback
             $('.validation-feedback').removeClass('valid invalid').text('');
             
-            // Reset status to active
+            // Đặt lại status to active
             $('#status_active').prop('checked', true);
             
             // Focus on first field
             $('#name').focus();
         }
 
-        // Handle unsaved changes warning
+        // Xử lý unsaved changes warning
         let formChanged = false;
         $('#supplierForm input, #supplierForm select, #supplierForm textarea').on('input change', function() {
             formChanged = true;

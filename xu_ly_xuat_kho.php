@@ -611,11 +611,12 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
                     <!-- Hướng dẫn sử dụng -->
                     <div class="alert alert-info mb-3" style="font-size: 13px;">
                         <i class="fas fa-info-circle mr-2"></i>
-                        <strong>Hướng dẫn:</strong>
+                        <strong>Hướng dẫn quét mã QR:</strong>
                         <ul class="text-left mb-0 mt-2" style="font-size: 12px;">
-                            <li>Quét QR bằng camera hoặc tải ảnh QR lên (nút "Choose file" bên dưới)</li>
-                            <li>Đảm bảo ảnh QR rõ nét, không bị mờ</li>
-                            <li>Nếu không quét được, dùng nút <strong>"Nhập thủ công"</strong></li>
+                            <li><strong>Cách 1:</strong> Sử dụng camera để quét trực tiếp (khuyến nghị)</li>
+                            <li><strong>Cách 2:</strong> Upload ảnh QR bằng nút "Choose File" bên dưới camera</li>
+                            <li><strong>Lưu ý:</strong> Ảnh cần rõ nét, ánh sáng đủ, mã QR không bị méo</li>
+                            <li><strong>Nếu không quét được:</strong> Dùng nút <strong>"Nhập thủ công"</strong> bên dưới</li>
                         </ul>
                     </div>
                     
@@ -723,6 +724,8 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
     
     <!-- QR Code Scanner -->
     <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- Fallback QR Reader -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     
     <script>
         let html5QrcodeScanner;
@@ -757,7 +760,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
         
         // Hiển thị chi tiết vị trí
         function showLocationDetail(locationText) {
-            // Phân tích cú pháp văn bản vị trí: "A01-01-01 (10)" -> shelf_code: A01-01-01, quantity: 10
+            // Parse location text: "A01-01-01 (10)" -> shelf_code: A01-01-01, quantity: 10
             const match = locationText.match(/^(.+?)\s*\((\d+)\)$/);
             
             if (match) {
@@ -799,7 +802,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
             }
         }
         
-        // Khởi tạo QR Scanner
+        // Initialize QR Scanner
         function initQRScanner() {
             if (html5QrcodeScanner) {
                 html5QrcodeScanner.clear();
@@ -809,9 +812,14 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
                 "qrReader",
                 { 
                     fps: 10, 
-                    qrbox: { width: 500, height: 500 },
-                    // Cấu hình để cải thiện đọc QR từ file
-                    formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ],
+                    qrbox: { width: 300, height: 300 },
+                    // Hỗ trợ nhiều định dạng mã
+                    formatsToSupport: [ 
+                        Html5QrcodeSupportedFormats.QR_CODE,
+                        Html5QrcodeSupportedFormats.DATA_MATRIX,
+                        Html5QrcodeSupportedFormats.AZTEC,
+                        Html5QrcodeSupportedFormats.PDF_417
+                    ],
                     // Bật nhiều thuật toán giải mã
                     experimentalFeatures: {
                         useBarCodeDetectorIfSupported: true
@@ -819,7 +827,13 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
                     // Tối ưu cho file upload
                     rememberLastUsedCamera: true,
                     aspectRatio: 1.0,
-                    showTorchButtonIfSupported: true
+                    showTorchButtonIfSupported: true,
+                    // Cải thiện đọc từ ảnh
+                    disableFlip: false,
+                    // Tăng khả năng đọc
+                    videoConstraints: {
+                        facingMode: "environment"
+                    }
                 },
                 /* verbose= */ false
             );
@@ -835,25 +849,101 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
         }
         
         function onScanFailure(error) {
-            // Chỉ hiển thị lỗi nếu là từ file upload
-            if (error && error.toString().includes('No MultiFormat Readers')) {
-                document.getElementById('scanResult').innerHTML = `
-                    <div class="alert alert-warning mt-3">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <strong>Không đọc được mã QR!</strong><br>
-                        <small>Có thể hình ảnh bị mờ hoặc chất lượng thấp.</small><br>
-                        <small>Vui lòng thử:</small>
-                        <ul class="text-left mb-0 mt-2" style="font-size: 12px;">
-                            <li>Chụp lại ảnh QR rõ nét hơn</li>
-                            <li>Đảm bảo ánh sáng đủ khi chụp</li>
-                            <li>Hoặc dùng nút "Nhập thủ công" bên dưới</li>
-                        </ul>
-                    </div>
-                `;
+            // Chỉ hiển thị lỗi có ý nghĩa từ file upload
+            const errorStr = error ? error.toString() : '';
+            
+            // Bỏ qua các lỗi scanning thông thường (khi camera đang tìm mã)
+            if (errorStr.includes('NotFoundException') || 
+                errorStr.includes('QR code parse error')) {
+                // Đây là lỗi bình thường khi scan, không cần hiển thị
+                return;
+            }
+            
+            // Chỉ hiển thị lỗi khi upload file và không đọc được
+            if (errorStr.includes('No MultiFormat Readers')) {
+                // Thử dùng jsQR làm fallback
+                tryFallbackQRReader();
             }
         }
         
-        // Xử lý mã QR
+        // Fallback QR Reader using jsQR
+        function tryFallbackQRReader() {
+            document.getElementById('scanResult').innerHTML = `
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-sync-alt fa-spin mr-2"></i>
+                    Đang thử phương thức đọc QR thay thế...
+                </div>
+            `;
+            
+            // Tìm file input từ html5-qrcode
+            const fileInput = document.querySelector('#qrReader input[type="file"]');
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        context.drawImage(img, 0, 0);
+                        
+                        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                        
+                        // Thử với jsQR
+                        if (typeof jsQR !== 'undefined') {
+                            const code = jsQR(imageData.data, imageData.width, imageData.height);
+                            if (code) {
+                                document.getElementById('scanResult').innerHTML = `
+                                    <div class="alert alert-success mt-3">
+                                        <i class="fas fa-check-circle mr-2"></i>
+                                        Đọc được mã QR bằng phương thức thay thế!
+                                    </div>
+                                `;
+                                processQRCode(code.data);
+                            } else {
+                                showQRReadFailure();
+                            }
+                        } else {
+                            showQRReadFailure();
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                
+                reader.readAsDataURL(file);
+            } else {
+                showQRReadFailure();
+            }
+        }
+        
+        // Show QR read failure message
+        function showQRReadFailure() {
+            document.getElementById('scanResult').innerHTML = `
+                <div class="alert alert-danger mt-3">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Không đọc được mã QR từ hình ảnh!</strong><br>
+                    <small class="mt-2 d-block">Nguyên nhân có thể:</small>
+                    <ul class="text-left mb-2 mt-2" style="font-size: 13px;">
+                        <li>Hình ảnh bị mờ hoặc chất lượng thấp</li>
+                        <li>Mã QR bị che khuất hoặc biến dạng</li>
+                        <li>Độ tương phản không đủ</li>
+                        <li>Góc chụp không vuông góc với mã QR</li>
+                    </ul>
+                    <small class="d-block mt-2"><strong>Giải pháp:</strong></small>
+                    <ul class="text-left mb-0" style="font-size: 13px;">
+                        <li>Chụp lại ảnh QR rõ nét hơn với ánh sáng tốt</li>
+                        <li>Đảm bảo mã QR chiếm phần lớn khung hình và thẳng góc</li>
+                        <li>Sử dụng camera trực tiếp thay vì upload ảnh (khuyến nghị)</li>
+                        <li>Nhấn nút "Nhập thủ công" bên dưới để nhập SKU</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        // Process QR Code
         function processQRCode(qrCode) {
             console.log('Processing QR Code:', qrCode);
             
@@ -924,7 +1014,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
                 const requiredQty = matchedItem.getAttribute('data-required');
                 const productName = matchedItem.querySelector('.card-title').textContent;
                 
-                // Ẩn modal QR và hiển thị modal số lượng
+                // Hide QR modal and show quantity modal
                 $('#qrScanModal').modal('hide');
                 showQuantityModal(itemId, requiredQty);
                 
@@ -983,13 +1073,13 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
             }
         }
         
-        // Bật/tắt nhập thủ công
+        // Toggle Manual Input
         function toggleManualInput() {
             const section = document.getElementById('manualInputSection');
             section.style.display = section.style.display === 'none' ? 'block' : 'none';
         }
         
-        // Mở modal QR cho sản phẩm cụ thể
+        // Open QR Modal for specific item
         function openQRModal(itemId) {
             currentItemId = itemId;
             $('#qrScanModal').modal('show');
@@ -1003,7 +1093,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
             $('#manualSkuModal').modal('show');
         }
         
-        // Kiểm tra SKU
+        // Validate SKU
         function validateSku() {
             const inputSku = document.getElementById('manualSku').value.trim().toUpperCase();
             
@@ -1062,14 +1152,14 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
             }, 500);
         }
         
-        // Hiển thị modal số lượng
+        // Show Quantity Modal
         function showQuantityModal(itemId, requiredQty) {
             currentItemId = itemId;
             document.getElementById('requiredQuantity').textContent = requiredQty;
             document.getElementById('pickedQuantity').value = requiredQty;
             document.getElementById('pickedQuantity').max = requiredQty;
             
-            // Lấy thông tin sản phẩm
+            // Get product info
             const itemCard = document.querySelector(`[data-item-id="${itemId}"]`);
             const productName = itemCard.querySelector('.card-title').textContent;
             document.getElementById('productInfo').innerHTML = `
@@ -1081,7 +1171,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
             $('#quantityModal').modal('show');
         }
         
-        // Lưu số lượng
+        // Save Quantity
         function saveQuantity() {
             const pickedQty = parseInt(document.getElementById('pickedQuantity').value);
             const requiredQty = parseInt(document.getElementById('requiredQuantity').textContent);
@@ -1118,7 +1208,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
                 return;
             }
             
-            // Gửi lên server
+            // Send to server
             fetch('api_xu_ly_xuat.php', {
                 method: 'POST',
                 headers: {
@@ -1226,7 +1316,7 @@ $progressPercentage = $totalItems > 0 ? round(($completedItems / $totalItems) * 
                     throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 200)}`);
                 }
                 
-                // Phân tích JSON
+                // Parse JSON
                 let data;
                 try {
                     data = JSON.parse(responseText);

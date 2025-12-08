@@ -404,7 +404,7 @@ function formatSupplierChartData($supplierPerformance) {
 function formatLeadTimeChartData($leadTimeAnalysis) {
     $monthlyData = [];
     
-    // Group by month
+    // Nhóm by month
     foreach ($leadTimeAnalysis as $item) {
         $month = $item['month_year'];
         if (!isset($monthlyData[$month])) {

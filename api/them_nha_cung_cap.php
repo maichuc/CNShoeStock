@@ -29,7 +29,7 @@ try {
     $email = trim($_POST['email'] ?? '');
     $address = trim($_POST['address'] ?? '');
     
-    // Validate
+    // Kiểm tra
     if (empty($name)) {
         throw new Exception('Tên nhà cung cấp không được để trống');
     }
@@ -82,7 +82,7 @@ try {
     
     $supplierId = $pdo->lastInsertId();
     
-    // Log audit
+    // Ghi nhật ký audit
     $auditLogger = new AuditLogger($pdo);
     $auditLogger->log(
         $userId,

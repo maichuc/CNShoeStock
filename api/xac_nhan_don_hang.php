@@ -204,7 +204,7 @@ try {
                     }
                 }
             } catch (Exception $exportError) {
-                // Export creation failed, rollback transaction
+                // Xuất creation failed, rollback transaction
                 throw new Exception('Failed to create export slip or reduce inventory: ' . $exportError->getMessage());
             }
         }

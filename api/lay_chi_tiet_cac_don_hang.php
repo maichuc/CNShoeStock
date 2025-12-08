@@ -52,7 +52,7 @@ try {
         throw new Exception('Order not found or access denied');
     }
     
-    // Get order details with product info - chỉ từ warehouse hiện tại
+    // Lấy chi tiết đơn hàng với thông tin sản phẩm - chỉ từ warehouse hiện tại
     $detailsSql = "
         SELECT 
             od.quantity,
@@ -75,7 +75,7 @@ try {
     
     $productDetails = $detailsStmt->fetch(PDO::FETCH_ASSOC);
     
-    // Get customer info if customer_id exists
+    // Lấy thông tin khách hàng nếu có customer_id
     $customerName = 'Unknown Customer';
     $customerPhone = '';
     $customerAddress = '';
@@ -116,7 +116,7 @@ try {
         'total_price' => $orderData['total_price']
     ];
     
-    // Add product details if found
+    // Thêm chi tiết sản phẩm nếu tìm thấy
     if ($productDetails) {
         $result = array_merge($result, $productDetails);
     } else {

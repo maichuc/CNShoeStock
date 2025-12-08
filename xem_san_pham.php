@@ -90,7 +90,7 @@ $stmt_images->bindParam(':product_id', $product_id, PDO::PARAM_INT);
 $stmt_images->execute();
 $images = $stmt_images->fetchAll(PDO::FETCH_ASSOC);
 
-// Debug: Log image paths
+// Gỡ lỗi: Ghi nhật ký image paths
 if (!empty($images)) {
     error_log("=== DEBUG: Product ID $product_id has " . count($images) . " images ===");
     foreach ($images as $idx => $img) {

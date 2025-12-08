@@ -17,7 +17,7 @@ try {
     // Kiểm tra đăng nhập (simplified for testing)
     $warehouseId = $_SESSION['warehouse_id'] ?? 6;
     
-    // Get orders with basic info
+    // Lấy orders với thông tin cơ bản
     $ordersSql = "
         SELECT 
             o.order_id,

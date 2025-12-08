@@ -1,5 +1,5 @@
 <?php
-// Get warehouse information
+// Lấy warehouse information
 require_once 'config/database.php';
 require_once 'classes/Kho.php';
 if (!isset($_SESSION)) {
@@ -16,7 +16,7 @@ if ($userWarehouseId) {
     }
 }
 
-// Get current page name for active menu
+// Lấy current page name for active menu
 $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 

@@ -11,7 +11,7 @@ class StockReceiptHistory {
      */
     public function logChange($receiptId, $userId, $actionType, $fieldChanged = null, $oldValue = null, $newValue = null, $reason = null, $warehouseId = null) {
         try {
-            // Get warehouse_id from stock_receipts if not provided
+            // Lấy warehouse_id from stock_receipts if not provided
             if ($warehouseId === null) {
                 $sqlWarehouse = "SELECT warehouse_id FROM stock_receipts WHERE receipt_id = ?";
                 $stmtWarehouse = $this->conn->prepare($sqlWarehouse);

@@ -172,7 +172,7 @@
             return $words;
         }
 
-        // Error correction code -----------------------------------------------
+        // Lỗi correction code -----------------------------------------------
         // Table of the error correction code (Reed-Solomon block)
         // See Table 12-16 (pp.30-36), JIS X0510:2004.
 
@@ -357,7 +357,7 @@
             return self::$versionPattern[$version -7];
         }
 
-        // Format information --------------------------------------------------
+        // Định dạng information --------------------------------------------------
         // See calcFormatInfo in tests/test_qrspec.c (orginal qrencode c lib)
         
         public static $formatInfo = array(
@@ -434,7 +434,7 @@
             QRstr::set($frame, $width-8, 7, $setPattern);
             QRstr::set($frame, 0, $width - 8, $setPattern);
         
-            // Format info
+            // Định dạng info
             $setPattern = str_repeat("\x84", 9);
             QRstr::set($frame, 0, 8, $setPattern);
             QRstr::set($frame, $width - 8, 8, $setPattern, 8);

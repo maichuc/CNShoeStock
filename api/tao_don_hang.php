@@ -83,41 +83,20 @@ try {
             }
         }
         
-        // Kiểm tra khách hàng có tồn tại không (trong cùng warehouse)
-        $customerSql = "SELECT customer_id FROM customers WHERE phone = ? AND warehouse_id = ?";
-        $customerStmt = $pdo->prepare($customerSql);
-        $customerStmt->execute([$customerData['phone'], $warehouseId]);
+        // Luôn tạo khách hàng mới cho mỗi đơn hàng (cho phép trùng lặp hoàn toàn)
+        // Mỗi warehouse lưu riêng, thông tin có thể trùng lặp
+        $insertCustomerSql = "INSERT INTO customers (full_name, phone, email, address, note, warehouse_id) VALUES (?, ?, ?, ?, ?, ?)";
+        $insertCustomerStmt = $pdo->prepare($insertCustomerSql);
+        $insertCustomerStmt->execute([
+            $customerData['name'],
+            $customerData['phone'],
+            $customerData['email'] ?? '',
+            $customerData['address'],
+            $customerData['note'] ?? '',
+            $warehouseId
+        ]);
         
-        $existingCustomer = $customerStmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($existingCustomer) {
-            // Cập nhật thông tin khách hàng (chỉ update trong cùng warehouse)
-            $customerId = $existingCustomer['customer_id'];
-            $updateCustomerSql = "UPDATE customers SET full_name = ?, email = ?, address = ?, note = ? WHERE customer_id = ? AND warehouse_id = ?";
-            $updateCustomerStmt = $pdo->prepare($updateCustomerSql);
-            $updateCustomerStmt->execute([
-                $customerData['name'],
-                $customerData['email'] ?? '',
-                $customerData['address'],
-                $customerData['note'] ?? '',
-                $customerId,
-                $warehouseId
-            ]);
-        } else {
-            // Tạo khách hàng mới với warehouse_id
-            $insertCustomerSql = "INSERT INTO customers (full_name, phone, email, address, note, warehouse_id) VALUES (?, ?, ?, ?, ?, ?)";
-            $insertCustomerStmt = $pdo->prepare($insertCustomerSql);
-            $insertCustomerStmt->execute([
-                $customerData['name'],
-                $customerData['phone'],
-                $customerData['email'] ?? '',
-                $customerData['address'],
-                $customerData['note'] ?? '',
-                $warehouseId
-            ]);
-            
-            $customerId = $pdo->lastInsertId();
-        }
+        $customerId = $pdo->lastInsertId();
         
         // Tạo đơn hàng
         $insertOrderSql = "INSERT INTO orders (warehouse_id, customer_id, status, discount, total_price, created_by) VALUES (?, ?, 'pending', ?, ?, ?)";

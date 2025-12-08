@@ -329,7 +329,7 @@ try {
     ];
     $sheet->getStyle('A1:L1')->applyFromArray($headerStyle);
     
-    // Set column widths
+    // Đặt column widths
     $sheet->getColumnDimension('A')->setWidth(6);
     $sheet->getColumnDimension('B')->setWidth(8);
     $sheet->getColumnDimension('C')->setWidth(15);

@@ -1,10 +1,10 @@
 <?php
-// Enable error reporting for debugging - log only, don't display
+// Bật error reporting for debugging - log only, don't display
 error_reporting(E_ALL);
 ini_set('display_errors', 0); // MUST BE 0 for JSON API
 ini_set('log_errors', 1);
 
-// Set content type FIRST before any output
+// Đặt content type FIRST before any output
 header('Content-Type: application/json; charset=utf-8');
 
 session_start();
@@ -148,7 +148,7 @@ function updatePickedQuantity($pdo, $input, $userId, $warehouseId) {
         // See: api/xac_nhan_don_hang.php - reduceInventory() function
         error_log("updatePickedQuantity: Skipping inventory reduction (already reduced when order accepted)");
         
-        // Log audit
+        // Ghi nhật ký audit
         logAudit($pdo, $userId, 'update_picked_quantity', 'warehouse_export_details', $detailId, [
             'export_id' => $exportId,
             'detail_id' => $detailId,
@@ -270,7 +270,7 @@ function completeExport($pdo, $input, $userId, $warehouseId) {
         $orderUpdateStmt->bindParam(':export_id', $exportId, PDO::PARAM_INT);
         $orderUpdateStmt->execute();
         
-        // Log audit
+        // Ghi nhật ký audit
         logAudit($pdo, $userId, 'complete_export', 'warehouse_exports', $exportId, [
             'export_id' => $exportId,
             'status' => 'completed',
@@ -372,7 +372,7 @@ function cancelExport($pdo, $input, $userId, $warehouseId) {
         $orderUpdateStmt->bindParam(':order_id', $exportInfo['order_id'], PDO::PARAM_INT);
         $orderUpdateStmt->execute();
         
-        // Log audit
+        // Ghi nhật ký audit
         logAudit($pdo, $userId, 'cancel_export', 'warehouse_exports', $exportId, [
             'export_id' => $exportId,
             'order_id' => $exportInfo['order_id'],

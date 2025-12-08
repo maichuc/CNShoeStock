@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Check if user is logged in
+// Kiểm tra if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.html");
     exit();
@@ -10,11 +10,11 @@ if (!isset($_SESSION['user_id'])) {
 // Include database connection
 require_once 'config/database.php';
 
-// Initialize database connection
+// Khởi tạo database connection
 $database = new Database();
 $pdo = $database->getConnection();
 
-// Get time period filter
+// Lấy time period filter
 $timePeriod = $_GET['period'] ?? 'today';
 $dateCondition = '';
 $dateInterval = 1;
@@ -52,11 +52,11 @@ if ($timePeriod === 'custom' && $startDate && $endDate) {
     }
 }
 
-// Get warehouse statistics
+// Lấy warehouse statistics
 $userWarehouseId = $_SESSION['warehouse_id'] ?? null;
 $warehouseName = 'Smart Warehouse';
 
-// Get warehouse name
+// Lấy warehouse name
 if ($userWarehouseId) {
     try {
         require_once 'classes/Kho.php';
@@ -70,7 +70,7 @@ if ($userWarehouseId) {
     }
 }
 
-// Initialize default values
+// Khởi tạo default values
 $totalProducts = 0;
 $totalValue = 0;
 $lowStockItems = 0;
@@ -86,7 +86,7 @@ $newProducts = 0;
 // Only fetch data if warehouse_id is set
 if ($userWarehouseId):
 
-// Get total products added in this period (FILTERED)
+// Lấy total products added in this period (FILTERED)
 $stmtProducts = $pdo->prepare("
     SELECT COUNT(DISTINCT p.product_id) as total 
     FROM products p
@@ -96,7 +96,7 @@ $stmtProducts = $pdo->prepare("
 $stmtProducts->execute([$userWarehouseId]);
 $newProducts = $stmtProducts->fetch(PDO::FETCH_ASSOC)['total'];
 
-// Get total revenue in this period (FILTERED)
+// Lấy total revenue in this period (FILTERED)
 $stmtRevenue = $pdo->prepare("
     SELECT COALESCE(SUM(od.total_price), 0) as total_revenue
     FROM orders o
@@ -108,7 +108,7 @@ $stmtRevenue = $pdo->prepare("
 $stmtRevenue->execute([$userWarehouseId]);
 $totalRevenue = $stmtRevenue->fetch(PDO::FETCH_ASSOC)['total_revenue'] ?? 0;
 
-// Get total items sold in this period (FILTERED)
+// Lấy total items sold in this period (FILTERED)
 $stmtItemsSold = $pdo->prepare("
     SELECT COALESCE(SUM(od.quantity), 0) as total_items
     FROM orders o
@@ -120,7 +120,7 @@ $stmtItemsSold = $pdo->prepare("
 $stmtItemsSold->execute([$userWarehouseId]);
 $totalItemsSold = $stmtItemsSold->fetch(PDO::FETCH_ASSOC)['total_items'] ?? 0;
 
-// Get completed orders in this period (FILTERED)
+// Lấy completed orders in this period (FILTERED)
 $stmtCompletedOrders = $pdo->prepare("
     SELECT COUNT(*) as total 
     FROM orders 
@@ -131,7 +131,7 @@ $stmtCompletedOrders = $pdo->prepare("
 $stmtCompletedOrders->execute([$userWarehouseId]);
 $completedOrders = $stmtCompletedOrders->fetch(PDO::FETCH_ASSOC)['total'];
 
-// Get recent stock movements (filtered by time period)
+// Lấy recent stock movements (filtered by time period)
 $stmtMovements = $pdo->prepare("
     SELECT DATE(sri.created_at) as date, SUM(sri.quantity) as total_quantity
     FROM stock_receipt_items sri
@@ -145,7 +145,7 @@ $stmtMovements = $pdo->prepare("
 $stmtMovements->execute([$userWarehouseId]);
 $stockMovements = $stmtMovements->fetchAll(PDO::FETCH_ASSOC);
 
-// Get product types and revenue by type
+// Lấy product types and revenue by type
 $stmtProductTypes = $pdo->prepare("
     SELECT 
         COALESCE(p.type, 'Chưa phân loại') as product_type,
@@ -241,11 +241,12 @@ if ($totalValue > 0) {
     $turnoverRate = $cogs / $totalValue;
 }
 
-// Lấy dữ liệu thực cho biểu đồ: Giá vốn hàng bán theo period
-$stmtCostChart = $pdo->prepare("
+// Lấy dữ liệu cho biểu đồ: So sánh Doanh thu vs Chi phí nhập hàng theo ngày
+// 1. Doanh thu (Revenue) - Tổng tiền khách hàng trả
+$stmtRevenueChart = $pdo->prepare("
     SELECT 
         DATE(o.created_at) as order_date,
-        COALESCE(SUM(od.total_price), 0) as daily_cogs
+        COALESCE(SUM(od.quantity * od.unit_price), 0) as daily_revenue
     FROM orders o
     JOIN order_details od ON o.order_id = od.order_id
     WHERE o.status = 'delivered'
@@ -254,22 +255,48 @@ $stmtCostChart = $pdo->prepare("
     GROUP BY DATE(o.created_at)
     ORDER BY order_date ASC
 ");
-$stmtCostChart->execute([$userWarehouseId]);
-$costChartData = $stmtCostChart->fetchAll(PDO::FETCH_ASSOC);
+$stmtRevenueChart->execute([$userWarehouseId]);
+$revenueChartData = $stmtRevenueChart->fetchAll(PDO::FETCH_ASSOC);
 
-// Tạo mảng dữ liệu giá vốn theo dateInterval (scale xuống cho biểu đồ)
-$costData = array_fill(0, $dateInterval, 0);
-foreach ($costChartData as $cost) {
-    $dayDiff = (strtotime(date('Y-m-d')) - strtotime($cost['order_date'])) / 86400;
+// 2. Chi phí nhập hàng (Import Cost) - Tổng tiền nhập hàng vào kho
+$stmtImportCostChart = $pdo->prepare("
+    SELECT 
+        DATE(sr.created_at) as receipt_date,
+        COALESCE(SUM(sri.quantity * sri.unit_price), 0) as daily_import_cost
+    FROM stock_receipts sr
+    JOIN stock_receipt_items sri ON sr.receipt_id = sri.receipt_id
+    WHERE sr.warehouse_id = ?
+        AND sr.created_at >= DATE_SUB(NOW(), INTERVAL " . $dateInterval . " DAY)
+    GROUP BY DATE(sr.created_at)
+    ORDER BY receipt_date ASC
+");
+$stmtImportCostChart->execute([$userWarehouseId]);
+$importCostChartData = $stmtImportCostChart->fetchAll(PDO::FETCH_ASSOC);
+
+// Tạo mảng dữ liệu theo dateInterval
+$revenueData = array_fill(0, $dateInterval, 0);
+$importCostData = array_fill(0, $dateInterval, 0);
+
+// Điền dữ liệu doanh thu
+foreach ($revenueChartData as $revenue) {
+    $dayDiff = (strtotime(date('Y-m-d')) - strtotime($revenue['order_date'])) / 86400;
     if ($dayDiff >= 0 && $dayDiff < $dateInterval) {
-        $costData[($dateInterval - 1) - intval($dayDiff)] = round($cost['daily_cogs'] / 1000); // Scale to thousands
+        $revenueData[($dateInterval - 1) - intval($dayDiff)] = round($revenue['daily_revenue'] / 1000000, 2); // Scale to millions
     }
 }
 
-// Query storage location heatmap data - only for user's warehouse
+// Điền dữ liệu chi phí nhập hàng
+foreach ($importCostChartData as $cost) {
+    $dayDiff = (strtotime(date('Y-m-d')) - strtotime($cost['receipt_date'])) / 86400;
+    if ($dayDiff >= 0 && $dayDiff < $dateInterval) {
+        $importCostData[($dateInterval - 1) - intval($dayDiff)] = round($cost['daily_import_cost'] / 1000000, 2); // Scale to millions
+    }
+}
+
+// Truy vấn storage location heatmap data - only for user's warehouse
 $storageHeatmapData = [];
 if ($userWarehouseId) {
-    // Get locations with inventory
+    // Lấy locations with inventory
     $stmtStorageHeatmap = $pdo->prepare("
         SELECT 
             l.shelf_code as location_code,
@@ -288,7 +315,7 @@ if ($userWarehouseId) {
     $stmtStorageHeatmap->execute([$userWarehouseId, $userWarehouseId]);
     $storageHeatmapData = $stmtStorageHeatmap->fetchAll(PDO::FETCH_ASSOC);
     
-    // Add unassigned inventory (location_id = NULL)
+    // Thêm unassigned inventory (location_id = NULL)
     $stmtUnassigned = $pdo->prepare("
         SELECT 
             COALESCE(SUM(quantity), 0) as total_quantity,
@@ -1045,6 +1072,8 @@ endif; // End of if ($userWarehouseId)
                             <div class="stat-card blue position-relative">
                                 <div class="stat-card-title">
                                     <i class="fas fa-box mr-2"></i>Sản phẩm mới thêm
+                                    <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
+                                       data-toggle="tooltip" title="Đếm số sản phẩm riêng biệt được thêm trong khoảng thời gian đã chọn và đang hoạt động"></i>
                                 </div>
                                 <div class="stat-card-value">
                                     <?php echo number_format($newProducts); ?>
@@ -1058,6 +1087,8 @@ endif; // End of if ($userWarehouseId)
                             <div class="stat-card green position-relative">
                                 <div class="stat-card-title">
                                     <i class="fas fa-dollar-sign mr-2"></i>Doanh thu
+                                    <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
+                                       data-toggle="tooltip" title="Công thức: Σ(Số lượng × Đơn giá) của các đơn hàng đã giao. Ví dụ: (100 × 500k) + (50 × 800k) = 90tr"></i>
                                 </div>
                                 <div class="stat-card-value">
                                     <?php echo number_format($totalRevenue / 1000000, 1); ?>
@@ -1072,6 +1103,8 @@ endif; // End of if ($userWarehouseId)
                             <div class="stat-card orange position-relative">
                                 <div class="stat-card-title">
                                     <i class="fas fa-shopping-cart mr-2"></i>Sản phẩm đã bán
+                                    <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
+                                       data-toggle="tooltip" title="Công thức: Σ(Số lượng) từ chi tiết đơn hàng của các đơn đã giao. Ví dụ: 100 + 50 + 75 = 225 sản phẩm"></i>
                                 </div>
                                 <div class="stat-card-value">
                                     <?php echo number_format($totalItemsSold); ?>
@@ -1085,6 +1118,8 @@ endif; // End of if ($userWarehouseId)
                             <div class="stat-card purple position-relative">
                                 <div class="stat-card-title">
                                     <i class="fas fa-check-circle mr-2"></i>Đơn hàng hoàn thành
+                                    <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
+                                       data-toggle="tooltip" title="Đếm số đơn hàng có trạng thái 'Đã giao' trong khoảng thời gian đã chọn"></i>
                                 </div>
                                 <div class="stat-card-value">
                                     <?php echo number_format($completedOrders); ?>
@@ -1099,7 +1134,7 @@ endif; // End of if ($userWarehouseId)
                                 <div class="stat-card-title">
                                     <i class="fas fa-calendar-alt mr-2"></i>Số ngày tồn kho
                                     <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
-                                       data-toggle="tooltip" title="Số ngày trung bình hàng tồn trong kho trước khi bán hết"></i>
+                                       data-toggle="tooltip" title="Công thức: (Giá trị tồn kho TB ÷ Giá vốn bán/ngày) × 365. Ví dụ: (200tr ÷ 5tr) × 365 = 14,600 ngày"></i>
                                 </div>
                                 <div class="stat-card-value">
                                     <?php echo $avgInventoryDays > 0 ? number_format($avgInventoryDays, 0) : 'N/A'; ?>
@@ -1117,7 +1152,7 @@ endif; // End of if ($userWarehouseId)
                                 <div class="stat-card-title">
                                     <i class="fas fa-barcode mr-2"></i>Tổng SKU
                                     <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
-                                       data-toggle="tooltip" title="SKU (Stock Keeping Unit) - Tổng số biến thể sản phẩm"></i>
+                                       data-toggle="tooltip" title="SKU = Số sản phẩm × Số màu × Số size. Ví dụ: 10 sản phẩm, mỗi sản phẩm 3 màu, 5 size = 150 SKU"></i>
                                 </div>
                                 <div class="stat-card-value">
                                     <?php
@@ -1139,6 +1174,8 @@ endif; // End of if ($userWarehouseId)
                             <div class="stat-card green position-relative">
                                 <div class="stat-card-title">
                                     <i class="fas fa-file-invoice mr-2"></i>Phiếu nhập <?php echo ($timePeriod == 'today') ? 'hôm nay' : (($timePeriod == 'week') ? 'tuần này' : 'tháng này'); ?>
+                                    <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
+                                       data-toggle="tooltip" title="Công thợc: COUNT(receipt_id) FROM stock_receipts WHERE created_at BETWEEN [start] AND [end]"></i>
                                 </div>
                                 <div class="stat-card-value">
                                     <?php
@@ -1167,7 +1204,7 @@ endif; // End of if ($userWarehouseId)
                                 <div class="stat-card-title">
                                     <i class="fas fa-sync-alt mr-2"></i>Tỷ lệ vòng quay kho
                                     <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
-                                       data-toggle="tooltip" title="Số lần hàng tồn kho được bán hết và thay thế trong một năm"></i>
+                                       data-toggle="tooltip" title="Công thức: Giá vốn hàng bán (COGS) ÷ Giá trị tồn kho trung bình. Ví dụ: 1,000 triệu ÷ 200 triệu = 5 lần/năm"></i>
                                 </div>
                                 <div class="stat-card-value">
                                     <?php echo $turnoverRate > 0 ? number_format($turnoverRate, 1) : 'N/A'; ?>
@@ -1189,7 +1226,9 @@ endif; // End of if ($userWarehouseId)
                             <div class="chart-card">
                                 <div class="chart-card-header">
                                     <h6 class="chart-card-title">
-                                        <i class="fas fa-chart-area mr-2 text-primary"></i>Xu hướng tồn kho so với giá vốn hàng bán
+                                        <i class="fas fa-chart-area mr-2 text-primary"></i>Doanh thu vs Chi phí nhập hàng
+                                        <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
+                                           data-toggle="tooltip" title="Dòng xanh: Tổng doanh thu bán hàng (đơn đã giao) | Dòng đỏ: Tổng chi phí nhập hàng vào kho. Đơn vị: triệu VNĐ"></i>
                                     </h6>
                                     <div class="dropdown no-arrow">
                                         <a class="dropdown-toggle text-gray-400" href="#" role="button" id="dropdownMenuLink"
@@ -1217,6 +1256,8 @@ endif; // End of if ($userWarehouseId)
                                 <div class="card-header py-3">
                                     <h6 class="m-0 font-weight-bold text-danger">
                                         <i class="fas fa-hourglass-half mr-2"></i>Số ngày tồn kho
+                                        <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
+                                           data-toggle="tooltip" title="Công thức: (Giá trị tồn kho TB ÷ (Giá vốn hàng bán ÷ Số ngày kỳ)) × 365. Ví dụ: (200tr ÷ (1000tr ÷ 30)) × 365 = 73 ngày"></i>
                                     </h6>
                                 </div>
                                 <div class="card-body d-flex align-items-center justify-content-center" style="min-height: 200px;">
@@ -1249,6 +1290,8 @@ endif; // End of if ($userWarehouseId)
                                 <div class="chart-card-header">
                                     <h6 class="chart-card-title">
                                         <i class="fas fa-chart-pie mr-2 text-success"></i>Doanh thu theo nhóm sản phẩm
+                                        <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
+                                           data-toggle="tooltip" title="Tỷ lệ % = (Doanh thu từng loại ÷ Tổng doanh thu) × 100. Ví dụ: Sneaker 60tr/100tr = 60%"></i>
                                     </h6>
                                     <div class="dropdown no-arrow">
                                         <a class="dropdown-toggle text-gray-400" href="#" role="button" id="dropdownMenuLink2"
@@ -1292,6 +1335,8 @@ endif; // End of if ($userWarehouseId)
                                 <div class="card-header py-3 bg-gradient-primary">
                                     <h6 class="m-0 font-weight-bold text-white">
                                         <i class="fas fa-table mr-2"></i>Doanh số theo nhóm sản phẩm
+                                        <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.8; cursor: help;" 
+                                           data-toggle="tooltip" title="Doanh số = Nhóm theo loại: Σ(Số lượng × Đơn giá). Tăng trưởng = ((Kỳ này - Kỳ trước) ÷ Kỳ trước) × 100%"></i>
                                     </h6>
                                 </div>
                                 <div class="card-body p-0">
@@ -1572,7 +1617,7 @@ endif; // End of if ($userWarehouseId)
                                                 $locationType = htmlspecialchars($location['location_type'] ?? 'Chưa phân loại');
                                                 $variantCount = $location['variant_count'];
                                                 
-                                                // Calculate color intensity
+                                                // Tính toán color intensity
                                                 $ratio = $maxQuantity > 0 ? ($quantity / $maxQuantity) : 0;
                                                 
                                                 if ($quantity == 0) {
@@ -1675,11 +1720,13 @@ endif; // End of if ($userWarehouseId)
                                 <div class="card-header py-3">
                                     <h6 class="m-0 font-weight-bold text-warning">
                                         <i class="fas fa-exclamation-triangle mr-2"></i>Cảnh báo hàng sắp hết
+                                        <i class="fas fa-info-circle ml-1" style="font-size: 11px; opacity: 0.6; cursor: help;" 
+                                           data-toggle="tooltip" title="Hiển thị các sản phẩm có số lượng tồn kho < 50, sắp xếp từ thấp đến cao"></i>
                                     </h6>
                                 </div>
                                 <div class="card-body">
                                     <?php
-                                    // Get all low stock products
+                                    // Lấy all low stock products
                                     $stmtLowStockProducts = $pdo->prepare("
                                         SELECT p.name as product_name, pv.color, pv.size, i.quantity
                                         FROM inventory i
@@ -1730,7 +1777,7 @@ endif; // End of if ($userWarehouseId)
                                             </table>
                                         </div>
                                         <?php if (count($lowStockProducts) > 10): 
-                                            // Prepare all products data for JavaScript
+                                            // Chuẩn bị all products data for JavaScript
                                             $allProductsRows = '';
                                             foreach ($lowStockProducts as $index => $product) {
                                                 $badgeClass = 'info';
@@ -1839,7 +1886,7 @@ endif; // End of if ($userWarehouseId)
 
     <!-- Page level custom scripts -->
     <script>
-    // Set new default font family and font color to mimic Bootstrap's default styling
+    // Đặt new default font family and font color to mimic Bootstrap's default styling
     Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
     Chart.defaults.global.defaultFontColor = '#858796';
 
@@ -1880,61 +1927,40 @@ endif; // End of if ($userWarehouseId)
                 ?>
             ],
             datasets: [{
-                label: "Giá vốn hàng bán",
+                label: "Doanh thu (Triệu VNĐ)",
                 lineTension: 0.3,
-                backgroundColor: "rgba(255, 193, 7, 0.05)",
-                borderColor: "rgba(255, 193, 7, 1)",
-                pointRadius: 4,
-                pointBackgroundColor: "rgba(255, 193, 7, 1)",
+                backgroundColor: "rgba(28, 200, 138, 0.1)",
+                borderColor: "rgba(28, 200, 138, 1)",
+                pointRadius: 5,
+                pointBackgroundColor: "rgba(28, 200, 138, 1)",
                 pointBorderColor: "rgba(255, 255, 255, 1)",
-                pointHoverRadius: 5,
-                pointHoverBackgroundColor: "rgba(255, 193, 7, 1)",
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: "rgba(28, 200, 138, 1)",
                 pointHoverBorderColor: "rgba(255, 255, 255, 1)",
                 pointHitRadius: 10,
                 pointBorderWidth: 2,
                 data: [
                     <?php
-                    // Dùng dữ liệu thực từ database
-                    if (!empty($costData) && array_sum($costData) > 0) {
-                        echo implode(',', $costData);
-                    } else {
-                        // Nếu không có dữ liệu, hiển thị 0 cho tất cả các ngày
-                        echo implode(',', array_fill(0, $dateInterval, 0));
-                    }
+                    echo implode(',', $revenueData);
                     ?>
                 ],
             },
             {
-                label: "Tồn kho",
+                label: "Chi phí nhập hàng (Triệu VNĐ)",
                 lineTension: 0.3,
-                backgroundColor: "rgba(78, 115, 223, 0.1)",
-                borderColor: "rgba(78, 115, 223, 1)",
-                pointRadius: 4,
-                pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                backgroundColor: "rgba(231, 74, 59, 0.1)",
+                borderColor: "rgba(231, 74, 59, 1)",
+                pointRadius: 5,
+                pointBackgroundColor: "rgba(231, 74, 59, 1)",
                 pointBorderColor: "rgba(255, 255, 255, 1)",
-                pointHoverRadius: 5,
-                pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                pointHoverRadius: 6,
+                pointHoverBackgroundColor: "rgba(231, 74, 59, 1)",
                 pointHoverBorderColor: "rgba(255, 255, 255, 1)",
                 pointHitRadius: 10,
                 pointBorderWidth: 2,
                 data: [
                     <?php
-                    $movementData = array_fill(0, $dateInterval, 0);
-                    foreach ($stockMovements as $movement) {
-                        $dayDiff = (strtotime(date('Y-m-d')) - strtotime($movement['date'])) / 86400;
-                        if ($dayDiff >= 0 && $dayDiff < $dateInterval) {
-                            $movementData[($dateInterval - 1) - intval($dayDiff)] = $movement['total_quantity'];
-                        }
-                    }
-                    // Sử dụng dữ liệu thực, nếu không có thì hiển thị 0
-                    $scaledData = array_map(function($val) { 
-                        if ($val > 0) {
-                            return round($val / 500); 
-                        } else {
-                            return 0; // Không dùng fallback values nữa
-                        }
-                    }, $movementData);
-                    echo implode(',', $scaledData);
+                    echo implode(',', $importCostData);
                     ?>
                 ],
             }],
@@ -2005,7 +2031,7 @@ endif; // End of if ($userWarehouseId)
                 callbacks: {
                     label: function(tooltipItem, chart) {
                         var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-                        return datasetLabel + ': ' + number_format(tooltipItem.yLabel);
+                        return datasetLabel + ': ' + number_format(tooltipItem.yLabel, 2) + ' Triệu VNĐ';
                     }
                 }
             }
@@ -2166,7 +2192,7 @@ endif; // End of if ($userWarehouseId)
         }
     });
 
-    // Load AI Insights and Forecast
+    // Tải AI Insights and Forecast
     var insightsLoaded = false; // Flag to prevent multiple loads
     
     function loadAIInsights() {
@@ -2176,7 +2202,7 @@ endif; // End of if ($userWarehouseId)
         }
         insightsLoaded = true;
         
-        // Clear container first
+        // Xóa container first
         $('#businessInsightsContainer').html('<div class="text-muted text-center"><i class="fas fa-spinner fa-spin"></i> Đang phân tích...</div>');
         
         $.ajax({
@@ -2241,7 +2267,7 @@ endif; // End of if ($userWarehouseId)
                 if (response.success && response.data) {
                     const data = response.data;
                     
-                    // Display business insights
+                    // Hiển thị business insights
                     let insightsHtml = '';
                     
                     // Tạo insights từ fast_moving products
@@ -2410,7 +2436,7 @@ endif; // End of if ($userWarehouseId)
                         $('#businessInsightsContainer').html('<div class="text-muted text-center">Chưa có đủ dữ liệu để phân tích</div>');
                     }
                     
-                    // Display next month forecast based on current data
+                    // Hiển thị next month forecast based on current data
                     // Tính toán dự báo dựa trên dữ liệu thực
                     let totalDailyRevenue = 0;
                     if (data.fast_moving && data.fast_moving.length > 0) {
@@ -2497,7 +2523,7 @@ endif; // End of if ($userWarehouseId)
                 $('#seasonalFactorsContainer').html('<div class="text-muted">Chưa có dữ liệu</div>');
             },
             complete: function() {
-                // Reset flag after request completes (success or error)
+                // Đặt lại flag after request completes (success or error)
                 // insightsLoaded = false; // Commented out to prevent reload on same page
             }
         });
@@ -2756,7 +2782,7 @@ endif; // End of if ($userWarehouseId)
         });
     });
 
-    // Toggle custom date picker
+    // Bật/tắt custom date picker
     function toggleCustomDatePicker() {
         var picker = document.getElementById('customDatePicker');
         if (picker.style.display === 'none' || picker.style.display === '') {
@@ -2766,7 +2792,7 @@ endif; // End of if ($userWarehouseId)
         }
     }
 
-    // Load AI insights on page load
+    // Tải AI insights on page load
     $(document).ready(function() {
         // Kích hoạt tooltip cho các chỉ số thống kê
         $('[data-toggle="tooltip"]').tooltip({
@@ -2776,14 +2802,14 @@ endif; // End of if ($userWarehouseId)
         
         loadAIInsights();
         
-        // Handle time period filter buttons
+        // Xử lý time period filter buttons
         $('#timePeriodFilter button').on('click', function() {
             var period = $(this).data('period');
-            // Reload page with period parameter
+            // Tải lại page with period parameter
             window.location.href = 'trang_chu.php?period=' + period;
         });
         
-        // Set default dates for custom picker if not set
+        // Đặt default dates for custom picker if not set
         if ($('input[name="start_date"]').val() === '') {
             var today = new Date();
             var lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);

@@ -86,7 +86,7 @@ if (!is_array($exclude_locations)) {
 // Merge exclude_locations với draft locations
 $all_excluded_locations = array_unique(array_merge($exclude_locations, $draft_locations));
 
-// Debug log
+// Gỡ lỗi log
 error_log("=== Storage Suggestion API ===");
 error_log("Product ID: {$product_id}");
 error_log("Product Type: '{$product_type}' - Brand: '{$product_brand}'");
@@ -349,7 +349,7 @@ try {
         error_log("ℹ️ Không có variant_id. Sẽ gợi ý vị trí mới dựa trên thông tin sản phẩm.");
     }
     
-    // Get product details for category and brand
+    // Lấy product details for category and brand
     if ($product_id) {
         $stmt = $pdo->prepare("
             SELECT p.type, p.brand, p.name, pv.sku 
@@ -437,7 +437,7 @@ try {
         $existingShelfCodes = array_unique(array_merge($existingShelfCodes, $receiptShelfCodes));
         
         // Bước 1.2: Extract kệ từ mã vị trí
-        // Format: AREA-K#-T#-P# (VD: SNEAKER-K1-T1-P1)
+        // Định dạng: AREA-K#-T#-P# (VD: SNEAKER-K1-T1-P1)
         // Lấy phần K#-T# để xác định kệ
         $shelves = [];
         foreach ($existingShelfCodes as $shelfCode) {
@@ -456,10 +456,10 @@ try {
                 return "%-{$shelf}-%"; // Pattern: %-K1-T1-%
             }, $shelves);
             
-            // Build dynamic WHERE clause for multiple shelves
+            // Xây dựng dynamic WHERE clause for multiple shelves
             $shelfConditions = implode(' OR ', array_fill(0, count($shelfPatterns), 'l.shelf_code LIKE ?'));
             
-            // Build exclude condition
+            // Xây dựng exclude condition
             $excludeCondition = '';
             if (!empty($all_excluded_locations)) {
                 $excludePlaceholders = implode(',', array_fill(0, count($all_excluded_locations), '?'));
@@ -561,9 +561,9 @@ try {
     $preferredZone = $zoneMapping[$productType] ?? 'D'; // Default to zone D for unknown types
     
     // Bước 2: Lấy thông tin kích cỡ nếu có (cho logic kệ theo size)
-    // Priority: 1. From request input, 2. From database
+    // Priority: 1. From request input, 2. từ database
     if (!$product_size && $product_id) {
-        // Fallback: Try to get from database if not provided in request
+        // Fallback: Try to get từ database if not provided in request
         $sizeStmt = $pdo->prepare("SELECT size FROM product_variants WHERE product_id = ? LIMIT 1");
         $sizeStmt->execute([$product_id]);
         $sizeRow = $sizeStmt->fetch(PDO::FETCH_ASSOC);
@@ -603,7 +603,7 @@ try {
     if (empty($suggestions) && !empty($productType)) {
         error_log("🔍 STEP 2: Searching by product type: '{$productType}'");
         
-        // Build exclude condition
+        // Xây dựng exclude condition
         $excludeCondition = '';
         $excludeParams = [];
         if (!empty($all_excluded_locations)) {
@@ -651,7 +651,7 @@ try {
     // BƯỚC 3: Fallback - Tìm vị trí TRỐNG theo mã vị trí (legacy)
     // CHỈ tìm vị trí HOÀN TOÀN TRỐNG
     if (empty($suggestions) && empty($availableLocations)) {
-        // Build exclude condition
+        // Xây dựng exclude condition
         $excludeCondition = '';
         $excludeParams = [];
         if (!empty($all_excluded_locations)) {

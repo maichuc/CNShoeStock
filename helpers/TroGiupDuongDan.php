@@ -24,7 +24,7 @@ class PathHelper {
             return $filePath;
         }
         
-        // Convert absolute Windows path to relative web path
+        // Chuyển đổi absolute Windows path to relative web path
         // Example: C:\xampp\htdocs\cmix_warehouseTOI\uploads\products\image.jpg
         //       -> uploads/products/image.jpg
         
@@ -32,12 +32,12 @@ class PathHelper {
         $filePath = str_replace('\\', '/', $filePath);
         
         // Try to extract relative path from common patterns
-        // Pattern 1: Extract everything after project folder name
+        // Pattern 1: Trích xuất everything after project folder name
         if (preg_match('/cmix_warehouseTOI\/(.+)$/', $filePath, $matches)) {
             return $matches[1];
         }
         
-        // Pattern 2: Extract uploads/* or img/* pattern
+        // Pattern 2: Trích xuất uploads/* or img/* pattern
         if (preg_match('/(uploads\/.+|img\/.+)/', $filePath, $matches)) {
             return $matches[1];
         }
@@ -47,10 +47,10 @@ class PathHelper {
         if (!empty($documentRoot)) {
             $documentRoot = str_replace('\\', '/', $documentRoot);
             
-            // Remove document root from file path to get relative path
+            // Xóa document root từ file path to get relative path
             if (strpos($filePath, $documentRoot) === 0) {
                 $relativePath = substr($filePath, strlen($documentRoot));
-                // Remove leading slash if exists
+                // Xóa leading slash nếu tồn tại
                 $relativePath = ltrim($relativePath, '/');
                 return $relativePath;
             }
@@ -74,12 +74,12 @@ class PathHelper {
             return $relativeUrl;
         }
         
-        // Build full URL
+        // Xây dựng full URL
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'];
         $baseUrl = $protocol . '://' . $host;
         
-        // Get base path from REQUEST_URI
+        // Lấy base path from REQUEST_URI
         $scriptName = dirname($_SERVER['SCRIPT_NAME']);
         if ($scriptName !== '/') {
             $baseUrl .= $scriptName;

@@ -1,12 +1,12 @@
 <?php
 /**
  * AI Service - Gemini AI Analysis System
- * Sử dụng Google Gemini 1.5 Flash cho phân tích hình ảnh sản phẩm
+ * Sử dụng Google Gemini 2.5 Flash cho phân tích hình ảnh sản phẩm
  */
 
 class AIService {
     private $geminiApiKey;
-    private $geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    private $geminiUrl = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent';
     
     public function __construct() {
         $this->loadEnvironmentVariables();
@@ -39,7 +39,7 @@ class AIService {
             'gemini' => [
                 'status' => !empty($this->geminiApiKey) ? 'configured' : 'not_configured',
                 'api_key' => !empty($this->geminiApiKey),
-                'service' => 'Gemini 1.5 Flash'
+                'service' => 'Gemini 2.5 Flash'
             ]
         ];
     }
@@ -53,7 +53,7 @@ class AIService {
         }
         
         try {
-            // Encode image to base64
+            // Mã hóa image to base64
             $imageData = $this->encodeImage($imagePath);
             
             // Default prompt for shoe analysis
@@ -129,93 +129,6 @@ class AIService {
     }
     
     /**
-     * Hybrid analysis - giữ lại để tương thích backward, nhưng chỉ dùng Gemini
-     * @deprecated Sử dụng analyze() thay thế
-     */
-    public function analyzeHybrid($imagePath) {
-        return $this->analyze($imagePath);
-    }
-    
-    /**
-     * Batch analysis - phân tích nhiều ảnh
-     */
-    public function analyzeBatch($imagePaths) {
-        $results = [];
-        $totalStartTime = microtime(true);
-        
-        foreach ($imagePaths as $index => $imagePath) {
-            if (!file_exists($imagePath)) {
-                $results[] = [
-                    'success' => false,
-                    'error' => 'Image file not found',
-                    'image' => $imagePath
-                ];
-                continue;
-            }
-            
-            $result = $this->analyzeWithGemini($imagePath);
-            
-            $result['image'] = basename($imagePath);
-            $result['image_path'] = $imagePath;
-            $result['index'] = $index + 1;
-            
-            $results[] = $result;
-        }
-        
-        $totalTime = round((microtime(true) - $totalStartTime) * 1000); // ms
-        
-        // Calculate summary statistics
-        $summary = $this->calculateBatchSummary($results, $totalTime);
-        
-        return [
-            'success' => true,
-            'total_images' => count($imagePaths),
-            'results' => $results,
-            'summary' => $summary
-        ];
-    }
-    
-    /**
-     * Calculate batch summary statistics
-     */
-    private function calculateBatchSummary($results, $totalTime) {
-        $successCount = 0;
-        $totalConfidence = 0;
-        $brands = [];
-        $colors = [];
-        
-        foreach ($results as $result) {
-            if ($result['success'] ?? false) {
-                $successCount++;
-                $totalConfidence += $result['confidence'] ?? 0;
-                
-                if (!empty($result['brand'])) {
-                    $brands[] = $result['brand'];
-                }
-                
-                if (!empty($result['color'])) {
-                    $colors[] = $result['color'];
-                }
-                
-
-            }
-        }
-        
-        $totalImages = count($results);
-        
-        return [
-            'success_rate' => $totalImages > 0 ? round(($successCount / $totalImages) * 100, 1) : 0,
-            'average_confidence' => $successCount > 0 ? round($totalConfidence / $successCount, 1) : 0,
-            'total_processing_time_ms' => $totalTime,
-            'average_time_per_image_ms' => $totalImages > 0 ? round($totalTime / $totalImages) : 0,
-            'brands_detected' => array_unique($brands),
-            'colors_detected' => array_unique($colors),
-            'total_success' => $successCount,
-            'total_failed' => $totalImages - $successCount
-        ];
-    }
-    
-    /**
      * Parse AI response (JSON hoặc text)
      */
     private function parseAIResponse($content, $source) {
@@ -238,27 +151,27 @@ class AIService {
             'raw_response' => $content
         ];
         
-        // Extract brand
+        // Trích xuất brand
         if (preg_match('/brand[:\s]+([A-Za-z\s]+)/i', $content, $match)) {
             $result['brand'] = trim($match[1]);
         }
         
-        // Extract model
+        // Trích xuất model
         if (preg_match('/model[:\s]+([A-Za-z0-9\s\-]+)/i', $content, $match)) {
             $result['model'] = trim($match[1]);
         }
         
-        // Extract color
+        // Trích xuất color
         if (preg_match('/color[:\s]+([A-Za-zÀ-ỹ\s]+)/i', $content, $match)) {
             $result['color'] = trim($match[1]);
         }
         
-        // Extract size
+        // Trích xuất size
         if (preg_match('/size[:\s]+(\d+)/i', $content, $match)) {
             $result['size'] = trim($match[1]);
         }
         
-        // Extract confidence
+        // Trích xuất confidence
         if (preg_match('/confidence[:\s]+([\d\.]+)/i', $content, $match)) {
             $result['confidence'] = floatval($match[1]);
         } else {

@@ -24,9 +24,9 @@ class User {
         $this->conn = $db;
     }
 
-    // Create new user
+    // Tạo new user
     public function create() {
-        // Generate employee code if not set
+        // Tạo employee code if not set
         if (empty($this->employee_code)) {
             $this->employee_code = $this->generateEmployeeCode();
         }
@@ -80,7 +80,7 @@ class User {
         return $errors;
     }
 
-    // Login using DB schema fields
+    // Đăng nhập using DB schema fields
     public function login($username, $password) {
         $query = "SELECT user_id, username, email, password_hash, full_name, phone, role, status, last_login, warehouse_id
                   FROM {$this->table_name}

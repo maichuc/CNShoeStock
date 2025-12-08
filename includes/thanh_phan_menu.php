@@ -110,9 +110,9 @@ function renderStandardSidebar($currentPage = '') {
                     <i class="fas fa-fw fa-truck-loading"></i>
                     <span>Xuất kho</span>
                 </a>
-                <div id="collapseExports" class="collapse ' . $collapseShow(['export_management']) . '" aria-labelledby="headingExports" data-parent="#accordionSidebar">
+                <div id="collapseExports" class="collapse ' . $collapseShow(['quan_ly_xuat_kho']) . '" aria-labelledby="headingExports" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item ' . ($currentPage == 'export_management' ? 'active' : '') . '" href="quan_ly_xuat_kho.php">
+                        <a class="collapse-item ' . ($currentPage == 'quan_ly_xuat_kho' ? 'active' : '') . '" href="quan_ly_xuat_kho.php">
                             <i class="fas fa-qrcode mr-1"></i> Xử lý đơn xuất kho
                         </a>
                     </div>

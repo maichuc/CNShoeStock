@@ -23,7 +23,7 @@ require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/classes/QuanLyNhanVien.php';
 require_once __DIR__ . '/classes/DichVuEmail.php';
 
-// Check authentication
+// Kiểm tra authentication
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
@@ -35,7 +35,7 @@ $pdo = $database->getConnection();
 $employeeManager = new EmployeeManager($pdo);
 $emailService = new EmailService($pdo);
 
-// Get action from POST body (JSON) or GET parameter or POST form data
+// Lấy action from POST body (JSON) or GET parameter or POST form data
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);
 
@@ -46,7 +46,7 @@ if (empty($data)) {
 
 $action = $data['action'] ?? $_GET['action'] ?? '';
 
-// Debug logging (remove in production)
+// Gỡ lỗi logging (remove in production)
 if (empty($action)) {
     error_log("API Debug - No action found.");
     error_log("API Debug - Input: " . $input);
@@ -71,7 +71,7 @@ try {
                 exit;
             }
             
-            // Check if username exists
+            // Kiểm tra if username exists
             $stmt = $pdo->prepare("SELECT user_id FROM users WHERE username = :username");
             $stmt->execute([':username' => $username]);
             $exists = $stmt->rowCount() > 0;
@@ -115,7 +115,7 @@ try {
                 exit;
             }
             
-            // Get data from JSON body (not from $data variable which might be used for action)
+            // Lấy data từ JSON body (not from $data variable which might be used for action)
             $requestData = $data ?? [];
             $requestData['warehouse_id'] = $requestData['warehouse_id'] ?? $warehouseId;
             
@@ -144,7 +144,7 @@ try {
                 exit;
             }
             
-            // Get warehouse_id from POST
+            // Lấy warehouse_id from POST
             $importWarehouseId = $_POST['warehouse_id'] ?? $warehouseId;
             
             $uploadDir = __DIR__ . '/uploads/employee_imports/';
@@ -169,7 +169,7 @@ try {
         // ==================== DANH SÁCH NHÂN VIÊN ====================
         // ==================== DANH SÁCH NHÂN VIÊN ====================
         case 'list':
-            // Get data from POST JSON body
+            // Lấy data from POST JSON body
             $requestData = $data ?? [];
             $page = $requestData['page'] ?? $_GET['page'] ?? 1;
             $limit = $requestData['limit'] ?? $_GET['limit'] ?? 1000;
@@ -224,7 +224,7 @@ try {
                 $params[':warehouse_id'] = $warehouseId;
             }
             
-            // Search
+            // Tìm kiếm
             if ($search) {
                 $sql .= " AND (u.full_name LIKE :search OR u.email LIKE :search OR u.username LIKE :search OR u.employee_code LIKE :search)";
                 $params[':search'] = "%$search%";
@@ -255,7 +255,7 @@ try {
             $countStmt->execute($countParams);
             $total = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
             
-            // Get data (no LIMIT for DataTables - let it handle pagination client-side)
+            // Lấy data (no LIMIT for DataTables - let it handle pagination client-side)
             $stmt = $pdo->prepare($sql);
             foreach ($params as $key => $value) {
                 $stmt->bindValue($key, $value);
@@ -264,7 +264,7 @@ try {
             
             $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Remove password_hash from response
+            // Xóa password_hash from response
             foreach ($employees as &$emp) {
                 unset($emp['password_hash']);
             }
@@ -407,7 +407,7 @@ try {
             $newPassword = $data['new_password'] ?? '';
             $confirmPassword = $data['confirm_password'] ?? '';
             
-            // Validate inputs
+            // Kiểm tra inputs
             if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
                 echo json_encode(['success' => false, 'message' => 'Vui lòng điền đầy đủ thông tin']);
                 exit;
@@ -418,7 +418,7 @@ try {
                 exit;
             }
             
-            // Validate password policy
+            // Kiểm tra password policy
             if (strlen($newPassword) < 8) {
                 echo json_encode(['success' => false, 'message' => 'Mật khẩu phải có ít nhất 8 ký tự']);
                 exit;
@@ -429,24 +429,24 @@ try {
                 exit;
             }
             
-            // Get current user
+            // Lấy current user
             $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = :id");
             $stmt->execute([':id' => $userId]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Verify current password
+            // Xác minh current password
             if (!password_verify($currentPassword, $user['password_hash'])) {
                 echo json_encode(['success' => false, 'message' => 'Mật khẩu hiện tại không chính xác']);
                 exit;
             }
             
-            // Check new password != old password
+            // Kiểm tra new password != old password
             if (password_verify($newPassword, $user['password_hash'])) {
                 echo json_encode(['success' => false, 'message' => 'Mật khẩu mới phải khác mật khẩu cũ']);
                 exit;
             }
             
-            // Update password
+            // Cập nhật password
             $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("
                 UPDATE users 
@@ -461,7 +461,7 @@ try {
                 ':id' => $userId
             ]);
             
-            // Send email notification
+            // Gửi email notification
             $emailService->sendPasswordChangedEmail($user['email'], $user['full_name'], 'manual');
             
             echo json_encode(['success' => true, 'message' => 'Đổi mật khẩu thành công']);
@@ -474,7 +474,7 @@ try {
             $newPassword = $data['new_password'] ?? '';
             $confirmPassword = $data['confirm_password'] ?? '';
             
-            // Validate inputs
+            // Kiểm tra inputs
             if (empty($oldPassword) || empty($newPassword) || empty($confirmPassword)) {
                 echo json_encode(['success' => false, 'message' => 'Vui lòng điền đầy đủ thông tin']);
                 exit;
@@ -485,7 +485,7 @@ try {
                 exit;
             }
             
-            // Validate password policy (UC-NV-02 requirements)
+            // Kiểm tra password policy (UC-NV-02 requirements)
             if (strlen($newPassword) < 8) {
                 echo json_encode(['success' => false, 'message' => 'Mật khẩu phải có ít nhất 8 ký tự']);
                 exit;
@@ -511,7 +511,7 @@ try {
                 exit;
             }
             
-            // Get current user
+            // Lấy current user
             $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = :id");
             $stmt->execute([':id' => $userId]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -521,7 +521,7 @@ try {
                 exit;
             }
             
-            // Verify old password
+            // Xác minh old password
             if (!password_verify($oldPassword, $user['password_hash'])) {
                 // Increment failed login attempts
                 $stmt = $pdo->prepare("
@@ -535,13 +535,13 @@ try {
                 exit;
             }
             
-            // Check new password != old password
+            // Kiểm tra new password != old password
             if (password_verify($newPassword, $user['password_hash'])) {
                 echo json_encode(['success' => false, 'message' => 'Mật khẩu mới phải khác mật khẩu hiện tại']);
                 exit;
             }
             
-            // UC-NV-05: Check password history - prevent reusing last 3 passwords
+            // UC-NV-05: Kiểm tra password history - prevent reusing last 3 passwords
             $stmt = $pdo->prepare("
                 SELECT password_hash 
                 FROM password_history 
@@ -562,7 +562,7 @@ try {
                 }
             }
             
-            // Save current password to history before updating
+            // Lưu current password to history before updating
             $stmt = $pdo->prepare("
                 INSERT INTO password_history (user_id, password_hash, changed_at) 
                 VALUES (:user_id, :password_hash, NOW())
@@ -572,7 +572,7 @@ try {
                 ':password_hash' => $user['password_hash']
             ]);
             
-            // Update password, reset must_change_password, and SET status='active'
+            // Cập nhật password, reset must_change_password, and SET status='active'
             $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("
                 UPDATE users 
@@ -591,10 +591,10 @@ try {
             ]);
             
             if ($success) {
-                // Send email notification
+                // Gửi email notification
                 $emailService->sendPasswordChangedEmail($user['email'], $user['full_name'], 'first_login');
                 
-                // Log activity
+                // Ghi nhật ký activity
                 $stmt = $pdo->prepare("
                     INSERT INTO employee_activity_logs 
                     (user_id, action, details, performed_by, created_at) 
@@ -631,7 +631,7 @@ try {
                 exit;
             }
             
-            // Get target user info
+            // Lấy target user info
             $stmt = $pdo->prepare("SELECT * FROM users WHERE user_id = :id");
             $stmt->execute([':id' => $targetUserId]);
             $targetUser = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -648,11 +648,11 @@ try {
                 exit;
             }
             
-            // Generate new temporary password
+            // Tạo new temporary password
             $newPassword = bin2hex(random_bytes(6)); // 12 characters
             $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
             
-            // Save current password to history before updating
+            // Lưu current password to history before updating
             $stmt = $pdo->prepare("
                 INSERT INTO password_history (user_id, password_hash, changed_at) 
                 VALUES (:user_id, :password_hash, NOW())
@@ -662,7 +662,7 @@ try {
                 ':password_hash' => $targetUser['password_hash']
             ]);
             
-            // Update password and force change on next login
+            // Cập nhật password and force change on next login
             $stmt = $pdo->prepare("
                 UPDATE users 
                 SET password_hash = :password, 
@@ -679,7 +679,7 @@ try {
             ]);
             
             if ($success) {
-                // Send email with new password
+                // Gửi email with new password
                 $emailService->sendPasswordResetByAdminEmail(
                     $targetUser['email'], 
                     $targetUser['full_name'], 
@@ -687,7 +687,7 @@ try {
                     $newPassword
                 );
                 
-                // Log activity
+                // Ghi nhật ký activity
                 $stmt = $pdo->prepare("
                     INSERT INTO employee_activity_logs 
                     (user_id, action, details, performed_by, created_at) 
@@ -735,7 +735,7 @@ try {
                 exit;
             }
             
-            // Generate new temp password
+            // Tạo new temp password
             $newTempPassword = bin2hex(random_bytes(6));
             $newPasswordHash = password_hash($newTempPassword, PASSWORD_DEFAULT);
             

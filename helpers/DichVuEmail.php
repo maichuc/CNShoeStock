@@ -26,7 +26,7 @@ class EmailService {
             return;
         }
         
-        // Load environment variables from .env file
+        // Tải environment variables from .env file
         $this->loadEnvironmentVariables();
         
         $this->mail = new \PHPMailer\PHPMailer\PHPMailer(true);
@@ -113,7 +113,7 @@ class EmailService {
         }
         
         try {
-            // Reset recipients for each send
+            // Đặt lại recipients for each send
             $this->mail->clearAddresses();
             $this->mail->clearAllRecipients();
             
@@ -137,10 +137,10 @@ class EmailService {
             $this->mail->Body = $emailBody;
             $this->mail->AltBody = $this->generatePlainTextEmail($adminName, $username, $password, $warehouseName, $loginUrl);
             
-            // Send email
+            // Gửi email
             $sendResult = $this->mail->send();
             
-            // Log to database if pdo is available
+            // Ghi nhật ký vào database if pdo is available
             if ($this->pdo) {
                 $this->logEmailToDatabase($adminEmail, $adminName, 'welcome_employee', $sendResult ? 'sent' : 'failed');
             }
@@ -154,7 +154,7 @@ class EmailService {
             error_log("Email sending failed: " . $this->mail->ErrorInfo);
             error_log("Exception: " . $e->getMessage());
             
-            // Log failure to database if pdo is available
+            // Ghi nhật ký failure vào database if pdo is available
             if ($this->pdo) {
                 $this->logEmailToDatabase($adminEmail, $adminName, 'welcome_employee', 'failed', $e->getMessage());
             }
@@ -167,7 +167,7 @@ class EmailService {
     }
     
     private function getLoginUrl() {
-        // Check if running from web context
+        // Kiểm tra if running from web context
         if (!isset($_SERVER['HTTP_HOST'])) {
             // Running from CLI or background - use default URL
             return 'http://localhost/cmix_warehouse23_11/login.html';
