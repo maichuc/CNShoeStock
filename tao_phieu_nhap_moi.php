@@ -17,7 +17,7 @@ if (!isset($_SESSION['user_id'])) {
 $database = new Database();
 $pdo = $database->getConnection();
 
-// Load environment variables from helper
+// Tải environment variables from helper
 loadEnvironmentVariables();
 
 $currentUser = $_SESSION['user_id'];
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $action = $_POST['action'] ?? '';
     
-    // API: Get or allocate location for product variant (reuse old location if exists)
+    // API: Lấy or allocate location for product variant (reuse old location nếu tồn tại)
     if ($action === 'get_or_allocate_location') {
         try {
             $warehouseId = $_POST['warehouse_id'] ?? $userWarehouseId;
@@ -126,10 +126,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $excludedLocations = array_filter(array_map('trim', $excludedLocations));
             }
             
-            // Log input parameters for debugging
+            // Ghi nhật ký input parameters for debugging
             error_log("get_or_allocate_location called with: warehouse_id=$warehouseId, variant_id=$variantId, sku=$sku, size=$size, type=$productType, excluded=" . json_encode($excludedLocations));
             
-            // Validate warehouse ID
+            // Kiểm tra warehouse ID
             if (!$warehouseId) {
                 throw new Exception('Warehouse ID không hợp lệ');
             }
@@ -177,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Chỉ gợi ý vị trí đang hoạt động (is_active = 1)
             // LOẠI TRỪ các vị trí đã dùng trong phiếu hiện tại (excluded_locations)
             if ($variantId) {
-                // Build exclusion condition
+                // Xây dựng exclusion condition
                 $excludeCondition = '';
                 $excludeParams = [];
                 if (!empty($allExcludedLocations)) {
@@ -240,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // BƯỚC 2: Nếu chưa có vị trí cũ, tìm vị trí TRỐNG cùng kệ với SKU cơ sở
             // Định nghĩa: SNEAKER-K1-T1-P1 (Khu vực SNEAKER, Kệ K1, Tầng T1, Vị trí P1)
             if (!$locationCode && $sku) {
-                // Extract base SKU (remove size part)
+                // Trích xuất base SKU (remove size part)
                 $parts = explode('-', $sku);
                 if (count($parts) > 1) {
                     array_pop($parts); // Remove size
@@ -298,7 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         $shelfConditions = implode(' OR ', array_fill(0, count($shelfPatterns), 'l.shelf_code LIKE ?'));
                         
-                        // Build type condition if productType is provided
+                        // Xây dựng type condition if productType is provided
                         $typeCondition = '';
                         $typeParams = [];
                         if (!empty($productType)) {
@@ -306,7 +306,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $typeParams = [$productType];
                         }
                         
-                        // Build exclusion condition
+                        // Xây dựng exclusion condition
                         $excludeCondition = '';
                         $excludeParams = [];
                         if (!empty($allExcludedLocations)) {
@@ -345,7 +345,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // BƯỚC 3: Nếu vẫn chưa có, tìm vị trí TRỐNG bất kỳ (theo type nếu có)
             if (!$locationCode) {
-                // Build type condition if productType is provided
+                // Xây dựng type condition if productType is provided
                 $typeCondition = '';
                 $typeParams = [];
                 if (!empty($productType)) {
@@ -353,7 +353,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $typeParams = [$productType];
                 }
                 
-                // Build exclusion condition
+                // Xây dựng exclusion condition
                 $excludeCondition = '';
                 $excludeParams = [];
                 if (!empty($allExcludedLocations)) {
@@ -416,12 +416,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
     
-    // API: Get available locations for smart allocation
+    // API: Lấy available locations for smart allocation
     if ($action === 'get_available_locations') {
         try {
             $warehouseId = $_POST['warehouse_id'] ?? $userWarehouseId;
             
-            // Get all locations for this warehouse
+            // Lấy all locations cho kho này
             $stmt = $pdo->prepare("
                 SELECT location_id, shelf_code, description 
                 FROM locations 
@@ -431,7 +431,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$warehouseId]);
             $allLocations = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-            // Get truly empty locations (no inventory at all)
+            // Lấy truly empty locations (no inventory at all)
             $stmt = $pdo->prepare("
                 SELECT l.location_id, l.shelf_code, l.description
                 FROM locations l
@@ -470,7 +470,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $productName = $_POST['product_name'] ?? '';
             $size = $_POST['size'] ?? '';
             
-            // Get next available location
+            // Lấy next available location
             $stmt = $pdo->prepare("
                 SELECT l.shelf_code, l.description
                 FROM locations l
@@ -500,7 +500,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $lastLocation = $stmt->fetch(PDO::FETCH_ASSOC);
                 
                 if ($lastLocation) {
-                    // Generate next location code
+                    // Tạo next location code
                     $lastCode = $lastLocation['shelf_code'];
                     preg_match('/([A-Z]+)-(\d+)-(\d+)/', $lastCode, $matches);
                     if ($matches) {
@@ -509,7 +509,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $col = intval($matches[3]) + 1;
                         $newCode = sprintf("%s-%d-%02d", $zone, $row, $col);
                         
-                        // Create new location
+                        // Tạo new location
                         $stmt = $pdo->prepare("
                             INSERT INTO locations (warehouse_id, shelf_code, description)
                             VALUES (?, ?, ?)
@@ -701,15 +701,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ob_end_clean();
         }
         
-        // Start fresh output buffering
+        // Bắt đầu fresh output buffering
         ob_start();
         
-        // Set error reporting to log errors but not display them
+        // Đặt error reporting to log errors but not display them
         error_reporting(E_ALL);
         ini_set('display_errors', 0);
         ini_set('log_errors', 1);
         
-        // Set default response
+        // Đặt default response
         $response = ['success' => false, 'message' => 'Unknown error occurred'];
         
         try {
@@ -792,7 +792,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response = ['success' => false, 'message' => 'Product ID không được cung cấp'];
         } else {
             try {
-                // Get product basic info
+                // Lấy product basic info
                 $stmt = $pdo->prepare("
                     SELECT 
                         p.product_id,
@@ -819,13 +819,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$productId]);
                 $product = $stmt->fetch(PDO::FETCH_ASSOC);
                 
-                // Debug: Log fetched product data
+                // Gỡ lỗi: Ghi nhật ký fetched product data
                 error_log("Fetched product data: " . json_encode($product));
                 
                 if (!$product) {
                     $response = ['success' => false, 'message' => 'Không tìm thấy sản phẩm'];
                 } else {
-                    // Get all images for this product
+                    // Lấy all images cho sản phẩm này
                     $imageStmt = $pdo->prepare("
                         SELECT file_path, is_primary 
                         FROM product_images 
@@ -835,7 +835,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $imageStmt->execute([$productId]);
                     $images = $imageStmt->fetchAll(PDO::FETCH_ASSOC);
                     
-                    // Format images for display
+                    // Định dạng images để hiển thị
                     $formattedImages = [];
                     foreach ($images as $img) {
                         $formattedImages[] = [
@@ -844,7 +844,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ];
                     }
                     
-                    // Get sizes and quantities
+                    // Lấy sizes and quantities
                     $sizeStmt = $pdo->prepare("
                         SELECT DISTINCT
                             pv.size,
@@ -859,19 +859,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $sizeStmt->execute([$productId]);
                     $sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
                     
-                    // Add default min_quantity for compatibility
+                    // Thêm default min_quantity for compatibility
                     foreach ($sizes as &$size) {
                         $size['min_quantity'] = 10; // Default value
                     }
                     unset($size); // Break reference
                     
-                    // Calculate base SKU from first variant SKU
+                    // Tính toán base SKU from first variant SKU
                     $baseSku = '';
                     if (!empty($sizes) && !empty($sizes[0]['sku'])) {
                         $firstSku = $sizes[0]['sku'];
                         $firstSize = $sizes[0]['size'];
                         
-                        // Remove size from SKU to get base SKU
+                        // Xóa size from SKU to get base SKU
                         // Pattern: BASE-SIZE or BASE-SIZE-TIMESTAMP
                         if (preg_match('/^(.+)-' . preg_quote($firstSize, '/') . '(?:-\d+)?$/', $firstSku, $matches)) {
                             $baseSku = $matches[1];
@@ -916,7 +916,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Clean any previous output
             ob_clean();
             
-            // Validate user warehouse_id
+            // Kiểm tra user warehouse_id
             if (empty($userWarehouseId)) {
                 error_log("ERROR: userWarehouseId is empty in save_product action");
                 $response = ['success' => false, 'message' => 'Lỗi: Không xác định được warehouse của user. Vui lòng đăng nhập lại.'];
@@ -925,7 +925,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             }
             
-            // Validate warehouse_id exists in warehouses table
+            // Kiểm tra warehouse_id exists in warehouses table
             try {
                 $stmt = $pdo->prepare("SELECT warehouse_id FROM warehouses WHERE warehouse_id = ?");
                 $stmt->execute([$userWarehouseId]);
@@ -946,11 +946,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             error_log("Save product action started with userWarehouseId: " . $userWarehouseId);
             
-            // Check if this is update mode
+            // Kiểm tra if this is update mode
             $isUpdateMode = isset($_POST['is_update_mode']) && $_POST['is_update_mode'] === 'true';
             $updateProductId = $_POST['update_product_id'] ?? null;
             
-            // Debug: Log received data
+            // Gỡ lỗi: Ghi nhật ký received data
             error_log("Save product action started - Update mode: " . ($isUpdateMode ? 'true' : 'false'));
             error_log("DEBUG: is_update_mode POST value: " . ($_POST['is_update_mode'] ?? 'NOT_SET'));
             error_log("DEBUG: update_product_id POST value: " . ($_POST['update_product_id'] ?? 'NOT_SET'));
@@ -977,7 +977,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             error_log("Parsed data - Product: $productName, SKU: $sku, Category: $categoryId");
             
-            // Initialize validation flag
+            // Khởi tạo validation flag
             $validationError = null;
             
             // Category validation removed - using type field instead
@@ -1006,7 +1006,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("Existing sizes data: " . json_encode($existingSizes));
             error_log("Existing min quantities data: " . json_encode($existingMinQuantities));
             
-            // Validate required fields
+            // Kiểm tra required fields
             if ($validationError) {
                 error_log("Skipping processing due to category validation error: " . $validationError);
                 $response = ['success' => false, 'message' => $validationError];
@@ -1014,7 +1014,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // For update mode, if fields are empty, try to get from existing product
                 if ($isUpdateMode && $updateProductId) {
                     error_log("Update mode: Missing product name or SKU, will try to use existing data");
-                    // Continue processing - we'll use existing data
+                    // Tiếp tục processing - we'll use existing data
                 } else {
                     error_log("Validation failed: Missing product name or SKU");
                     $response = ['success' => false, 'message' => 'Vui lòng điền đầy đủ thông tin bắt buộc (Tên sản phẩm và SKU cơ sở)'];
@@ -1085,16 +1085,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $pdo->beginTransaction();
                         
                         // Thêm sản phẩm chính
-                        // CRITICAL: Validate foreign key references before database insertion
+                        // CRITICAL: Kiểm tra foreign key references before database insertion
                         error_log("Pre-insertion validation - category_id: '$categoryId', userWarehouseId: '$userWarehouseId'");
                         
-                        // Validate category_id is not empty/null (required foreign key)
+                        // Kiểm tra category_id is not empty/null (required foreign key)
                         if (empty($categoryId) || $categoryId === '') {
                             error_log("VALIDATION FAILED: category_id is empty - cannot insert product");
                             throw new Exception("Vui lòng chọn danh mục sản phẩm. Category ID không được để trống.");
                         }
                         
-                        // Validate userWarehouseId is not empty/null (required foreign key)
+                        // Kiểm tra userWarehouseId is not empty/null (required foreign key)
                         if (empty($userWarehouseId) || $userWarehouseId === '') {
                             error_log("VALIDATION FAILED: userWarehouseId is empty - cannot insert product");
                             throw new Exception("Lỗi phiên đăng nhập: Warehouse ID không hợp lệ. Vui lòng đăng nhập lại.");
@@ -1102,7 +1102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         // Category validation removed - using type field instead
                         
-                        // Validate warehouse exists in database  
+                        // Kiểm tra warehouse exists trong database
                         $warehouseCheckStmt = $pdo->prepare("SELECT warehouse_id FROM warehouses WHERE warehouse_id = ?");
                         $warehouseCheckStmt->execute([$userWarehouseId]);
                         if (!$warehouseCheckStmt->fetch()) {
@@ -1137,7 +1137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         $createdSizes = [];
                         
-                        // Get existing sizes if in update mode
+                        // Lấy existing sizes if in update mode
                         $existingSizes = [];
                         if ($isUpdateMode && $updateProductId) {
                             $existingStmt = $pdo->prepare("SELECT DISTINCT size FROM product_variants WHERE product_id = ?");
@@ -1146,11 +1146,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             error_log("Existing sizes: " . json_encode($existingSizes));
                         }
                         
-                        // Process sizes: skip existing ones, only create new ones
+                        // Xử lý sizes: skip existing ones, only create new ones
                         foreach ($validSizes as $index => $sizeData) {
                             $currentSize = $sizeData['size'];
                             
-                            // Skip if this size already exists in update mode
+                            // Bỏ qua if this size already exists in update mode
                             if ($isUpdateMode && in_array($currentSize, $existingSizes)) {
                                 error_log("Skipping existing size: " . $currentSize);
                                 continue;
@@ -1173,7 +1173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             // Tạo bản ghi trong inventory với quantity = 0 và min_stock_level
                             if ($userWarehouseId) {
                                 try {
-                                    // Validate warehouse exists before creating inventory
+                                    // Kiểm tra warehouse exists before creating inventory
                                     $warehouseCheck = $pdo->prepare("SELECT warehouse_id FROM warehouses WHERE warehouse_id = ?");
                                     $warehouseCheck->execute([$userWarehouseId]);
                                     if (!$warehouseCheck->fetch()) {
@@ -1181,7 +1181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         throw new Exception("Warehouse ID không hợp lệ: $userWarehouseId");
                                     }
                                     
-                                    // Validate variant exists before creating inventory
+                                    // Kiểm tra variant exists before creating inventory
                                     $variantCheck = $pdo->prepare("SELECT variant_id FROM product_variants WHERE variant_id = ?");
                                     $variantCheck->execute([$variantId]);
                                     if (!$variantCheck->fetch()) {
@@ -1189,18 +1189,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         throw new Exception("Product variant ID không hợp lệ: $variantId");
                                     }
                                     
-                                    // Create inventory record with proper foreign key validation
+                                    // Tạo inventory record with proper foreign key validation
                                     $stmt = $pdo->prepare("INSERT INTO inventory (variant_id, warehouse_id, quantity, location_id) VALUES (?, ?, 0, NULL)");
                                     $stmt->execute([$variantId, $userWarehouseId]);
                                     error_log("Successfully created inventory record for variant $variantId in warehouse $userWarehouseId");
                                     
                                 } catch (Exception $e) {
-                                    // Log detailed error information for foreign key constraint violations
+                                    // Ghi nhật ký detailed error information for foreign key constraint violations
                                     error_log("INVENTORY CREATION ERROR: " . $e->getMessage());
                                     error_log("Error code: " . $e->getCode());
                                     error_log("Variant ID: $variantId, Warehouse ID: $userWarehouseId");
                                     
-                                    // Check if this is a foreign key constraint violation
+                                    // Kiểm tra if this is a foreign key constraint violation
                                     if (strpos($e->getMessage(), '1452') !== false || strpos($e->getMessage(), 'foreign key constraint fails') !== false) {
                                         error_log("FOREIGN KEY CONSTRAINT VIOLATION detected in inventory creation");
                                         // Don't skip this error - it indicates a serious data integrity issue
@@ -1236,7 +1236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                         }
                         
-                        // Log audit
+                        // Ghi nhật ký audit
                         $auditLogger = new AuditLogger($pdo);
                         $auditLogger->log($currentUser, 'create_product_catalog', 'products', $productId, null, [
                             'product_name' => $productName,
@@ -1291,13 +1291,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response = ['success' => false, 'message' => 'Lỗi không xác định - không có response'];
         }
         
-        // Check for empty message in failed response
+        // Kiểm tra for empty message in failed response
         if (isset($response['success']) && $response['success'] === false && empty($response['message'])) {
             error_log("Warning: Response has success=false but empty message");
             $response['message'] = 'Đã xảy ra lỗi không xác định trong quá trình xử lý';
         }
         
-        // Debug: Log response before sending
+        // Gỡ lỗi: Ghi nhật ký response before sending
         error_log("Final response being sent: " . json_encode($response));
         
         header('Content-Type: application/json');
@@ -1305,7 +1305,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
     
-    // Get available sizes for a product
+    // Lấy available sizes for a product
     if ($action === 'get_available_sizes') {
         $productId = $_POST['product_id'] ?? '';
         
@@ -1377,7 +1377,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
     
-    // Get product ID by SKU
+    // Lấy product ID by SKU
     if ($action === 'get_product_id_by_sku') {
         $sku = $_POST['sku'] ?? '';
         
@@ -1423,7 +1423,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
     
-    // Save product and get variants (for adding to existing receipt)
+    // Lưu product and get variants (for adding to existing receipt)
     if ($action === 'save_product_get_variants') {
         $productData = json_decode($_POST['product_data'] ?? '{}', true);
         $warehouseId = $_POST['warehouse_id'] ?? $userWarehouseId;
@@ -1435,7 +1435,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $variants = [];
             
-            // Process each product
+            // Xử lý each product
             if (!empty($productData['products'])) {
                 foreach ($productData['products'] as $product) {
                     error_log("Processing product: " . json_encode($product));
@@ -1443,7 +1443,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     foreach ($product['sizes'] as $size) {
                         error_log("Processing size: " . json_encode($size));
                         
-                        // Get variant_id based on product_id and size
+                        // Lấy variant_id based on product_id and size
                         $stmtVariant = $pdo->prepare("
                             SELECT variant_id FROM product_variants 
                             WHERE product_id = ? AND size = ? LIMIT 1
@@ -1485,7 +1485,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
     
-    // Get variant_id by product_id and size (for adding to existing receipt)
+    // Lấy variant_id by product_id and size (for adding to existing receipt)
     if ($action === 'get_variant_id') {
         $productId = $_POST['product_id'] ?? null;
         $size = $_POST['size'] ?? '';
@@ -1549,14 +1549,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
     
-    // Save receipt draft (status: draft)
+    // Lưu receipt draft (status: draft)
     if ($action === 'save_receipt_draft') {
         $receiptData = json_decode($_POST['receipt_data'] ?? '{}', true);
         $warehouseId = $_POST['warehouse_id'] ?? $userWarehouseId;
         $supplierId = $_POST['supplier_id'] ?? null;
         $receiptNote = $_POST['receipt_note'] ?? '';
         
-        // Debug logging
+        // Gỡ lỗi logging
         error_log("=== SAVE RECEIPT DRAFT DEBUG ===");
         error_log("Supplier ID: " . $supplierId);
         error_log("Warehouse ID: " . $warehouseId);
@@ -1585,7 +1585,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $itemsInserted = 0;
             
-            // Insert receipt items (products with storage location)
+            // Thêm receipt items (products with storage location)
             if (!empty($receiptData['products'])) {
                 $stmtDetail = $pdo->prepare("
                     INSERT INTO stock_receipt_items 
@@ -1599,7 +1599,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     foreach ($product['sizes'] as $size) {
                         error_log("Processing size: " . json_encode($size));
                         
-                        // Get variant_id based on product_id and size
+                        // Lấy variant_id based on product_id and size
                         $stmtVariant = $pdo->prepare("
                             SELECT variant_id FROM product_variants 
                             WHERE product_id = ? AND size = ? LIMIT 1
@@ -1668,7 +1668,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
             
-            // Get draft data
+            // Lấy draft data
             $stmt = $pdo->prepare("SELECT * FROM stock_receipts WHERE receipt_id = ? AND status = 'draft'");
             $stmt->execute([$draftId]);
             $draft = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -1677,7 +1677,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Không tìm thấy nháp phiếu nhập hàng');
             }
             
-            // Extract JSON data from note
+            // Trích xuất JSON data from note
             $noteLines = explode("\n", $draft['note']);
             $jsonData = null;
             $capturing = false;
@@ -1697,7 +1697,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $receiptData = json_decode($jsonString, true);
                 
                 if ($receiptData && isset($receiptData['products'])) {
-                    // Update receipt status to confirmed
+                    // Cập nhật receipt status to confirmed
                     $stmt = $pdo->prepare("
                         UPDATE stock_receipts 
                         SET status = 'confirmed', note = ? 
@@ -1710,7 +1710,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $totalProducts = count($receiptData['products']);
                     $totalQuantity = 0;
                     
-                    // Process products (this would normally create stock receipt details)
+                    // Xử lý products (this would normally create stock receipt details)
                     foreach ($receiptData['products'] as $product) {
                         foreach ($product['sizes'] as $size) {
                             $totalQuantity += $size['import_quantity'];
@@ -1749,7 +1749,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
             
-            // Get input data
+            // Lấy input data
             $productId = $_POST['product_id'] ?? '';
             $receiptItems = $_POST['receipt_items'] ?? [];
             $totalQuantity = $_POST['total_quantity'] ?? 0;
@@ -1761,7 +1761,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Thiếu thông tin sản phẩm hoặc items');
             }
             
-            // Create stock receipt record
+            // Tạo stock receipt record
             $receiptNumber = 'SR-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
             
             $stmt = $pdo->prepare("
@@ -1771,7 +1771,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$receiptNumber, $supplierId, $totalQuantity, $totalValue, $receiptNotes, $currentUser, $userWarehouseId]);
             $receiptId = $pdo->lastInsertId();
             
-            // Process each receipt item
+            // Xử lý each receipt item
             foreach ($receiptItems as $item) {
                 $variantId = $item['variant_id'] ?? null;
                 $quantity = intval($item['quantity']);
@@ -1779,16 +1779,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 if ($quantity <= 0 || $price <= 0) continue;
                 
-                // Insert stock receipt item
+                // Thêm stock receipt item
                 $stmt = $pdo->prepare("
                     INSERT INTO stock_receipt_items (receipt_id, product_id, variant_id, quantity, unit_price, total_price) 
                     VALUES (?, ?, ?, ?, ?, ?)
                 ");
                 $stmt->execute([$receiptId, $productId, $variantId, $quantity, $price, ($quantity * $price)]);
                 
-                // Update inventory
+                // Cập nhật inventory
                 if ($variantId) {
-                    // Update variant quantity
+                    // Cập nhật variant quantity
                     $stmt = $pdo->prepare("
                         UPDATE product_variants 
                         SET current_quantity = current_quantity + ?, updated_at = NOW() 
@@ -1796,7 +1796,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ");
                     $stmt->execute([$quantity, $variantId]);
                 } else {
-                    // Update product quantity (if no variants)
+                    // Cập nhật product quantity (if no variants)
                     $stmt = $pdo->prepare("
                         UPDATE products 
                         SET stock_quantity = COALESCE(stock_quantity, 0) + ?, updated_at = NOW() 
@@ -1805,7 +1805,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$quantity, $productId]);
                 }
                 
-                // Create inventory transaction record
+                // Tạo inventory transaction record
                 $stmt = $pdo->prepare("
                     INSERT INTO inventory_transactions (product_id, variant_id, transaction_type, quantity, reference_type, reference_id, notes, created_by) 
                     VALUES (?, ?, 'stock_in', ?, 'stock_receipt', ?, ?, ?)
@@ -1813,7 +1813,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$productId, $variantId, $quantity, $receiptId, "Stock receipt: {$receiptNumber}", $currentUser]);
             }
             
-            // Update receipt status
+            // Cập nhật receipt status
             $stmt = $pdo->prepare("UPDATE stock_receipts SET status = 'completed', completed_at = NOW() WHERE receipt_id = ?");
             $stmt->execute([$receiptId]);
             
@@ -1828,7 +1828,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'total_value' => $totalValue
             ];
             
-            // Log successful action
+            // Ghi nhật ký successful action
             error_log("✅ Stock receipt created successfully for existing product - ID: {$receiptId}, Number: {$receiptNumber}");
             
         } catch (Exception $e) {
@@ -3814,6 +3814,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- SweetAlert2 JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.28/dist/sweetalert2.all.min.js"></script>
 
+    <!-- Normalization Utilities - Centralized functions -->
+    <script src="js/normalization-utils.js"></script>
+
     <script>
         // Global variables để có thể truy cập từ mọi nơi
         let currentStep = 1;
@@ -3847,7 +3850,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Function to select duplicate for update
         window.selectStockReceiptDuplicateForUpdate = function(element) {
-            // Remove previous selections
+            // Xóa previous selections
             $('.stock-receipt-duplicate-card').removeClass('border-primary bg-light');
             $('.selected-indicator').hide();
             
@@ -3862,7 +3865,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 product_brand: $(element).data('product-brand')
             };
             
-            // Enable update button (if exists)
+            // Bật update button (nếu tồn tại)
             $('#updateSelectedStockReceiptDuplicateBtn').prop('disabled', false);
             
             console.log('✅ Selected duplicate for update:', window.selectedStockReceiptDuplicate);
@@ -3881,7 +3884,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('📋 Product data:', productData);
             console.log('🤖 Available AI data:', window.aiData);
             
-            // Reset flag for AI mode or create new mode
+            // Đặt lại flag for AI mode or create new mode
             if (mode !== 'existing') {
                 window.useExistingDataOnly = false;
                 useExistingDataOnly = false;
@@ -3903,10 +3906,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 console.log('✅ Form fields enabled for editing');
             }
             
-            // Hide duplicate results
+            // Ẩn duplicate results
             $('#stockReceiptDuplicateResults').slideUp();
             
-            // Move to step 4 first
+            // Di chuyển to step 4 first
             moveToStep(4);
             
             if (mode === 'ai' && productData) {
@@ -3918,11 +3921,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 window.isUpdateMode = true;
                 window.updateProductId = productData.product_id;
                 
-                // Pre-populate form with AI data if available
+                // Pre-populate form with AI data nếu có sẵn
                 if (window.aiData && typeof window.aiData === 'object') {
                     populateFormWithAIData(window.aiData);
                     
-                    // Show AI success message
+                    // Hiển thị AI success message
                     const aiSuccessMsg = `
                         <div class="alert alert-info border-0 shadow-sm" id="aiDataLoadedSuccess">
                             <div class="d-flex align-items-center">
@@ -3943,14 +3946,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $('#step4-content .card-body').prepend(aiSuccessMsg);
                 }
             } else {
-                // Create new mode: Use pure AI data
+                // Tạo new mode: Use pure AI data
                 console.log('➕ Using create new mode with AI data');
                 
-                // Pre-populate form with AI data if available
+                // Pre-populate form with AI data nếu có sẵn
                 if (window.aiData && typeof window.aiData === 'object') {
                     populateFormWithAIData(window.aiData);
                     
-                    // Show success message about AI data usage
+                    // Hiển thị success message about AI data usage
                     const aiSuccessMsg = `
                         <div class="alert alert-success border-0 shadow-sm" id="aiDataLoadedSuccess">
                             <div class="d-flex align-items-center">
@@ -3992,11 +3995,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             console.log('💾 Stored selected product for receipt:', window.selectedProductForReceipt);
             
-            // Hide inline duplicate results
+            // Ẩn inline duplicate results
             $('#stockReceiptDuplicateResults').slideUp();
             $('#aiDuplicateCheckResult').slideUp();
             
-            // Show update source modal to choose between existing data or AI analysis
+            // Hiển thị update source modal to choose between existing data or AI analysis
             $('#updateSourceModal').modal('show');
         };
         
@@ -4004,10 +4007,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.continueCreateNewProduct = function() {
             console.log('✅ User chose to create NEW product despite duplicates');
             
-            // Hide duplicate check result
+            // Ẩn duplicate check result
             $('#aiDuplicateCheckResult').slideUp();
             
-            // Move to step 4 (edit product info)
+            // Di chuyển to step 4 (edit product info)
             moveToStep(4);
             
             // If we have AI data, populate the form
@@ -4023,7 +4026,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.viewProductDetails = function(productId) {
             console.log('👁️ Viewing product details for ID:', productId);
             
-            // Open product detail page in new tab
+            // Mở product detail page in new tab
             window.open(`xem_san_pham.php?id=${productId}`, '_blank');
         };
         
@@ -4062,7 +4065,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 reverseButtons: true
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Show loading
+                    // Hiển thị loading
                     Swal.fire({
                         title: 'Đang kích hoạt...',
                         text: 'Vui lòng chờ',
@@ -4074,7 +4077,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     });
                     
-                    // Send AJAX request to reactivate
+                    // Gửi AJAX request to reactivate
                     $.ajax({
                         url: 'kich_hoat_lai_san_pham.php',
                         method: 'POST',
@@ -4090,7 +4093,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     showConfirmButton: false
                                 });
                                 
-                                // Update UI without reloading - find all cards with this product ID
+                                // Cập nhật UI without reloading - find all cards with this product ID
                                 const cardSelectors = [
                                     `.duplicate-product-card[data-product-id="${productId}"]`,
                                     `.stock-receipt-duplicate-card[data-product-id="${productId}"]`
@@ -4100,7 +4103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     $(selector).each(function() {
                                         const $card = $(this);
                                         
-                                        // Remove inactive styling
+                                        // Xóa inactive styling
                                         $card.removeClass('border-warning')
                                              .css({
                                                  'opacity': '1',
@@ -4112,10 +4115,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         // Remove inactive badge (⏸ Tạm ngừng)
                                         $card.find('.badge-warning:contains("Tạm ngừng")').remove();
                                         
-                                        // Find the button container (parent div of reactivate button)
+                                        // Tìm the button container (parent div of reactivate button)
                                         const $btnReactivate = $card.find('.btn-reactivate-product');
                                         if ($btnReactivate.length > 0) {
-                                            // Get product name for the button
+                                            // Lấy product name for the button
                                             const productNameEscaped = productName.replace(/`/g, '\\`').replace(/'/g, "\\'");
                                             
                                             // Replace reactivate button with "Tiếp tục nhập kho" button
@@ -4129,13 +4132,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             `);
                                         }
                                         
-                                        // Remove warning alert
+                                        // Xóa warning alert
                                         $card.find('.alert-warning').remove();
                                         
-                                        // Update card images opacity
+                                        // Cập nhật card images opacity
                                         $card.find('img').css('opacity', '1');
                                         
-                                        // Update onclick attribute if exists
+                                        // Cập nhật onclick attribute nếu tồn tại
                                         const onclickAttr = $card.attr('onclick');
                                         if (onclickAttr && onclickAttr.includes('showInactiveWarning')) {
                                             $card.removeAttr('onclick');
@@ -4178,7 +4181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (confirm('Bạn có chắc muốn hủy quá trình nhập kho này?\n\nDữ liệu đã nhập sẽ bị mất.')) {
                 $('#stockReceiptDuplicateResults').slideDown();
                 moveToStep(3);
-                // Clear step 4 content
+                // Xóa step 4 content
                 $('#step4-content .card-body').empty();
                 delete window.selectedProductForReceipt;
                 delete window.stockReceiptMode;
@@ -4191,7 +4194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('⚠️ This function should NOT be called when using existing database data!');
             
             try {
-                // Clear any existing content first
+                // Xóa any existing content first
                 $('#step4-content .card-body').children().not('#aiDataLoadedSuccess').remove();
                 
                 // Fill basic product information
@@ -4228,15 +4231,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $('#tags').val(aiData.tags);
                 }
                 
-                // Generate SKU if not provided
+                // Tạo SKU if not provided
                 let baseSku = aiData.sku || generateSkuFromAI(aiData);
                 $('#baseSku').val(baseSku);
                 
-                // Set default values if not provided by AI
+                // Đặt default values if not provided by AI
                 $('#productPrice').val(aiData.price || '');
                 $('#minQuantity').val(aiData.min_quantity || 10);
                 
-                // Show AI-populated form
+                // Hiển thị AI-populated form
                 showAIPopulatedForm();
                 
                 console.log('✅ Form populated successfully with AI data');
@@ -4262,7 +4265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Make sure step 4 is visible
             $('#step4-content').show();
             
-            // Check if form fields exist
+            // Kiểm tra if form fields exist
             if ($('#productName').length === 0) {
                 console.log('📋 Form fields not found, need to generate form first');
                 // Form hasn't been generated yet, we need to trigger the normal flow
@@ -4287,7 +4290,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // First, remove any existing loading indicator
             $('#step4-loading').remove();
             
-            // Find container (prefer card-body, fallback to step4-content)
+            // Tìm container (prefer card-body, fallback to step4-content)
             const body = $('#step4-content .card-body').first();
             const container = body.length ? body : $('#step4-content');
             
@@ -4296,7 +4299,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
             
-            // Create new loading indicator
+            // Tạo new loading indicator
             const html = `
                 <div id="step4-loading" class="alert alert-info d-flex align-items-center" role="alert" style="margin-bottom: 1rem;">
                     <i class="fas fa-spinner fa-spin mr-2"></i>
@@ -4323,12 +4326,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.cleanupStep4Content = function() {
             console.log('🧹 Cleaning up step 4 content...');
             
-            // Remove all duplicate sections
+            // Xóa all duplicate sections
             $('#step4-content .existing-sizes-section').remove();
             $('#step4-content .sizes-section').remove();
             $('#step4-loading').remove();
             
-            // Reset sizeSelectionArea to original state if needed
+            // Đặt lại sizeSelectionArea to original state if needed
             const sizeArea = $('#sizeSelectionArea');
             if (sizeArea.length && sizeArea.find('.existing-sizes-section').length > 0) {
                 console.log('🔄 Resetting sizeSelectionArea to placeholder');
@@ -4354,7 +4357,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // ===== DATABASE INTEGRATION FUNCTIONS (from Trung_lap_TC) =====
         
-        // Function to load product data from database for update
+        // Function to load product data từ database for update
         window.updateFromExistingData = function() {
             console.log('📋 Updating from existing product data...');
             
@@ -4367,16 +4370,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             console.log('🔍 Loading product data for ID:', productInfo.product_id);
             
-            // Set flag BEFORE moving to step 4 to prevent AI suggestions
+            // Đặt flag BEFORE moving to step 4 to prevent AI suggestions
             window.useExistingDataOnly = true;
             useExistingDataOnly = true; // Also set local variable
             console.log('🔧 Set useExistingDataOnly =', window.useExistingDataOnly, 'local =', useExistingDataOnly);
             
-            // Move to step 4 and show loading
+            // Di chuyển to step 4 and show loading
             moveToStep(4);
             showStep4Loading('Đang tải thông tin sản phẩm từ database...');
             
-            // Get product data from database
+            // Lấy product data từ database
             $.ajax({
                 url: 'api_lay_chi_tiet_san_pham.php',
                 method: 'POST',
@@ -4403,7 +4406,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Fill form with existing product data
                         fillFormWithProductData(response.product);
                         
-                        // Set update mode
+                        // Đặt update mode
                         window.updateProductId = productInfo.product_id;
                         window.isUpdateMode = true;
                         
@@ -4432,11 +4435,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         };
         
-        // Function to fill form with product data from database (FROM Trung_lap_TC)
+        // Function to fill form with product data từ database (FROM Trung_lap_TC)
         window.fillFormWithProductData = function(product) {
             console.log('📝 Filling form with product data:', product);
             
-            // Add guard to prevent multiple calls
+            // Thêm guard to prevent multiple calls
             if (window._fillingForm) {
                 console.warn('⚠️ Already filling form, skipping duplicate call');
                 return;
@@ -4455,7 +4458,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $('#tags').val(product.tags || '');
                 $('#baseSku').val(product.base_sku || '');
                 
-                // Set category if available from database
+                // Đặt category nếu có sẵn từ database
                 if (product.category_id) {
                     $('#hiddenCategoryId').val(product.category_id);
                     console.log('📂 Set category from database:', product.category_id);
@@ -4463,11 +4466,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     console.log('📂 No category in database, leaving empty');
                 }
                 
-                // Set product ID for update mode
+                // Đặt product ID for update mode
                 $('#product_id').val(product.product_id || product.id);
                 $('#productId').val(product.product_id || product.id); // Also set the hidden field
                 
-                // Fill color info if available
+                // Fill color info nếu có sẵn
                 if (product.colors && product.colors.length > 0) {
                     $('#color').val(product.colors[0]);
                 } else if (product.colors_string) {
@@ -4520,7 +4523,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 console.log('✅ All basic fields set to readonly');
                 
-                // Display uploaded images if any
+                // Hiển thị uploaded images if any
                 if (product.images && product.images.length > 0) {
                     displayExistingImages(product.images);
                 }
@@ -4531,7 +4534,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     displayProductSizesForSelection(product.variants);
                 }
                 
-                // Set flags
+                // Đặt flags
                 window.hasExistingData = true;
                 window.productFromDB = true;
                 
@@ -4541,7 +4544,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 console.error('❌ Error filling form:', error);
                 showToast('Lỗi khi điền thông tin vào form', 'error');
             } finally {
-                // Reset flag after form filling is complete
+                // Đặt lại flag after form filling is complete
                 setTimeout(() => {
                     window._fillingForm = false;
                     console.log('✅ Form filling flag reset');
@@ -4559,7 +4562,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
             
-            // Clear previous variants
+            // Xóa previous variants
             variantContainer.empty();
             
             if (!variants || variants.length === 0) {
@@ -4567,7 +4570,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
             
-            // Group variants by size
+            // Nhóm variants by size
             const variantsBySize = {};
             variants.forEach(variant => {
                 const size = variant.size || 'N/A';
@@ -4577,7 +4580,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 variantsBySize[size].push(variant);
             });
             
-            // Create variant selection UI
+            // Tạo variant selection UI
             let html = '<div class="variant-selection mt-3">';
             html += '<h6>Chọn Size và Variant:</h6>';
             html += '<div class="size-buttons mb-3">';
@@ -4604,12 +4607,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             variantContainer.html(html);
             
-            // Handle size button clicks
+            // Xử lý size button clicks
             $('.size-btn').on('click', function() {
                 const selectedSize = $(this).data('size');
                 const sizeVariants = variantsBySize[selectedSize];
                 
-                // Update button states
+                // Cập nhật button states
                 $('.size-btn').removeClass('btn-primary').addClass('btn-outline-primary');
                 $(this).removeClass('btn-outline-primary').addClass('btn-primary');
                 
@@ -4621,7 +4624,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $('#selectedVariantStock').val(variant.current_stock || '0');
                     $('#selectedVariantId').val(variant.id || '');
                     
-                    // Show variant details
+                    // Hiển thị variant details
                     $('.variant-details').slideDown();
                     
                     console.log('✅ Selected variant:', variant);
@@ -4631,7 +4634,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('✅ Variants displayed successfully');
         };
         
-        // Function to display existing images from database (FROM Trung_lap_TC)
+        // Function to display existing images từ database (FROM Trung_lap_TC)
         window.displayExistingImages = function(images) {
             console.log('🖼️ Displaying existing images:', images);
             
@@ -4656,7 +4659,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 container.html(`<div class="row">${imagesHtml}</div>`);
                 
-                // Show container
+                // Hiển thị container
                 container.show();
                 $('.images-step').addClass('completed');
                 if ($('#imageUploadBtn').length) {
@@ -4676,14 +4679,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 sale_price: v.sale_price
             })));
             
-            // Add guard to prevent multiple calls
+            // Thêm guard to prevent multiple calls
             if (window._displayingSizes) {
                 console.warn('⚠️ Already displaying sizes, skipping duplicate call');
                 return;
             }
             window._displayingSizes = true;
             
-            // Create size selection table from variants
+            // Tạo size selection table from variants
             const sizeRows = variants.map(variant => `
                 <tr data-size="${variant.size}" 
                     data-sku="${variant.sku}" 
@@ -4730,7 +4733,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </table>
             `;
             
-            // Show in step 4 - Target the correct container
+            // Hiển thị in step 4 - Target the correct container
             console.log('🔧 Looking for size selection container...');
             
             // First, try to find sizeSelectionArea
@@ -4754,7 +4757,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (step4Content.length) {
                     console.log('🔧 Removing existing sizes sections...');
                     
-                    // Remove ALL existing sizes sections (not just one)
+                    // Xóa ALL existing sizes sections (not just one)
                     step4Content.find('.existing-sizes-section').each(function() {
                         console.log('🗑️ Removing existing-sizes-section');
                         $(this).remove();
@@ -4777,7 +4780,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Unbind previous handlers to prevent duplicates
             $(document).off('click', '.select-size-btn');
             
-            // Add click handlers
+            // Thêm click handlers
             $(document).off('click', '.select-size-btn').on('click', '.select-size-btn', function() {
                 const row = $(this).closest('tr');
                 const size = row.data('size');
@@ -4793,16 +4796,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'data-sale-price': row.attr('data-sale-price')
                 });
                 
-                // Hide the row instead of just disabling the button
+                // Ẩn the row instead of just disabling the button
                 row.fadeOut('fast');
                 
-                // Add size row to the sizes table with both prices
+                // Thêm size row to the sizes table with both prices
                 addSizeRowToStockReceipt(size, sku, color, unitPrice, salePrice, variantId);
                 
                 showToast(`Đã thêm size ${size} vào danh sách nhập hàng`, 'success');
             });
             
-            // Reset flag after setup is complete
+            // Đặt lại flag after setup is complete
             setTimeout(() => {
                 window._displayingSizes = false;
                 console.log('✅ Size display flag reset');
@@ -4813,11 +4816,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.addSizeRowToStockReceipt = function(size, sku, color, unitPrice = 0, salePrice = 0, variantId = '') {
             console.log('➕ Adding size row to stock receipt:', {size, sku, color, unitPrice, salePrice, variantId});
             
-            // Find or create sizes table in step 4
+            // Tìm or create sizes table in step 4
             let sizesTable = $('#step4-content .sizes-table tbody');
             
             if (!sizesTable.length) {
-                // Create sizes table if it doesn't exist
+                // Tạo sizes table if it doesn't exist
                 const tableHtml = `
                     <div class="sizes-section mt-4 mb-4">
                         <h5><i class="fas fa-ruler text-info"></i> Size đã chọn để nhập kho</h5>
@@ -4845,7 +4848,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 `;
                 
-                // Find existing-sizes-section and insert after it
+                // Tìm existing-sizes-section and insert after it
                 const existingSizesSection = $('#step4-content .existing-sizes-section');
                 if (existingSizesSection.length) {
                     existingSizesSection.after(tableHtml);
@@ -4857,14 +4860,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 sizesTable = $('#step4-content .sizes-table tbody');
             }
             
-            // Check if size already exists
+            // Kiểm tra if size already exists
             const existingRow = sizesTable.find(`tr[data-size="${size}"]`);
             if (existingRow.length) {
                 showToast(`Size ${size} đã có trong danh sách`, 'warning');
                 return;
             }
             
-            // Add new row with price info from database
+            // Thêm new row with price info từ database
             const rowHtml = `
                 <tr class="size-row" data-size="${size}" data-sku="${sku}" data-variant-id="${variantId}">
                     <td><strong>${size}</strong></td>
@@ -4927,7 +4930,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 row.remove();
                 showToast(`Đã xóa size ${size}`, 'success');
                 
-                // Show the hidden row in selection table
+                // Hiển thị the hidden row in selection table
                 $('table tr[data-size="' + size + '"]').fadeIn('fast');
                 
                 // Also re-enable the select button if it exists
@@ -4985,7 +4988,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
             
-            // Validate all required fields
+            // Kiểm tra all required fields
             let isValid = true;
             const items = [];
             
@@ -4996,14 +4999,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const variantId = row.data('variant-id');
                 
                 const quantity = row.find('input[name="import_quantities[]"]').val();
-                // Get raw values from data attributes (unformatted numbers)
+                // Lấy raw values from data attributes (unformatted numbers)
                 const importPriceInput = row.find('input[name="original_prices[]"]');
                 const salePriceInput = row.find('input[name="sale_prices[]"]');
                 const importPrice = importPriceInput.data('raw-value') || importPriceInput.val().replace(/[^\d]/g, '');
                 const salePrice = salePriceInput.data('raw-value') || salePriceInput.val().replace(/[^\d]/g, '');
                 const location = row.find('input[name="storage_locations[]"]').val();
                 
-                // Validate
+                // Kiểm tra
                 if (!quantity || parseFloat(quantity) <= 0) {
                     showToast(`Size ${size}: Số lượng nhập phải lớn hơn 0`, 'error');
                     isValid = false;
@@ -5067,13 +5070,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('✅ Collected items with full info:', items);
             console.log('📊 Total items:', items.length);
             
-            // Debug: Log prices
+            // Gỡ lỗi: Ghi nhật ký prices
             items.forEach((item, idx) => {
                 console.log(`  Item #${idx}: ${item.product_name} - Size ${item.size}`);
                 console.log(`    → price: ${item.price}, sale_price: ${item.sale_price}`);
             });
             
-            // Add items to receiptItems array
+            // Thêm items to receiptItems array
             if (typeof receiptItems === 'undefined') {
                 window.receiptItems = [];
             }
@@ -5085,16 +5088,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('📋 Updated receiptItems:', receiptItems);
             console.log('👤 Selected supplier:', selectedSupplier);
             
-            // Save to localStorage
+            // Lưu to localStorage
             saveDataToLocalStorage();
             
-            // Update continue button visibility
+            // Cập nhật continue button visibility
             updateContinueToStep5Button();
             
-            // Show success message
+            // Hiển thị success message
             showToast(`Đã thêm ${items.length} size vào phiếu nhập kho`, 'success');
             
-            // Move to step 5
+            // Di chuyển to step 5
             setTimeout(() => {
                 moveToStep(5);
             }, 500);
@@ -5111,7 +5114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('🔄 Location tracking reset');
         };
         
-        // Helper: Log current tracking status
+        // Helper: Ghi nhật ký current tracking status
         window.logLocationTracking = function() {
             console.log('📍 Currently tracked locations:', window.suggestedLocations);
         };
@@ -5137,12 +5140,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // ===== TEST FUNCTIONS =====
         
-        // 🆕 NEW TEST: Complete database workflow from Trung_lap_TC
+        // 🆕 NEW TEST: Hoàn thành database workflow from Trung_lap_TC
         window.testCompleteDatabaseWorkflow = function() {
             console.log('🔧 Testing complete database workflow (FROM TRUNG_LAP_TC)...');
             $('#debugInfo').html('Testing complete Trung_lap_TC workflow...');
             
-            // Set up product selection
+            // Đặt up product selection
             window.selectedProductForReceipt = {
                 product_id: 24,
                 name: 'Giày cao gót Charles & Keith'  
@@ -5151,12 +5154,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('1️⃣ Set selectedProductForReceipt:', window.selectedProductForReceipt);
             $('#debugInfo').append('<br>1️⃣ Product selected: ID 24');
             
-            // Call updateFromExistingData (this should load from database)
+            // Call updateFromExistingData (this should load từ database)
             updateFromExistingData();
             $('#debugInfo').append('<br>2️⃣ Called updateFromExistingData()');
         };
         
-        // Test function for API Product Details
+        // Kiểm tra function for API Product Details
         window.testProductDetailsAPI = function() {
             console.log('🔧 Testing API Product Details for ID 24...');
             $('#debugInfo').html('Testing API...');
@@ -5170,7 +5173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     console.log('✅ API Response:', response);
                     $('#debugInfo').html(`<strong>API Success:</strong><br><pre>${JSON.stringify(response, null, 2)}</pre>`);
                     
-                    // Test fillFormWithProductData if API succeeds
+                    // Kiểm tra fillFormWithProductData if API succeeds
                     if (response.success && response.product) {
                         console.log('🔧 Testing fillFormWithProductData...');
                         $('#debugInfo').append(`<br><strong>Testing form fill...</strong>`);
@@ -5184,15 +5187,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         };
         
-        // Test function to simulate selecting a product
+        // Kiểm tra function to simulate selecting a product
         window.testSelectProduct = function() {
             console.log('🔧 Testing Select Product workflow...');
             $('#debugInfo').html('Simulating product selection...');
             
-            // Close any open modals
+            // Đóng any open modals
             $('.modal').modal('hide');
             
-            // Move to step 4 first for testing
+            // Di chuyển to step 4 first for testing
             moveToStep(4);
             
             // Simulate selecting Charles & Keith product
@@ -5208,33 +5211,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             selectProductForStockReceipt(testProduct.product_id, testProduct.name);
         };
         
-        // Test function for updateFromExistingData directly
+        // Kiểm tra function for updateFromExistingData directly
         window.testUpdateFromExistingData = function() {
             console.log('🔧 Testing updateFromExistingData directly...');
             $('#debugInfo').html('Testing updateFromExistingData...');
             
-            // Set up test data
+            // Đặt up test data
             window.selectedProductForReceipt = {
                 product_id: 24,
                 name: 'Giày cao gót Charles & Keith'
             };
             
-            // Move to step 4
+            // Di chuyển to step 4
             moveToStep(4);
             
             // Call the function
             updateFromExistingData();
         };
         
-        // Test function for database fill only (without step movement)
+        // Kiểm tra function for database fill only (without step movement)
         window.testDatabaseOnlyFill = function() {
             console.log('🔧 Testing database fill only...');
             $('#debugInfo').html('Testing database fill only...');
             
-            // Move to step 4 first
+            // Di chuyển to step 4 first
             moveToStep(4);
             
-            // Set flags to prevent AI interference
+            // Đặt flags to prevent AI interference
             window.useExistingDataOnly = true;
             useExistingDataOnly = true;
             
@@ -5288,7 +5291,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
             
-            // Update supplier info
+            // Cập nhật supplier info
             if (supplierInfoElement.length > 0) {
                 let supplierHtml = '';
                 if (selectedSupplier && selectedSupplier.name) {
@@ -5306,18 +5309,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 console.error('❌ #supplierInfo element not found');
             }
             
-            // Update current date
+            // Cập nhật current date
             const currentDate = new Date().toLocaleDateString('vi-VN');
             $('#currentDate').text(currentDate);
             
-            // Update receipt notes
+            // Cập nhật receipt notes
             const receiptNotes = $('#receiptNotes').val() || 'Không có ghi chú';
             $('#receiptNotesDisplay').text(receiptNotes);
             
-            // Initialize total amount
+            // Khởi tạo total amount
             let totalAmount = 0;
             
-            // Update items list
+            // Cập nhật items list
             if (itemsListElement.length > 0) {
                 itemsListElement.empty();
                 
@@ -5409,7 +5412,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 console.error('❌ #receiptItemsList element not found');
             }
             
-            // Update total amount
+            // Cập nhật total amount
             if (totalAmountElement.length > 0) {
                 const formattedTotal = formatCurrency(totalAmount || 0);
                 totalAmountElement.text(formattedTotal);
@@ -5418,7 +5421,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 console.error('❌ #totalAmount element not found');
             }
             
-            // Update debug info
+            // Cập nhật debug info
             updateDebugInfo();
             
             console.log('🎯 updateReceiptSummary completed');
@@ -5454,7 +5457,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.addTestData = function() {
             console.log('🧪 Adding test data...');
             
-            // Test supplier
+            // Kiểm tra supplier
             selectedSupplier = {
                 id: 1,
                 name: 'Công ty test',
@@ -5498,14 +5501,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             ];
             
-            // Save to localStorage as backup
+            // Lưu to localStorage as backup
             saveDataToLocalStorage();
             
             console.log('✅ Test data added');
             console.log('👤 selectedSupplier:', selectedSupplier);
             console.log('📦 receiptItems:', receiptItems);
             
-            // Update summary
+            // Cập nhật summary
             updateReceiptSummary();
         };
         
@@ -5516,7 +5519,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 localStorage.setItem('selectedSupplier', JSON.stringify(selectedSupplier || null));
                 localStorage.setItem('currentStep', currentStep || 1);
                 
-                // Save form data if exists
+                // Lưu form data nếu tồn tại
                 const receiptDate = $('#receiptDate').val();
                 const receiptNotes = $('#receiptNotes').val();
                 if (receiptDate) {
@@ -5552,7 +5555,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (items.length > 0) {
                         receiptItems = items;
                         console.log('💾 Loaded receiptItems from localStorage:', receiptItems.length, 'items');
-                        // Update continue button after loading items
+                        // Cập nhật continue button after loading items
                         if (typeof updateContinueToStep5Button === 'function') {
                             updateContinueToStep5Button();
                         }
@@ -5565,7 +5568,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         selectedSupplier = supplier;
                         console.log('💾 Loaded selectedSupplier from localStorage:', selectedSupplier.name);
                         
-                        // Restore supplier selection in form
+                        // Khôi phục supplier selection in form
                         if ($('#supplierSelect').length > 0) {
                             $('#supplierSelect').val(selectedSupplier.id);
                         }
@@ -5582,7 +5585,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     console.log('💾 Loaded receiptNotes from localStorage:', savedNotes);
                 }
                 
-                // Restore step if we have items or supplier
+                // Khôi phục step if we have items or supplier
                 if (savedStep && (receiptItems.length > 0 || selectedSupplier)) {
                     const stepToRestore = parseInt(savedStep) || 1;
                     if (stepToRestore > 1) {
@@ -5649,7 +5652,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (hasData) {
                     console.log('📋 Found saved data:', dataInfo);
                     
-                    // Show notification with option to restore
+                    // Hiển thị notification with option to restore
                     const notification = `
                         <div class="alert alert-info alert-dismissible fade show saved-data-notification" 
                              style="position: fixed; top: 80px; right: 20px; z-index: 9999; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
@@ -5696,7 +5699,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         };
         
-        // Function to restore saved data (called when user clicks "Continue")
+        // Function to restore saved data (called when user clicks "Tiếp tục")
         window.restoreSavedData = function() {
             console.log('🔄 Restoring saved data...');
             loadDataFromLocalStorage();
@@ -5718,7 +5721,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $('[id^="step"][id$="-content"]').hide();
             $('#step1-content').show();
             
-            // Clear form fields
+            // Xóa form fields
             $('#receiptDate').val('');
             $('#supplierSelect').val('');
             $('#receiptNotes').val('');
@@ -5744,7 +5747,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $('#debugItemCount').text(receiptItems ? receiptItems.length : 0);
             $('#debugSupplier').text(selectedSupplier ? selectedSupplier.name : 'None');
             
-            // Update quick debug info too
+            // Cập nhật quick debug info too
             $('#quickDebugItems').text(receiptItems ? receiptItems.length : 0);
             $('#quickDebugSupplier').text(selectedSupplier ? selectedSupplier.name : 'None');
         };
@@ -5761,17 +5764,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('💾 localStorage receiptItems:', localStorage.getItem('receiptItems'));
             console.log('💾 localStorage selectedSupplier:', localStorage.getItem('selectedSupplier'));
             
-            // Check DOM elements
+            // Kiểm tra DOM elements
             console.log('🏗️ DOM Elements:');
             console.log('- #supplierInfo:', $('#supplierInfo').length);
             console.log('- #receiptItemsList:', $('#receiptItemsList').length);
             console.log('- #totalAmount:', $('#totalAmount').length);
             
-            // Check current step
+            // Kiểm tra current step
             console.log('📍 Current Step:', currentStep);
             console.log('📍 Active step element:', $('.step.active').attr('id'));
             
-            // Check form data for debug
+            // Kiểm tra form data for debug
             console.log('📝 Current Form Data:');
             console.log('- Product Name:', $('#productName').val());
             console.log('- Price:', $('#price').val());
@@ -5780,7 +5783,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             console.log('==========================================');
             
-            // Update debug info
+            // Cập nhật debug info
             updateDebugInfo();
             
             // Try force update
@@ -5792,11 +5795,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.addTestDataFromForm = function() {
             console.log('🧪 Adding test data from current form...');
             
-            // Get current form values
+            // Lấy current form values
             const productName = $('#productName').val() || 'Test Product';
             const price = parseFloat($('#price').val()) || 500000;
             
-            // Get sizes from form
+            // Lấy sizes from form
             const formSizes = [];
             $('select[name="sizes[]"]').each(function(index) {
                 const size = $(this).val();
@@ -5819,7 +5822,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
             }
             
-            // Set supplier if not already set
+            // Đặt supplier if not already set
             if (!selectedSupplier) {
                 selectedSupplier = {
                     id: 1,
@@ -5828,7 +5831,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 };
             }
             
-            // Create receipt items from form data
+            // Tạo receipt items from form data
             receiptItems = [];
             formSizes.forEach(sizeInfo => {
                 receiptItems.push({
@@ -5840,14 +5843,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
             });
             
-            // Save to localStorage
+            // Lưu to localStorage
             saveDataToLocalStorage();
             
             console.log('✅ Test data added from form');
             console.log('👤 selectedSupplier:', selectedSupplier);
             console.log('📦 receiptItems:', receiptItems);
             
-            // Update summary
+            // Cập nhật summary
             updateReceiptSummary();
         };
         
@@ -5855,7 +5858,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         window.verifyAndFixVariables = function() {
             console.log('🔍 Verifying variables...');
             
-            // Check if variables exist and are accessible
+            // Kiểm tra if variables exist and are accessible
             if (typeof receiptItems === 'undefined') {
                 console.error('❌ receiptItems is undefined! Creating new array...');
                 window.receiptItems = [];
@@ -5882,7 +5885,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // First, remove any existing loading indicator
             $('#step4-loading').remove();
             
-            // Find container (prefer card-body, fallback to step4-content)
+            // Tìm container (prefer card-body, fallback to step4-content)
             const body = $('#step4-content .card-body').first();
             const container = body.length ? body : $('#step4-content');
             
@@ -5891,7 +5894,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
             
-            // Create new loading indicator
+            // Tạo new loading indicator
             const html = `
                 <div id="step4-loading" class="alert alert-info d-flex align-items-center" role="alert" style="margin-bottom: 1rem;">
                     <i class="fas fa-spinner fa-spin mr-2"></i>
@@ -5907,7 +5910,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('🚀 Page loaded - Starting fresh at Step 1');
             console.log('📋 Checking for previously saved data...');
             
-            // Initialize price formatting
+            // Khởi tạo price formatting
             setupPriceFormatting();
             
             // Function để hiển thị thông báo toast (define FIRST before using)
@@ -5953,7 +5956,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $('#step4-loading').remove();
             console.log('🧹 Cleaned up any existing loading indicators');
             
-            // Test if saveDraftBtn exists
+            // Kiểm tra if saveDraftBtn exists
             setTimeout(() => {
                 const btnExists = $('#saveDraftBtn').length > 0;
                 console.log('🔍 Save Draft button exists in DOM:', btnExists);
@@ -5964,7 +5967,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }, 1000);
             
-            // Initialize size management
+            // Khởi tạo size management
             updateRemoveButtons();
 
             // Xác thực và điều hướng Bước 1
@@ -5984,7 +5987,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return isValid;
             }
 
-            // Handle step 1 field changes
+            // Xử lý step 1 field changes
             $('#receiptDate, #supplierSelect').on('change', function() {
                 // Kiểm tra nếu chọn supplier bị tạm ngưng
                 if (this.id === 'supplierSelect') {
@@ -6032,13 +6035,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 saveDataToLocalStorage();
             });
             
-            // Handle receipt notes changes
+            // Xử lý receipt notes changes
             $('#receiptNotes').on('change blur', function() {
                 console.log('📝 Receipt notes changed');
                 saveDataToLocalStorage();
             });
 
-            // Handle next to upload button
+            // Xử lý next to upload button
             $('#nextToUpload').click(function() {
                 if (validateStep1()) {
                     moveToStep(2);
@@ -6055,7 +6058,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Initial validation
             validateStep1();
 
-            // Handle step indicator clicks
+            // Xử lý step indicator clicks
             $('.step').click(function() {
                 const stepNum = parseInt($(this).attr('id').replace('step', ''));
                 
@@ -6065,7 +6068,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             });
 
-            // Handle file upload
+            // Xử lý file upload
             $('#fileInput').change(function(e) {
                 const files = Array.from(e.target.files);
                 if (files.length < 2 || files.length > 4) {
@@ -6075,7 +6078,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 handleFileUpload(files);
             });
 
-            // Handle drag and drop
+            // Xử lý drag and drop
             $('#uploadArea').on('dragover', function(e) {
                 e.preventDefault();
                 $(this).addClass('drag-over');
@@ -6105,7 +6108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 formData.append('action', 'upload_images');
 
-                // Show loading
+                // Hiển thị loading
                 $('#uploadArea').html(`
                     <div class="text-center">
                         <div class="spinner-border text-primary" role="status">
@@ -6187,14 +6190,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 html += '</div>';
                 $('#imagePreview').html(html);
                 
-                // Add debug info
+                // Thêm debug info
                 console.log('Uploaded images:', uploadedImages);
                 console.log('Primary image index:', primaryImageIndex);
                 uploadedImages.forEach((file, index) => {
                     console.log(`Image ${index + 1}: ${file.url}`);
                 });
                 
-                // Reset upload area
+                // Đặt lại upload area
                 resetUploadArea();
             }
 
@@ -6256,19 +6259,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $('#aiAutoFilledTable1').empty();
                 $('#aiAutoFilledTable2').empty();
                 
-                // Move to step 3
+                // Di chuyển to step 3
                 moveToStep(3);
                 
-                // Show images being analyzed
+                // Hiển thị images being analyzed
                 displayImagesInAnalysisStep();
                 $('#analyzingImages').show();
                 $('#loadingSpinner').show();
 
-                // Prepare image paths for analysis - use primary image first
+                // Chuẩn bị image paths for analysis - use primary image first
                 const imagePaths = [];
-                // Add primary image first
+                // Thêm primary image first
                 imagePaths.push(uploadedImages[primaryImageIndex].path);
-                // Add other images
+                // Thêm other images
                 uploadedImages.forEach((img, index) => {
                     if (index !== primaryImageIndex) {
                         imagePaths.push(img.path);
@@ -6304,9 +6307,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             displayAIResults(aiData);
                             // Store image paths with primary image info
                             const orderedImagePaths = [];
-                            // Add primary image first
+                            // Thêm primary image first
                             orderedImagePaths.push(uploadedImages[primaryImageIndex].path);
-                            // Add other images
+                            // Thêm other images
                             uploadedImages.forEach((img, index) => {
                                 if (index !== primaryImageIndex) {
                                     orderedImagePaths.push(img.path);
@@ -6326,7 +6329,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
             });
 
-            // Set primary image
+            // Đặt primary image
             window.setPrimaryImage = function(index) {
                 if (index >= 0 && index < uploadedImages.length) {
                     primaryImageIndex = index;
@@ -6335,7 +6338,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Re-display images with updated primary
                     displayUploadedImages();
                     
-                    // Show success message
+                    // Hiển thị success message
                     const fileName = uploadedImages[index].name;
                     const toast = `
                         <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 300px;">
@@ -6425,11 +6428,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const formattedName = formatProductName(data);
                 data.name = formattedName;
                 
-                // Display analyzed images info
+                // Hiển thị analyzed images info
                 const imageCount = data.analyzed_images_count || uploadedImages.length;
                 const confidence = data.confidence || 0.5;
                 
-                // Add multi-image analysis info
+                // Thêm multi-image analysis info
                 let analysisInfo = `
                     <div class="alert alert-info mb-3 ai-analysis-alert">
                         <i class="fas fa-images mr-2"></i>
@@ -6440,7 +6443,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 `;
                 
-                // Display product information from Gemini
+                // Hiển thị product information from Gemini
                 if (data.tags && Array.isArray(data.tags)) {
                     let tagsHtml = '';
                     data.tags.forEach(tag => {
@@ -6449,7 +6452,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $('#productTags').html(tagsHtml);
                 }
 
-                // Display colors
+                // Hiển thị colors
                 if (data.colors && Array.isArray(data.colors)) {
                     let colorsHtml = '';
                     data.colors.forEach(color => {
@@ -6458,7 +6461,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $('#dominantColors').html(colorsHtml);
                 }
                 
-                // Display image-specific details if available
+                // Hiển thị image-specific details nếu có sẵn
                 if (data.image_details && Array.isArray(data.image_details)) {
                     let imageDetailsHtml = '<div class="mt-3 ai-analysis-alert"><h6>Chi tiết từng ảnh:</h6><div class="row">';
                     data.image_details.forEach((detail, index) => {
@@ -6478,7 +6481,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     analysisInfo += imageDetailsHtml;
                 }
                 
-                // Remove old analysis alert before adding new one
+                // Xóa old analysis alert before adding new one
                 $('#aiResults .ai-analysis-alert').remove();
                 
                 // Prepend analysis info to AI results (keep static HTML)
@@ -6494,670 +6497,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }, 1000);
             }
             
-            // Hàm chuẩn hóa tên loại sản phẩm (copy from them_san_pham_ai.php)
-            function standardizeProductType(type) {
-                if (!type) return '';
-                
-                const typeMapping = {
-                    // Giày thể thao - Giữ nguyên "Sneaker"
-                    'sneaker': 'Sneaker',
-                    'sneakers': 'Sneaker',
-                    'giày thể thao': 'Sneaker',
-                    'giay the thao': 'Sneaker',
-                    'running': 'Sneaker',
-                    'running shoe': 'Sneaker',
-                    'running shoes': 'Sneaker',
-                    'training': 'Sneaker',
-                    'training shoe': 'Sneaker',
-                    'training shoes': 'Sneaker',
-                    'casual': 'Sneaker',
-                    'casual shoe': 'Sneaker',
-                    'casual shoes': 'Sneaker',
-                    'lifestyle': 'Sneaker',
-                    'basketball': 'Sneaker',
-                    'basketball shoe': 'Sneaker',
-                    'basketball shoes': 'Sneaker',
-                    'tennis': 'Sneaker',
-                    'tennis shoe': 'Sneaker',
-                    'tennis shoes': 'Sneaker',
-                    'walking shoe': 'Sneaker',
-                    'walking shoes': 'Sneaker',
-                    'gym shoe': 'Sneaker',
-                    'gym shoes': 'Sneaker',
-                    'athletic shoe': 'Sneaker',
-                    'athletic shoes': 'Sneaker',
-                    'sport shoe': 'Sneaker',
-                    'sport shoes': 'Sneaker',
-                    'sports shoe': 'Sneaker',
-                    'sports shoes': 'Sneaker',
-                    
-                    // Sandal - Giữ nguyên "Sandal"
-                    'sandal': 'Sandal',
-                    'sandals': 'Sandal',
-                    'dép': 'Sandal',
-                    'dep': 'Sandal',
-                    'slide': 'Sandal',
-                    'flip-flop': 'Sandal',
-                    'flipflop': 'Sandal',
-                    
-                    // Giày cao gót
-                    'high heels': 'Giày cao gót',
-                    'high heel': 'Giày cao gót',
-                    'cao gót': 'Giày cao gót',
-                    'cao got': 'Giày cao gót',
-                    'giày cao gót': 'Giày cao gót',
-                    'giay cao got': 'Giày cao gót',
-                    'pump': 'Giày cao gót',
-                    'pumps': 'Giày cao gót',
-                    'stiletto': 'Giày cao gót',
-                    'stilettos': 'Giày cao gót',
-                    'block heel': 'Giày cao gót',
-                    'kitten heels': 'Giày cao gót',
-                    'kitten heel': 'Giày cao gót',
-                    'slingback': 'Giày cao gót',
-                    'slingbacks': 'Giày cao gót',
-                    
-                    // Giày đế xuồng
-                    'wedge': 'Giày đế xuồng',
-                    'wedges': 'Giày đế xuồng',
-                    'đế xuồng': 'Giày đế xuồng',
-                    'de xuong': 'Giày đế xuồng',
-                    'giày đế xuồng': 'Giày đế xuồng',
-                    'sandal đế xuồng': 'Giày đế xuồng',  // Ưu tiên đế xuồng hơn sandal
-                    'sandal de xuong': 'Giày đế xuồng',
-                    'sandal bịt mũi đế xuồng': 'Giày đế xuồng',
-                    'sandal bit mui de xuong': 'Giày đế xuồng',
-                    'wedge sandal': 'Giày đế xuồng',
-                    'wedge sandals': 'Giày đế xuồng',
-                    
-                    // Giày bệt
-                    'flat': 'Giày bệt',
-                    'flats': 'Giày bệt',
-                    'giày bệt': 'Giày bệt',
-                    'giay bet': 'Giày bệt',
-                    'ballet flat': 'Giày bệt',
-                    'ballet flats': 'Giày bệt',
-                    'giày búp bê': 'Giày bệt',
-                    'bệt': 'Giày bệt',
-                    'bet': 'Giày bệt',
-                    
-                    // Giày lười
-                    'loafer': 'Giày lười',
-                    'loafers': 'Giày lười',
-                    'giày lười': 'Giày lười',
-                    'giay luoi': 'Giày lười',
-                    'slip-on': 'Giày lười',
-                    'slip on': 'Giày lười',
-                    'slipon': 'Giày lười',
-                    'moccasin': 'Giày lười',
-                    'moccasins': 'Giày lười',
-                    'boat shoe': 'Giày lười',
-                    'boat shoes': 'Giày lười',
-                    
-                    // Giày tây
-                    'oxford': 'Giày tây',
-                    'oxfords': 'Giày tây',
-                    'giày tây': 'Giày tây',
-                    'giay tay': 'Giày tây',
-                    'dress shoe': 'Giày tây',
-                    'dress shoes': 'Giày tây',
-                    'formal shoe': 'Giày tây',
-                    'formal shoes': 'Giày tây',
-                    'business shoe': 'Giày tây',
-                    'derby': 'Giày tây',
-                    'brogue': 'Giày tây',
-                    
-                    // Boot
-                    'boot': 'Boot',
-                    'boots': 'Boot',
-                    'giày boot': 'Boot',
-                    'giay boot': 'Boot',
-                    'ankle boot': 'Boot',
-                    'ankle boots': 'Boot',
-                    'chelsea boot': 'Boot',
-                    'chelsea boots': 'Boot',
-                    'combat boot': 'Boot',
-                    'combat boots': 'Boot',
-                    'knee boot': 'Boot',
-                    'knee boots': 'Boot',
-                    
-                    // Giày mules
-                    'mule': 'Giày mules',
-                    'mules': 'Giày mules',
-                    'giày mules': 'Giày mules',
-                    
-                    // Giày quai hậu
-                    'quai hậu': 'Giày quai hậu',
-                    'quai hau': 'Giày quai hậu',
-                    'giày quai hậu': 'Giày quai hậu',
-                    
-                    // Giày thể thao chuyên dụng
-                    'football boot': 'Giày thể thao chuyên dụng',
-                    'football boots': 'Giày thể thao chuyên dụng',
-                    'soccer cleat': 'Giày thể thao chuyên dụng',
-                    'golf shoe': 'Giày thể thao chuyên dụng',
-                    'golf shoes': 'Giày thể thao chuyên dụng',
-                    
-                    // ============ THÊM CÁC LOẠI PHỔ BIẾN TẠI VIỆT NAM ============
-                    
-                    // Dép (các biến thể)
-                    'dép lê': 'Dép',
-                    'dep le': 'Dép',
-                    'dép đi trong nhà': 'Dép',
-                    'dep di trong nha': 'Dép',
-                    'dép xỏ ngón': 'Dép',
-                    'dep xo ngon': 'Dép',
-                    'dép quai ngang': 'Dép',
-                    'dep quai ngang': 'Dép',
-                    'slipper': 'Dép',
-                    'slippers': 'Dép',
-                    'house slipper': 'Dép',
-                    'indoor slipper': 'Dép',
-                    
-                    // Giày thể thao (các biến thể tiếng Việt)
-                    'giày chạy bộ': 'Sneaker',
-                    'giay chay bo': 'Sneaker',
-                    'giày tập gym': 'Sneaker',
-                    'giay tap gym': 'Sneaker',
-                    'giày tập luyện': 'Sneaker',
-                    'giay tap luyen': 'Sneaker',
-                    'giày đá bóng': 'Giày thể thao chuyên dụng',
-                    'giay da bong': 'Giày thể thao chuyên dụng',
-                    
-                    // Giày cao gót (các biến thể)
-                    'giày gót nhọn': 'Giày cao gót',
-                    'giay got nhon': 'Giày cao gót',
-                    'giày gót vuông': 'Giày cao gót',
-                    'giay got vuong': 'Giày cao gót',
-                    'giày gót thấp': 'Giày cao gót',
-                    'giay got thap': 'Giày cao gót',
-                    'giày cao cổ': 'Giày cao gót',
-                    'giay cao co': 'Giày cao gót',
-                    
-                    // Boot (các biến thể)
-                    'bốt': 'Boot',
-                    'bot': 'Boot',
-                    'giày bốt': 'Boot',
-                    'giay bot': 'Boot',
-                    'boot cao cổ': 'Boot',
-                    'boot cao co': 'Boot',
-                    'boot cổ ngắn': 'Boot',
-                    'boot co ngan': 'Boot',
-                    'boot da': 'Boot',
-                    'boot cao gót': 'Boot',
-                    'boot cao got': 'Boot',
-                    'martin': 'Boot',
-                    'dr martens': 'Boot',
-                    'dr. martens': 'Boot',
-                    
-                    // Sandal (các biến thể - NHƯNG KHÔNG BAO GỒM ĐẾ XUỒNG)
-                    'sandal quai': 'Sandal',
-                    'sandal nữ': 'Sandal',
-                    'sandal nu': 'Sandal',
-                    'sandal nam': 'Sandal',
-                    'sandal trẻ em': 'Sandal',
-                    'sandal tre em': 'Sandal',
-                    'sandal bít mũi': 'Sandal',  // Trừ khi có "đế xuồng" thì sẽ bị override
-                    'sandal bit mui': 'Sandal',
-                    'sandal hở mũi': 'Sandal',
-                    'sandal ho mui': 'Sandal',
-                    
-                    // Giày lười (các biến thể)
-                    'giày không dây': 'Giày lười',
-                    'giay khong day': 'Giày lười',
-                    'giày slip on': 'Giày lười',
-                    'giay slip on': 'Giày lười',
-                    'giày lười nam': 'Giày lười',
-                    'giay luoi nam': 'Giày lười',
-                    'giày lười nữ': 'Giày lười',
-                    'giay luoi nu': 'Giày lười',
-                    'giày da lười': 'Giày lười',
-                    'giay da luoi': 'Giày lười',
-                    
-                    // Giày bệt (các biến thể)
-                    'giày đế bằng': 'Giày bệt',
-                    'giay de bang': 'Giày bệt',
-                    'giày búp bê nữ': 'Giày bệt',
-                    'giay bup be nu': 'Giày bệt',
-                    'giày ballerina': 'Giày bệt',
-                    'giay ballerina': 'Giày bệt',
-                    'giày êm chân': 'Giày bệt',
-                    'giay em chan': 'Giày bệt',
-                    
-                    // Giày tây (các biến thể)
-                    'giày da nam': 'Giày tây',
-                    'giay da nam': 'Giày tây',
-                    'giày công sở': 'Giày tây',
-                    'giay cong so': 'Giày tây',
-                    'giày công sở nam': 'Giày tây',
-                    'giay cong so nam': 'Giày tây',
-                    'giày dây': 'Giày tây',
-                    'giay day': 'Giày tây',
-                    'giày buộc dây': 'Giày tây',
-                    'giay buoc day': 'Giày tây',
-                    
-                    // Giày đế xuồng (CỰC KỲ QUAN TRỌNG - các biến thể)
-                    'giày sandal đế xuồng': 'Giày đế xuồng',
-                    'giay sandal de xuong': 'Giày đế xuồng',
-                    'sandal nữ đế xuồng': 'Giày đế xuồng',
-                    'sandal nu de xuong': 'Giày đế xuồng',
-                    'giày đế bằng xuồng': 'Giày đế xuồng',
-                    'giay de bang xuong': 'Giày đế xuồng',
-                    'giày nữ đế xuồng': 'Giày đế xuồng',
-                    'giay nu de xuong': 'Giày đế xuồng',
-                    'giày cao gót đế xuồng': 'Giày đế xuồng',
-                    'giay cao got de xuong': 'Giày đế xuồng',
-                    'wedge heel': 'Giày đế xuồng',
-                    'wedge heel sandal': 'Giày đế xuồng',
-                    'wedge heel shoe': 'Giày đế xuồng',
-                    'platform wedge': 'Giày đế xuồng',
-                    
-                    // Giày mules (các biến thể)
-                    'giày không gót': 'Giày mules',
-                    'giay khong got': 'Giày mules',
-                    'giày hở gót': 'Giày mules',
-                    'giay ho got': 'Giày mules',
-                    'giày sục': 'Giày mules',
-                    'giay suc': 'Giày mules',
-                    
-                    // Giày quai hậu (các biến thể)
-                    'giày có quai hậu': 'Giày quai hậu',
-                    'giay co quai hau': 'Giày quai hậu',
-                    'giày quai sau': 'Giày quai hậu',
-                    'giay quai sau': 'Giày quai hậu',
-                    'slingback heels': 'Giày quai hậu',
-                    'slingback pumps': 'Giày quai hậu',
-                    
-                    // Các loại đặc biệt khác
-                    'giày vải': 'Sneaker',  // Thường là giày thể thao
-                    'giay vai': 'Sneaker',
-                    'giày canvas': 'Sneaker',
-                    'giay canvas': 'Sneaker',
-                    'converse': 'Sneaker',
-                    'vans': 'Sneaker',
-                    
-                    // Giày thời trang (tùy context)
-                    'giày thời trang': 'Sneaker',  // Mặc định về Sneaker
-                    'giay thoi trang': 'Sneaker',
-                    'giày casual nữ': 'Sneaker',
-                    'giay casual nu': 'Sneaker',
-                    'giày casual nam': 'Sneaker',
-                    'giay casual nam': 'Sneaker',
-                    
-                    // Giày oxford (dạng tây)
-                    'giày oxford': 'Giày tây',
-                    'giay oxford': 'Giày tây',
-                    'giày oxford nam': 'Giày tây',
-                    'giay oxford nam': 'Giày tây',
-                    
-                    // Espadrilles (giày vải cói - thường là bệt)
-                    'espadrille': 'Giày bệt',
-                    'espadrilles': 'Giày bệt',
-                    'giày cói': 'Giày bệt',
-                    'giay coi': 'Giày bệt',
-                    
-                    // Platform (giày đế cao nhưng không phải xuồng)
-                    'platform': 'Giày cao gót',
-                    'platform shoe': 'Giày cao gót',
-                    'platform shoes': 'Giày cao gót',
-                    'giày đế cao': 'Giày cao gót',
-                    'giay de cao': 'Giày cao gót',
-                    
-                    // Giày Mary Jane
-                    'mary jane': 'Giày bệt',
-                    'mary janes': 'Giày bệt',
-                    'giày mary jane': 'Giày bệt',
-                    
-                    // Giày monk strap
-                    'monk strap': 'Giày tây',
-                    'monk straps': 'Giày tây',
-                    'giày monk': 'Giày tây',
-                    
-                    // Giày penny loafer
-                    'penny loafer': 'Giày lười',
-                    'penny loafers': 'Giày lười',
-                    
-                    // Giày driving (lái xe)
-                    'driving shoe': 'Giày lười',
-                    'driving shoes': 'Giày lười',
-                    'giày lái xe': 'Giày lười',
-                    'giay lai xe': 'Giày lười',
-                };
-                
-                const typeLower = type.trim().toLowerCase();
-                
-                // Sắp xếp keys theo độ dài giảm dần để kiểm tra cụm từ dài trước
-                const sortedKeys = Object.keys(typeMapping).sort((a, b) => b.length - a.length);
-                
-                // Kiểm tra exact match trước
-                if (typeMapping[typeLower]) {
-                    return typeMapping[typeLower];
-                }
-                
-                // Nếu không có exact match, tìm partial match với cụm từ dài nhất
-                for (const key of sortedKeys) {
-                    if (typeLower.includes(key)) {
-                        console.log(`🔍 Partial match: '${typeLower}' contains '${key}' → '${typeMapping[key]}'`);
-                        return typeMapping[key];
-                    }
-                }
-                
-                // Nếu không tìm thấy, giữ nguyên
-                return type;
-            }
-            
-            // Hàm chuẩn hóa màu sắc để đảm bảo nhất quán
-            function standardizeColor(color) {
-                if (!color) return '';
-                
-                const colorMapping = {
-                    // ============ BASIC COLORS (Màu cơ bản) ============
-                    'black': 'Đen',
-                    'white': 'Trắng',
-                    'red': 'Đỏ',
-                    'blue': 'Xanh dương',
-                    'green': 'Xanh lá',
-                    'yellow': 'Vàng',
-                    'orange': 'Cam',
-                    'purple': 'Tím',
-                    'pink': 'Hồng',
-                    'brown': 'Nâu',
-                    'gray': 'Xám',
-                    'grey': 'Xám',
-                    
-                    // ============ SPECIAL COLORS (Màu đặc biệt) ============
-                    'beige': 'Beige',
-                    'cream': 'Trắng kem',
-                    'nude': 'Nude',
-                    'gold': 'Vàng kim',
-                    'silver': 'Bạc',
-                    'bronze': 'Đồng',
-                    'copper': 'Đồng đỏ',
-                    'rose gold': 'Vàng hồng',
-                    'rosegold': 'Vàng hồng',
-                    
-                    // ============ VIETNAMESE VARIATIONS (Biến thể tiếng Việt) ============
-                    'đen': 'Đen',
-                    'den': 'Đen',
-                    'trắng': 'Trắng',
-                    'trang': 'Trắng',
-                    'đỏ': 'Đỏ',
-                    'do': 'Đỏ',
-                    'xanh': 'Xanh dương',
-                    'xanh dương': 'Xanh dương',
-                    'xanh duong': 'Xanh dương',
-                    'xanh lá': 'Xanh lá',
-                    'xanh la': 'Xanh lá',
-                    'xanh lá cây': 'Xanh lá',
-                    'vàng': 'Vàng',
-                    'vang': 'Vàng',
-                    'cam': 'Cam',
-                    'tím': 'Tím',
-                    'tim': 'Tím',
-                    'hồng': 'Hồng',
-                    'hong': 'Hồng',
-                    'nâu': 'Nâu',
-                    'nau': 'Nâu',
-                    'xám': 'Xám',
-                    'xam': 'Xám',
-                    'be': 'Beige',
-                    'kem': 'Trắng kem',
-                    'trắng be': 'Beige',
-                    'trang be': 'Beige',
-                    'màu be': 'Beige',
-                    'mau be': 'Beige',
-                    'màu kem': 'Trắng kem',
-                    'mau kem': 'Trắng kem',
-                    'màu nude': 'Nude',
-                    'mau nude': 'Nude',
-                    'vàng kim': 'Vàng kim',
-                    'vang kim': 'Vàng kim',
-                    'bạc': 'Bạc',
-                    'bac': 'Bạc',
-                    
-                    // ============ SHADES & MODIFIERS (Sắc độ & Bổ nghĩa) ============
-                    'dark': 'đậm',
-                    'light': 'nhạt',
-                    'bright': 'tươi',
-                    'pale': 'nhạt',
-                    'deep': 'đậm',
-                    'vivid': 'rực rỡ',
-                    'pastel': 'pastel',
-                    'neon': 'neon',
-                    'matte': 'mờ',
-                    'metallic': 'kim loại',
-                    'fluorescent': 'huỳnh quang',
-                    
-                    // ============ BLUE FAMILY (Họ màu xanh dương) ============
-                    'navy': 'Xanh navy',
-                    'navy blue': 'Xanh navy',
-                    'royal blue': 'Xanh hoàng gia',
-                    'sky blue': 'Xanh da trời',
-                    'baby blue': 'Xanh baby',
-                    'powder blue': 'Xanh phấn',
-                    'turquoise': 'Xanh ngọc',
-                    'teal': 'Xanh lục',
-                    'cyan': 'Xanh cyan',
-                    'aqua': 'Xanh nước biển',
-                    'cobalt': 'Xanh cobalt',
-                    'indigo': 'Xanh chàm',
-                    'sapphire': 'Xanh sapphire',
-                    'azure': 'Xanh thiên thanh',
-                    'cerulean': 'Xanh cerulean',
-                    
-                    // ============ GREEN FAMILY (Họ màu xanh lá) ============
-                    'lime': 'Xanh chanh',
-                    'lime green': 'Xanh chanh',
-                    'olive': 'Xanh ô liu',
-                    'olive green': 'Xanh ô liu',
-                    'mint': 'Xanh bạc hà',
-                    'mint green': 'Xanh bạc hà',
-                    'emerald': 'Xanh lục bảo',
-                    'forest green': 'Xanh rừng',
-                    'sage': 'Xanh sage',
-                    'sage green': 'Xanh sage',
-                    'seafoam': 'Xanh biển',
-                    'pistachio': 'Xanh hạt dẻ',
-                    'jade': 'Xanh ngọc bích',
-                    'hunter green': 'Xanh thợ săn',
-                    'kelly green': 'Xanh kelly',
-                    
-                    // ============ RED FAMILY (Họ màu đỏ) ============
-                    'burgundy': 'Đỏ burgundy',
-                    'wine': 'Đỏ rượu',
-                    'wine red': 'Đỏ rượu',
-                    'maroon': 'Đỏ nâu',
-                    'crimson': 'Đỏ thẫm',
-                    'scarlet': 'Đỏ tươi',
-                    'cherry': 'Đỏ cherry',
-                    'cherry red': 'Đỏ cherry',
-                    'ruby': 'Đỏ ruby',
-                    'brick': 'Đỏ gạch',
-                    'brick red': 'Đỏ gạch',
-                    'tomato': 'Đỏ cà chua',
-                    'rust': 'Đỏ rỉ sét',
-                    'terracotta': 'Đỏ đất nung',
-                    'cardinal': 'Đỏ hồng y',
-                    
-                    // ============ PINK FAMILY (Họ màu hồng) ============
-                    'hot pink': 'Hồng cánh sen',
-                    'fuchsia': 'Hồng fuchsia',
-                    'magenta': 'Hồng magenta',
-                    'rose': 'Hồng rose',
-                    'blush': 'Hồng phấn',
-                    'blush pink': 'Hồng phấn',
-                    'baby pink': 'Hồng baby',
-                    'salmon': 'Hồng cam',
-                    'coral': 'San hô',
-                    'peach': 'Hồng đào',
-                    'mauve': 'Hồng tím',
-                    'dusty rose': 'Hồng cánh hoa khô',
-                    'dusty pink': 'Hồng cánh hoa khô',
-                    
-                    // ============ PURPLE/VIOLET FAMILY (Họ màu tím) ============
-                    'lavender': 'Tím lavender',
-                    'lilac': 'Tím lilac',
-                    'violet': 'Tím violet',
-                    'plum': 'Tím mận',
-                    'eggplant': 'Tím cà',
-                    'orchid': 'Tím phong lan',
-                    'amethyst': 'Tím thạch anh',
-                    'periwinkle': 'Tím periwinkle',
-                    
-                    // ============ BROWN FAMILY (Họ màu nâu) ============
-                    'tan': 'Nâu nhạt',
-                    'taupe': 'Nâu xám',
-                    'khaki': 'Kaki',
-                    'camel': 'Nâu lạc đà',
-                    'chocolate': 'Nâu sô cô la',
-                    'coffee': 'Nâu cà phê',
-                    'mocha': 'Nâu mocha',
-                    'chestnut': 'Nâu hạt dẻ',
-                    'cognac': 'Nâu cognac',
-                    'mahogany': 'Nâu gỗ',
-                    'espresso': 'Nâu espresso',
-                    'sienna': 'Nâu sienna',
-                    'umber': 'Nâu umber',
-                    'sepia': 'Nâu sepia',
-                    
-                    // ============ NEUTRAL FAMILY (Họ màu trung tính) ============
-                    'ivory': 'Ngà',
-                    'ecru': 'Ngà sữa',
-                    'linen': 'Vải lanh',
-                    'champagne': 'Champagne',
-                    'sand': 'Cát',
-                    'stone': 'Đá',
-                    'charcoal': 'Xám đen',
-                    'slate': 'Xám đá phiến',
-                    'slate gray': 'Xám đá phiến',
-                    'ash': 'Xám tro',
-                    'ash gray': 'Xám tro',
-                    'dove gray': 'Xám bồ câu',
-                    'smoke': 'Xám khói',
-                    'pewter': 'Xám thiếc',
-                    'graphite': 'Xám graphite',
-                    
-                    // ============ YELLOW/ORANGE FAMILY (Họ màu vàng/cam) ============
-                    'mustard': 'Vàng mù tạt',
-                    'goldenrod': 'Vàng goldenrod',
-                    'canary': 'Vàng canary',
-                    'lemon': 'Vàng chanh',
-                    'amber': 'Hổ phách',
-                    'apricot': 'Cam mơ',
-                    'tangerine': 'Cam quýt',
-                    'pumpkin': 'Cam bí ngô',
-                    'burnt orange': 'Cam cháy',
-                    'rust orange': 'Cam rỉ sét',
-                    
-                    // ============ WHITE VARIATIONS (Biến thể màu trắng) ============
-                    'off-white': 'Trắng ngà',
-                    'off white': 'Trắng ngà',
-                    'snow white': 'Trắng tuyết',
-                    'pearl': 'Trắng ngọc trai',
-                    'pearl white': 'Trắng ngọc trai',
-                    'milk white': 'Trắng sữa',
-                    'eggshell': 'Trắng vỏ trứng',
-                    
-                    // ============ BLACK VARIATIONS (Biến thể màu đen) ============
-                    'jet black': 'Đen tuyền',
-                    'ebony': 'Đen mun',
-                    'onyx': 'Đen onyx',
-                    'coal': 'Đen than',
-                    'midnight': 'Đen nửa đêm',
-                    'raven': 'Đen quạ',
-                    
-                    // ============ METALLIC (Kim loại) ============
-                    'platinum': 'Bạch kim',
-                    'gunmetal': 'Xám kim loại',
-                    'chrome': 'Chrome',
-                    'titanium': 'Titan',
-                    
-                    // ============ COMBINATIONS (Tổ hợp màu thông dụng) ============
-                    'light blue': 'Xanh dương nhạt',
-                    'dark blue': 'Xanh dương đậm',
-                    'light green': 'Xanh lá nhạt',
-                    'dark green': 'Xanh lá đậm',
-                    'bright red': 'Đỏ tươi',
-                    'dark red': 'Đỏ đậm',
-                    'light pink': 'Hồng nhạt',
-                    'dark pink': 'Hồng đậm',
-                    'light purple': 'Tím nhạt',
-                    'dark purple': 'Tím đậm',
-                    'light brown': 'Nâu nhạt',
-                    'dark brown': 'Nâu đậm',
-                    'light gray': 'Xám nhạt',
-                    'dark gray': 'Xám đậm',
-                    'light grey': 'Xám nhạt',
-                    'dark grey': 'Xám đậm',
-                    'bright yellow': 'Vàng tươi',
-                    'bright orange': 'Cam tươi',
-                    'pale pink': 'Hồng nhạt',
-                    'pale blue': 'Xanh nhạt',
-                    'pale green': 'Xanh nhạt',
-                    'pale yellow': 'Vàng nhạt',
-                    
-                    // ============ MULTICOLOR (Nhiều màu) ============
-                    'multicolor': 'Nhiều màu',
-                    'multi-color': 'Nhiều màu',
-                    'rainbow': 'Cầu vồng',
-                    'colorful': 'Nhiều màu',
-                    'mixed': 'Pha trộn',
-                    'tie dye': 'Tie dye',
-                    'tie-dye': 'Tie dye',
-                    'camouflage': 'Rằn ri',
-                    'camo': 'Rằn ri',
-                    'leopard': 'Da báo',
-                    'zebra': 'Ngựa vằn',
-                    'animal print': 'Họa tiết động vật',
-                    
-                    // ============ TRANSPARENT/CLEAR (Trong suốt) ============
-                    'transparent': 'Trong suốt',
-                    'clear': 'Trong',
-                    'translucent': 'Mờ đục',
-                };
-                
-                const colorLower = color.trim().toLowerCase();
-                
-                // Check exact match first
-                if (colorMapping[colorLower]) {
-                    return colorMapping[colorLower];
-                }
-                
-                // Try to translate parts if it contains multiple words
-                const words = colorLower.split(/\s+/);
-                if (words.length > 1) {
-                    const translatedWords = [];
-                    for (const word of words) {
-                        if (colorMapping[word]) {
-                            translatedWords.push(colorMapping[word]);
-                        } else {
-                            // Capitalize first letter if not found
-                            translatedWords.push(word.charAt(0).toUpperCase() + word.slice(1));
-                        }
-                    }
-                    return translatedWords.join(' ');
-                }
-                
-                // If not found, capitalize first letter
-                return color.charAt(0).toUpperCase() + color.slice(1);
-            }
-            
-            // Hàm chuẩn hóa danh sách màu sắc
-            function normalizeColors(colors) {
-                if (!colors) return [];
-                
-                // Nếu là mảng, chuẩn hóa từng phần tử
-                if (Array.isArray(colors)) {
-                    return colors.map(color => standardizeColor(color));
-                }
-                
-                // Nếu là chuỗi, tách và chuẩn hóa
-                if (typeof colors === 'string') {
-                    return colors.split(',').map(color => standardizeColor(color.trim())).filter(c => c);
-                }
-                
-                return [];
-            }
+            // ========================================
+            // NOTE: Normalization functions (standardizeProductType, standardizeColor, 
+            // standardizeBrand, normalizeColors) are now loaded from js/normalization-utils.js
+            // ========================================
             
             // Hàm hiển thị thông tin AI đã tự động điền
             function displayAIAutoFilledInfo(data) {
@@ -7212,7 +6555,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
                 
-                // Build table 1 (left column)
+                // Xây dựng table 1 (left column)
                 let table1Html = '';
                 if (data.name) {
                     table1Html += `
@@ -7257,7 +6600,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     `;
                 }
                 
-                // Build table 2 (right column)
+                // Xây dựng table 2 (right column)
                 let table2Html = '';
                 if (data.colors) {
                     const colorDisplay = Array.isArray(data.colors) ? data.colors.join(', ') : data.colors;
@@ -7306,7 +6649,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $('#aiAutoFilledTable1').html(table1Html);
                 $('#aiAutoFilledTable2').html(table2Html);
                 
-                // Show the auto-filled info section
+                // Hiển thị the auto-filled info section
                 $('#aiAutoFilledInfo').slideDown();
                 
                 console.log('✅ AI auto-filled info displayed');
@@ -7316,7 +6659,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             function loadExistingProductData(productId, productName) {
                 console.log('🔄 Loading existing product data for ID:', productId);
                 
-                // Show loading
+                // Hiển thị loading
                 $('#aiResults').prepend('<div class="alert alert-info ai-analysis-alert" id="loadingProductData"><i class="fas fa-spinner fa-spin"></i> Đang tải thông tin sản phẩm hiện tại...</div>');
                 
                 $.ajax({
@@ -7331,17 +6674,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $('#loadingProductData').remove();
                         
                         if (response.success) {
-                            // Set update mode
+                            // Đặt update mode
                             isUpdateMode = true;
                             updateProductId = productId;
                             
-                            // Move to step 4
+                            // Di chuyển to step 4
                             moveToStep(4);
                             
                             // Populate form with existing data
                             populateFormWithExistingData(response.product);
                             
-                            // Show update mode alert
+                            // Hiển thị update mode alert
                             $('#productForm').prepend(`
                                 <div class="alert alert-info" id="updateModeAlert">
                                     <i class="fas fa-edit"></i> <strong>Chế độ cập nhật sản phẩm:</strong> 
@@ -7367,7 +6710,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             function loadExistingProductDataWithAI(productId, productName) {
                 console.log('🤖 Loading existing product data with AI suggestions for ID:', productId);
                 
-                // Show loading
+                // Hiển thị loading
                 $('#aiResults').prepend('<div class="alert alert-info ai-analysis-alert" id="loadingProductData"><i class="fas fa-spinner fa-spin"></i> Đang tải thông tin sản phẩm và áp dụng gợi ý AI...</div>');
                 
                 $.ajax({
@@ -7382,17 +6725,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $('#loadingProductData').remove();
                         
                         if (response.success) {
-                            // Set update mode
+                            // Đặt update mode
                             isUpdateMode = true;
                             updateProductId = productId;
                             
-                            // Move to step 4
+                            // Di chuyển to step 4
                             moveToStep(4);
                             
                             // Populate form with mixed data (AI suggestions + existing data)
                             populateFormWithMixedData(response.product, aiData);
                             
-                            // Show update mode alert with AI note
+                            // Hiển thị update mode alert with AI note
                             $('#productForm').prepend(`
                                 <div class="alert alert-success" id="updateModeAlert">
                                     <i class="fas fa-robot"></i> <strong>Chế độ cập nhật với AI:</strong> 
@@ -7419,7 +6762,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 console.log('📝 Populating form with existing product data:', product);
                 console.log('🚨 useExistingDataOnly flag:', useExistingDataOnly);
                 
-                // Clear any AI data first if we're using existing data only
+                // Xóa any AI data first if we're using existing data only
                 if (useExistingDataOnly) {
                     console.log('🔒 Using existing data only - blocking AI override');
                 }
@@ -7435,7 +6778,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $('#color').val(product.color || '');
                 $('#price').val(product.price || '');
                 
-                // Set category if available
+                // Đặt category nếu có sẵn
                 if (product.category_id) {
                     $('#categoryId').val(product.category_id); // Correct ID
                 }
@@ -7453,12 +6796,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     category: $('#categoryId').val()
                 });
                 
-                // Add note about SKU
+                // Thêm note about SKU
                 if (!$('#skuNote').length) {
                     $('#baseSku').after('<small id="skuNote" class="form-text text-muted"><i class="fas fa-lock"></i> SKU hiện tại được giữ nguyên. Size mới sẽ tạo SKU mới.</small>');
                 }
                 
-                // Load existing sizes
+                // Tải existing sizes
                 if (product.sizes && product.sizes.length > 0) {
                     loadExistingSizes(product.sizes);
                 }
@@ -7468,7 +6811,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             function populateFormWithMixedData(existingProduct, aiData) {
                 console.log('🔀 Populating form with mixed data:', { existingProduct, aiData });
                 
-                // Use AI suggestions for these fields (if available), otherwise use existing
+                // Use AI suggestions for these fields (nếu có sẵn), otherwise use existing
                 $('#productName').val(aiData?.suggested_name || existingProduct.name || ''); // Correct ID
                 $('#brand').val(aiData?.brand || existingProduct.brand || '');
                 $('#type').val(aiData?.type || existingProduct.type || '');
@@ -7485,7 +6828,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $('#tags').val(combinedTags);
                 
-                // For color, prefer AI analysis if available
+                // For color, prefer AI analysis nếu có sẵn
                 const aiColors = aiData?.colors;
                 if (aiColors && Array.isArray(aiColors) && aiColors.length > 0) {
                     $('#color').val(aiColors.join(', '));
@@ -7502,7 +6845,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Keep existing SKU (read-only)
                 $('#baseSku').val(existingProduct.sku || '').prop('readonly', true); // Correct ID
                 
-                // Add note about SKU and AI usage
+                // Thêm note about SKU and AI usage
                 if (!$('#skuNote').length) {
                     $('#baseSku').after(`
                         <small id="skuNote" class="form-text text-muted">
@@ -7512,7 +6855,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     `);
                 }
                 
-                // Load existing sizes
+                // Tải existing sizes
                 if (existingProduct.sizes && existingProduct.sizes.length > 0) {
                     loadExistingSizes(existingProduct.sizes);
                 }
@@ -7590,10 +6933,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             function loadExistingSizes(existingSizes) {
                 console.log('👟 Loading existing sizes:', existingSizes);
                 
-                // Clear current sizes
+                // Xóa current sizes
                 $('#sizeContainer').empty();
                 
-                // Add existing sizes (read-only)
+                // Thêm existing sizes (read-only)
                 existingSizes.forEach(sizeData => {
                     addSizeRow(sizeData.size, sizeData.min_quantity, true);
                 });
@@ -7611,12 +6954,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $('button[type="submit"]').html('<i class="fas fa-plus-circle mr-2"></i> <span class="d-none d-sm-inline">Thêm vào phiếu nhập</span><span class="d-inline d-sm-none">Thêm</span>');
                 
                 if (isUpdateMode) {
-                    // Update form title/header to indicate using existing product
+                    // Cập nhật form title/header to indicate using existing product
                     if ($('.card-header h6').length) {
                         $('.card-header h6').html('<i class="fas fa-box-open"></i> Bước 4: Chỉnh sửa thông tin sản phẩm');
                     }
                     
-                    // Update note text
+                    // Cập nhật note text
                     const noteElement = $('.alert-info:contains("Lưu ý:")');
                     if (noteElement.length) {
                         noteElement.html(`
@@ -7649,7 +6992,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 console.log('  📦 Loại sản phẩm:', productType);
                 console.log('  🎨 Màu sắc:', colors);
                 
-                // Validate data
+                // Kiểm tra data
                 if (!productName || !brand) {
                     console.warn('⚠️ Missing required data for duplicate check');
                     $('#aiDuplicateCheckResult').html(`
@@ -7830,11 +7173,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             function displayStockReceiptDuplicateResults(aiData, duplicates, response = null) {
                 console.log('🎯 Displaying inline duplicate results for stock receipt');
                 
-                // 🔥 IMPORTANT: Save AI data to window for later use
+                // 🔥 IMPORTANT: Lưu AI data to window for later use
                 window.aiData = aiData;
                 console.log('💾 Saved AI data to window.aiData:', window.aiData);
                 
-                // Use response data if available, otherwise calculate
+                // Use response data nếu có sẵn, otherwise calculate
                 let maxSimilarity = response ? response.max_similarity : 0;
                 let warningLevel = response ? response.warning_level : 'low';
                 
@@ -8074,7 +7417,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 <i class="fas fa-play mr-1"></i> Kích hoạt lại
                                             </button>
                                             ` : `
-                                            <button class="btn btn-success btn-sm mb-2 px-3 font-weight-bold" onclick="event.stopPropagation(); selectProductForStockReceipt(${product.product_id}, '${product.name.replace(/'/g, "\\'")}')">
+                                            <button class="btn btn-success btn-sm mb-2 px-3 font-weight-bold" 
+                                                    data-product-id="${product.product_id}"
+                                                    data-product-name="${product.name.replace(/"/g, '&quot;').replace(/'/g, '&#39;')}"
+                                                    onclick="event.stopPropagation(); 
+                                                        const btn = event.currentTarget;
+                                                        selectProductForStockReceipt(
+                                                            btn.dataset.productId, 
+                                                            btn.dataset.productName
+                                                        );">
                                                 <i class="fas fa-warehouse mr-1"></i> Tiếp tục nhập kho
                                             </button>
                                             `}
@@ -8133,10 +7484,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const productId = window.selectedStockReceiptDuplicate.product_id;
                 console.log('📝 Updating stock receipt duplicate product:', productId);
                 
-                // Hide duplicate results
+                // Ẩn duplicate results
                 $('#stockReceiptDuplicateResults').slideUp();
                 
-                // Load product data and move to edit step
+                // Tải product data and move to edit step
                 loadStockReceiptProductDataForUpdate(productId);
             }
             
@@ -8144,7 +7495,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             function loadStockReceiptProductDataForUpdate(productId) {
                 console.log('📊 Loading product data for stock receipt update:', productId);
                 
-                // Show loading
+                // Hiển thị loading
                 const loadingHtml = `
                     <div class="alert alert-info" id="loadingProductUpdate">
                         <i class="fas fa-spinner fa-spin"></i> Đang tải thông tin sản phẩm...
@@ -8152,7 +7503,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 `;
                 $('#step4-content .card-body').prepend(loadingHtml);
                 
-                // Load product details via API
+                // Tải product details via API
                 $.ajax({
                     url: 'api_lay_chi_tiet_san_pham.php',
                     method: 'POST',
@@ -8191,19 +7542,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $('#productPrice').val(productData.price || '');
                 $('#minQuantity').val(productData.min_quantity || '');
                 
-                // Fill other fields if available
+                // Fill other fields nếu có sẵn
                 if (productData.material) $('#material').val(productData.material);
                 if (productData.features) $('#features').val(productData.features);
                 if (productData.tags) $('#tags').val(productData.tags);
                 if (productData.color) $('#color').val(productData.color);
                 if (productData.category_id) $('#category').val(productData.category_id);
                 
-                // Display existing variants if any
+                // Hiển thị existing variants if any
                 if (productData.variants && productData.variants.length > 0) {
                     displayExistingStockReceiptVariants(productData.variants);
                 }
                 
-                // Show success message
+                // Hiển thị success message
                 const successMsg = `
                     <div class="alert alert-success" id="productLoadedSuccess">
                         <i class="fas fa-check-circle"></i>
@@ -8238,7 +7589,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // First, move to step 4 to show the loading state
                 moveToStep(4);
                 
-                // Show loading message in step 4
+                // Hiển thị loading message in step 4
                 const loadingHtml = `
                     <div class="alert alert-info text-center" id="loadingProductForReceipt">
                         <div class="mb-3">
@@ -8250,7 +7601,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 `;
                 $('#step4-content .card-body').html(loadingHtml);
                 
-                // Load product details
+                // Tải product details
                 $.ajax({
                     url: 'api_lay_chi_tiet_san_pham.php',
                     method: 'POST',
@@ -8271,10 +7622,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             // Mark this as stock receipt mode
                             window.stockReceiptMode = true;
                             
-                            // Display stock receipt form for this product
+                            // Hiển thị stock receipt form cho sản phẩm này
                             displayStockReceiptForm(response.data);
                             
-                            // Update step indicator to show we're in step 4 (edit/input)
+                            // Cập nhật step indicator to show we're in step 4 (edit/input)
                             $('.step').removeClass('active completed');
                             $('#step1, #step2, #step3').addClass('completed');
                             $('#step4').addClass('active');
@@ -8311,10 +7662,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             function displayStockReceiptForm(productData) {
                 console.log('📋 Displaying stock receipt form for product:', productData);
                 
-                // Clear any existing content in step 4
+                // Xóa any existing content in step 4
                 $('#step4-content .card-body').empty();
                 
-                // Show success message about selected product
+                // Hiển thị success message about selected product
                 const successMsg = `
                     <div class="alert alert-success border-0 shadow-sm" id="productSelectedSuccess">
                         <div class="d-flex align-items-center">
@@ -8342,7 +7693,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 `;
                 $('#step4-content .card-body').append(successMsg);
                 
-                // Create product info display (readonly)
+                // Tạo product info display (readonly)
                 const productInfoHtml = `
                     <div class="card shadow mb-4" id="selectedProductInfo">
                         <div class="card-header bg-gradient-info text-white">
@@ -8393,7 +7744,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 `;
                 $('#step4-content .card-body').append(productInfoHtml);
                 
-                // Show existing variants for quantity selection
+                // Hiển thị existing variants for quantity selection
                 if (productData.variants && productData.variants.length > 0) {
                     displayVariantsForStockReceipt(productData.variants);
                 } else {
@@ -8401,7 +7752,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     displaySimpleQuantityInput(productData);
                 }
                 
-                // Add submit button for stock receipt
+                // Thêm submit button for stock receipt
                 const submitButtonHtml = `
                     <div class="card shadow mt-4" id="stockReceiptSubmitCard">
                         <div class="card-header bg-gradient-success text-white">
@@ -8432,7 +7783,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 `;
                 
-                // Insert after the last element in the form area
+                // Thêm after the last element in the form area
                 $('#step4-content .card-body').append(submitButtonHtml);
                 
                 // Auto hide success message
@@ -8445,7 +7796,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             function displayVariantsForStockReceipt(variants) {
                 console.log('👟 Displaying variants for stock receipt:', variants);
                 
-                // Create variants section
+                // Tạo variants section
                 const variantsHtml = `
                     <div class="card shadow mb-4" id="stockReceiptVariantsCard">
                         <div class="card-header bg-gradient-primary text-white">
@@ -8538,7 +7889,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $('#variantsContainer').html(variantsListHtml);
                 
-                // Add summary section
+                // Thêm summary section
                 const summaryHtml = `
                     <div class="card border-success mt-4" id="receiptSummaryCard" style="display: none;">
                         <div class="card-header bg-light border-success">
@@ -8553,7 +7904,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 `;
                 $('#variantsContainer').after(summaryHtml);
                 
-                // Add event listeners for quantity/price changes
+                // Thêm event listeners for quantity/price changes
                 $('.variant-quantity, .variant-price').on('input', function() {
                     const variantId = $(this).data('variant-id');
                     updateVariantSubtotal(variantId);
@@ -8590,7 +7941,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         totalItems += quantity;
                         totalValue += (quantity * price);
                         
-                        // Get variant info
+                        // Lấy variant info
                         const variantCard = $(this).closest('.variant-row');
                         const sizeBadge = variantCard.find('.badge-info').text();
                         
@@ -8643,7 +7994,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $('#receiptSummary').html(summaryHtml);
                     $('#receiptSummaryCard').slideDown();
                     
-                    // Enable submit button
+                    // Bật submit button
                     $('#submitStockReceiptBtn').prop('disabled', false);
                 } else {
                     $('#receiptSummaryCard').slideUp();
@@ -8754,13 +8105,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     return;
                 }
                 
-                // Validate input
+                // Kiểm tra input
                 const receiptData = collectStockReceiptData();
                 if (!receiptData) {
                     return; // Validation failed
                 }
                 
-                // Confirm submission
+                // Xác nhận submission
                 const confirmMessage = `Xác nhận nhập kho:\n\n` +
                     `Sản phẩm: ${window.selectedProductForReceipt.product_data.name}\n` +
                     `Tổng số lượng: ${receiptData.totalQuantity}\n` +
@@ -8780,7 +8131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 let totalValue = 0;
                 let hasValidItems = false;
                 
-                // Check if this is simple input or variants
+                // Kiểm tra if this is simple input or variants
                 const simpleQuantity = $('#simpleQuantity').val();
                 const simplePrice = $('#simplePrice').val();
                 
@@ -8853,10 +8204,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             function processStockReceiptSubmission(receiptData) {
                 console.log('⚡ Processing stock receipt submission:', receiptData);
                 
-                // Disable submit button and show loading
+                // Tắt submit button and show loading
                 $('#submitStockReceiptBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...');
                 
-                // Prepare data for API
+                // Chuẩn bị data for API
                 const apiData = {
                     action: 'submit_stock_receipt_for_existing',
                     product_id: receiptData.productData.product_id,
@@ -8879,7 +8230,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (response.success) {
                             console.log('✅ Stock receipt submitted successfully:', response);
                             
-                            // Show success message
+                            // Hiển thị success message
                             showStockReceiptSuccessModal(response, receiptData);
                         } else {
                             console.error('❌ Failed to submit stock receipt:', response);
@@ -8963,7 +8314,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Function to cancel stock receipt process
             function cancelStockReceiptProcess() {
                 if (confirm('Bạn có chắc muốn hủy bỏ quá trình nhập kho? Tất cả dữ liệu đã nhập sẽ bị mất.')) {
-                    // Reset everything
+                    // Đặt lại everything
                     window.selectedProductForReceipt = null;
                     $('#stockReceiptDuplicateResults').slideUp();
                     moveToStep(1);
@@ -8976,18 +8327,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $('#stockReceiptSuccessModal').modal('hide');
                 window.selectedProductForReceipt = null;
                 moveToStep(1);
-                // Clear all form data
+                // Xóa all form data
                 $('#productForm')[0].reset();
                 $('#stockReceiptVariantsCard, #stockReceiptSimpleCard, #stockReceiptSubmitCard').remove();
                 console.log('🔄 Reset to new receipt');
             }
 
-            // Test duplicate check manually
+            // Kiểm tra duplicate check manually
             $('#testDuplicate').click(function() {
                 if (aiData && Object.keys(aiData).length > 0) {
                     console.log('🧪 Manual duplicate check triggered');
                     
-                    // Get current form data for enhanced duplicate checking
+                    // Lấy current form data for enhanced duplicate checking
                     const currentFormData = {
                         name: $('#productName').val() || aiData.name,
                         brand: $('#brand').val() || aiData.brand,
@@ -8999,7 +8350,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         tags: $('#tags').val() || aiData.tags
                     };
                     
-                    // Merge with original AI data
+                    // Gộp with original AI data
                     const enhancedAiData = {
                         ...aiData,
                         ...currentFormData
@@ -9018,7 +8369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 moveToStep(4);
                 displaySuggestions();
                 
-                // Check if there's pending AI data to populate
+                // Kiểm tra if there's pending AI data to populate
                 if (window.pendingAIData) {
                     console.log('🤖 Found pending AI data, populating form...');
                     setTimeout(() => {
@@ -9028,25 +8379,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             });
 
-            // Reset the entire process
+            // Đặt lại the entire process
             $('#resetBtn').click(function() {
                 if (confirm('Bạn có chắc muốn bắt đầu lại? Tất cả dữ liệu sẽ bị xóa.')) {
-                    // Reset all variables
+                    // Đặt lại all variables
                     uploadedImages = [];
                     primaryImageIndex = 0;
                     aiData = null;
                     suggestions = null;
                     
-                    // Clear all form fields
+                    // Xóa all form fields
                     $('#productForm')[0].reset();
                     
-                    // Reset UI
+                    // Đặt lại UI
                     $('#imagePreview').empty();
                     $('#analyzeSection').hide();
                     $('#aiResults').hide();
                     $('#suggestionCard').hide();
                     
-                    // Reset upload area
+                    // Đặt lại upload area
                     resetUploadArea();
                     
                     // Go back to step 2 (upload)
@@ -9063,19 +8414,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $('#backToAnalysis').click(function() {
                 console.log('🔄 User clicked "Quay lại phân tích" - Resetting all data');
                 
-                // Reset all AI-related variables
+                // Đặt lại all AI-related variables
                 uploadedImages = [];
                 aiData = null;
                 suggestions = null;
                 primaryImageIndex = 0;
                 
-                // Reset update mode flags
+                // Đặt lại update mode flags
                 isUpdateMode = false;
                 updateProductId = null;
                 useExistingDataOnly = false;
                 window.useExistingDataOnly = false;
                 
-                // Clear all DOM elements
+                // Xóa all DOM elements
                 $('#imagePreview').empty();
                 $('#analyzedImages').empty();
                 $('#aiResults .ai-analysis-alert').remove();
@@ -9089,22 +8440,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $('#dominantColors').empty();
                 $('#aiDuplicateCheckResult').hide().empty();
                 
-                // Reset upload area to initial state
+                // Đặt lại upload area to initial state
                 resetUploadArea();
                 
-                // Hide analyze button section
+                // Ẩn analyze button section
                 $('#analyzeSection').hide();
                 
                 console.log('✅ Reset complete - Ready for new image upload');
                 
-                // Move back to step 2 (upload step)
+                // Di chuyển back to step 2 (upload step)
                 moveToStep(2);
             });
 
             function displaySuggestions() {
                 console.log('🎯 displaySuggestions called with useExistingDataOnly =', useExistingDataOnly, 'window.useExistingDataOnly =', window.useExistingDataOnly);
                 
-                // Update UI for update mode
+                // Cập nhật UI for update mode
                 updateUIForMode();
                 
                 // Chặn display suggestions nếu đang dùng existing data only
@@ -9365,17 +8716,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 updateSKUExample();
             });
             
-            // Generate SKU button
+            // Tạo SKU button
             $('#generateSkuBtn').click(function() {
                 generateSmartSKU();
             });
             
-            // Update SKU example when sizes change
+            // Cập nhật SKU example when sizes change
             $(document).on('change', '.size-select', function() {
                 updateSKUExample();
             });
             
-            // Update SKU example when adding/removing sizes
+            // Cập nhật SKU example when adding/removing sizes
             $(document).on('click', '#addSizeBtn, .remove-size-btn', function() {
                 setTimeout(() => {
                     updateSKUExample();
@@ -9421,7 +8772,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 console.log('🖱️ Clicked on duplicate product card');
                 
-                // Check if product is inactive
+                // Kiểm tra if product is inactive
                 const status = $(this).data('product-status');
                 if (status === 'inactive') {
                     window.showInactiveWarning();
@@ -9569,7 +8920,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // Save product
+            // Lưu product
             $('#productForm').submit(function(e) {
                 e.preventDefault();
                 
@@ -9622,7 +8973,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Lấy tất cả size rows - hỗ trợ CẢ 2 layout:
                 // 1. New product: table rows in #sizeTableBody
-                // 2. Update existing: div.size-row in #sizesContainer
+                // 2. Cập nhật existing: div.size-row in #sizesContainer
                 
                 // Try update existing product layout first (div.size-row)
                 if ($('.size-row').length > 0) {
@@ -9632,11 +8983,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         const size = $row.find('input[name="sizes[]"]').val();
                         const quantity = $row.find('input[name="import_quantities[]"]').val();
                         const sku = $row.find('input[name="skus[]"]').val();
-                        // Get raw values from formatted inputs
+                        // Lấy raw values from formatted inputs
                         const priceInput = $row.find('input[name="original_prices[]"]');
                         const salePriceInput = $row.find('input[name="sale_prices[]"]');
                         
-                        // Debug log
+                        // Gỡ lỗi log
                         console.log(`🔍 Row #${index} - Size: ${size}`);
                         console.log('  priceInput.data("raw-value"):', priceInput.data('raw-value'));
                         console.log('  priceInput.val():', priceInput.val());
@@ -9671,7 +9022,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         const priceInput = $row.find('input[name="prices[]"], input[name="original_prices[]"]');
                         const salePriceInput = $row.find('input[name="sale_prices[]"]');
                         
-                        // Debug log
+                        // Gỡ lỗi log
                         console.log(`🔍 Row #${index} - Size: ${size}`);
                         console.log('  priceInput.data("raw-value"):', priceInput.data('raw-value'));
                         console.log('  priceInput.val():', priceInput.val());
@@ -9697,33 +9048,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 console.log('📦 Captured form data BEFORE submit:', capturedFormData);
                 
-                // Show loading
+                // Hiển thị loading
                 const submitBtn = $(this).find('button[type="submit"]');
                 const originalText = submitBtn.html();
                 // Luôn hiển thị "Đang thêm vào phiếu..." vì đây là flow tạo phiếu nhập
                 const loadingText = '<i class="fas fa-spinner fa-spin"></i> Đang thêm vào phiếu...';
                 submitBtn.html(loadingText).prop('disabled', true);
                 
-                // Add update mode info to form data
+                // Thêm update mode info to form data
                 let formData = $(this).serialize();
                 
                 // CRITICAL FIX: Ensure category_id is always provided to prevent foreign key constraint violation
-                // Check if category_id is missing or empty in the form data
+                // Kiểm tra if category_id is missing or empty in the form data
                 if (!formData.includes('category_id=') || formData.includes('category_id=&') || formData.includes('category_id=""')) {
                     console.warn('⚠️ category_id missing or empty - adding default category');
                     // Add default category (Giày sneaker = ID 1)
                     formData += '&category_id=1';
                     
-                    // Show warning to user
+                    // Hiển thị warning to user
                     showToast('Danh mục sản phẩm chưa được chọn, đã tự động chọn "Giày sneaker"', 'warning');
                 } else {
                     console.log('✅ category_id found in form data');
                 }
                 
-                // Add action parameter
+                // Thêm action parameter
                 formData += '&action=save_product';
                 
-                // Check for update mode from global variables
+                // Kiểm tra for update mode from global variables
                 const updateMode = window.isUpdateMode || isUpdateMode;
                 const prodId = window.updateProductId || updateProductId;
                 
@@ -9743,7 +9094,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     console.log('ℹ️ Not in update mode or missing product ID');
                 }
                 
-                // Debug: Log form data before sending
+                // Gỡ lỗi: Ghi nhật ký form data before sending
                 console.log('📤 Form data being sent:', formData);
                 
                 $.ajax({
@@ -9906,7 +9257,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const $row = $(this).closest('.size-row');
                 const size = $row.data('size');
                 
-                // Show the checkbox back in selection area
+                // Hiển thị the checkbox back in selection area
                 if (size) {
                     $(`.size-option[data-size="${size}"]`).fadeIn('fast');
                     updateSelectedSizesCount();
@@ -9923,7 +9274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const $row = $(this).closest('.size-row');
                 const size = $row.data('size');
                 
-                // Show the checkbox back in selection area
+                // Hiển thị the checkbox back in selection area
                 if (size) {
                     $(`.size-option[data-size="${size}"]`).fadeIn('fast');
                     updateSelectedSizesCount();
@@ -9941,13 +9292,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Function to show all hidden sizes (useful for reset)
             window.showAllSizes = function() {
-                // Show all table rows
+                // Hiển thị all table rows
                 $('table tr[data-size]').fadeIn('fast');
                 
-                // Show all checkbox options  
+                // Hiển thị all checkbox options
                 $('.size-option').fadeIn('fast');
                 
-                // Reset all select buttons
+                // Đặt lại all select buttons
                 $('.select-size-btn').removeClass('btn-success').addClass('btn-primary')
                                      .html('<i class="fas fa-plus"></i> Chọn')
                                      .prop('disabled', false);
@@ -9955,7 +9306,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Uncheck all checkboxes
                 $('.size-checkbox').prop('checked', false);
                 
-                // Update counts
+                // Cập nhật counts
                 updateSelectedSizesCount();
             };
 
@@ -9978,7 +9329,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     const size = $(this).val();
                     const currentRow = $(this).closest('.size-row');
                     
-                    // Reset style
+                    // Đặt lại style
                     currentRow.find('.card').removeClass('border-left-danger').addClass('border-left-primary');
                     
                     if (size && sizes.includes(size)) {
@@ -10045,14 +9396,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 console.log('[moveToStep] Current receiptItems:', receiptItems);
                 console.log('[moveToStep] Current selectedSupplier:', selectedSupplier);
                 
-                // Update step indicator
+                // Cập nhật step indicator
                 $('.step').removeClass('active completed');
                 for (let i = 1; i < step; i++) {
                     $(`#step${i}`).addClass('completed');
                 }
                 $(`#step${step}`).addClass('active');
 
-                // Show/hide content
+                // Hiển thị/hide content
                 $('[id^="step"][id$="-content"]').hide();
                 $(`#step${step}-content`).show();
 
@@ -10088,19 +9439,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         console.log('🔄 Reset location tracking for new product entry');
                     }
                     
-                    // Reset duplicate prevention flags
+                    // Đặt lại duplicate prevention flags
                     window._fillingForm = false;
                     window._displayingSizes = false;
                     console.log('🔄 Reset duplicate prevention flags for step 4');
                     
-                    // Remove any loading indicator if exists
+                    // Xóa any loading indicator nếu tồn tại
                     if (typeof removeStep4Loading === 'function') {
                         removeStep4Loading();
                     }
                     
                     console.log('🔍 Step 4 check: suggestions =', !!suggestions, 'useExistingDataOnly =', useExistingDataOnly, 'window.useExistingDataOnly =', window.useExistingDataOnly);
                     
-                    // Check both local and global useExistingDataOnly flags
+                    // Kiểm tra both local and global useExistingDataOnly flags
                     const shouldSkipSuggestions = useExistingDataOnly || window.useExistingDataOnly;
                     
                     if (suggestions && !shouldSkipSuggestions) {
@@ -10110,7 +9461,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         console.log('✅ Skipping displaySuggestions - using existing data or no suggestions. shouldSkipSuggestions =', shouldSkipSuggestions);
                     }
                     
-                    // Update continue to step 5 button visibility
+                    // Cập nhật continue to step 5 button visibility
                     if (typeof updateContinueToStep5Button === 'function') {
                         updateContinueToStep5Button();
                     }
@@ -10121,12 +9472,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // KHÔNG load từ localStorage ở đây vì nó có thể trigger moveToStep() lại
                     // Data đã được load/add trước khi moveToStep(5) được gọi
                     
-                    // Verify data
+                    // Xác minh data
                     console.log('📊 Data check before summary:');
                     console.log('- receiptItems:', receiptItems);
                     console.log('- selectedSupplier:', selectedSupplier);
                     
-                    // Update debug info
+                    // Cập nhật debug info
                     updateDebugInfo();
                     
                     // Force update summary after a short delay to ensure DOM is ready
@@ -10142,7 +9493,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 currentStep = step;
                 
-                // Save current state to localStorage
+                // Lưu current state to localStorage
                 saveDataToLocalStorage();
             }
             // Expose globally so external handlers can call it
@@ -10151,32 +9502,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Function to reset form for new product
         function resetFormForNewProduct() {
-            // Confirm before reset
+            // Xác nhận before reset
             if (confirm('Bạn có chắc muốn reset form để thêm sản phẩm mới? Tất cả dữ liệu hiện tại sẽ bị mất.')) {
-                // Reset all form fields
+                // Đặt lại all form fields
                 $('#productForm')[0].reset();
                 
-                // Reset uploaded images
+                // Đặt lại uploaded images
                 uploadedImages = [];
                 aiData = null;
                 currentStep = 1;
                 
-                // Clear image displays
+                // Xóa image displays
                 $('#imagePreview').empty();
                 $('#analyzedImages').empty();
                 
-                // Hide all sections
+                // Ẩn all sections
                 $('#analyzeSection').hide();
                 $('#aiResults').hide();
                 $('#successModal').modal('hide');
                 
-                // Reset steps
+                // Đặt lại steps
                 $('.step').removeClass('active completed');
                 $('#step1').addClass('active');
                 $('[id^="step"][id$="-content"]').hide();
                 $('#step1-content').show();
                 
-                // Reset size container
+                // Đặt lại size container
                 $('#sizeContainer').html(`
                     <div class="size-row mb-3 p-3 border rounded">
                         <div class="row">
@@ -10210,35 +9561,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 `);
                 
-                // Show toast
+                // Hiển thị toast
                 showToast('Form đã được reset để thêm sản phẩm mới', 'success');
             }
         }
 
         // Enhanced Size Selection Functions for step 4
-        // Handle size selection
+        // Xử lý size selection
         $('#selectSizesBtn').click(function() {
             $('#sizeSelectionModal').modal('show');
         });
 
-        // Handle size selection modal events
+        // Xử lý size selection modal events
         $('#sizeSelectionModal').on('shown.bs.modal', function() {
             loadAvailableSizes();
         });
         
-        // Initialize button state when modal is fully loaded
+        // Khởi tạo button state when modal is fully loaded
         $('#sizeSelectionModal').on('shown.bs.modal', function() {
             setTimeout(() => {
                 toggleConfirmButton();
             }, 500);
         });
 
-        // Handle size checkbox changes
+        // Xử lý size checkbox changes
         $(document).on('change', '.size-checkbox', function() {
             updateSelectedSizesCount();
             toggleConfirmButton();
             
-            // Add visual feedback
+            // Thêm visual feedback
             const $card = $(this).closest('.size-option');
             if ($(this).is(':checked')) {
                 $card.addClass('selected');
@@ -10247,7 +9598,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         });
         
-        // Handle confirm multiple sizes selection
+        // Xử lý confirm multiple sizes selection
         $(document).on('click', '#confirmMultipleSizes', function(e) {
             console.log('🎯 Confirm button clicked!');
             e.preventDefault();
@@ -10269,12 +9620,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function loadAvailableSizes() {
             console.log('📋 Loading available sizes for product...');
             
-            // Show loading state
+            // Hiển thị loading state
             $('#sizesLoadingState').show();
             $('#availableSizesList').hide();
             $('#noSizesFound').hide();
             
-            // Get product ID - try multiple sources
+            // Lấy product ID - try multiple sources
             let productId = updateProductId;
             
             // If not in update mode, try to get from hidden input or other sources
@@ -10282,7 +9633,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 productId = $('#product_id').val() || $('#hidden_product_id').val();
             }
             
-            // Try to get from aiData if available
+            // Try to get from aiData nếu có sẵn
             if (!productId && typeof aiData !== 'undefined' && aiData.product_id) {
                 productId = aiData.product_id;
             }
@@ -10321,7 +9672,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 console.error('❌ No product ID available for loading sizes');
                 $('#sizesLoadingState').hide();
                 
-                // Show error with more details
+                // Hiển thị error with more details
                 const errorHtml = `
                     <div class="alert alert-warning text-center">
                         <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
@@ -10410,7 +9761,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const container = $('#sizesCheckboxContainer');
             container.empty();
             
-            // Create checkbox grid for multiple selection
+            // Tạo checkbox grid for multiple selection
             const checkboxHtml = `
                 <div class="col-12">
                     <div class="card border-primary shadow-sm">
@@ -10492,7 +9843,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             container.html(checkboxHtml);
             $('#availableSizesList').show();
             
-            // Initialize counters and button state
+            // Khởi tạo counters and button state
             setTimeout(() => {
                 updateSelectedSizesCount();
                 toggleConfirmButton();
@@ -10536,22 +9887,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             return selectedSizes;
         }
         
-        // Display selected sizes with advanced layout
+        // Hiển thị selected sizes with advanced layout
         function displaySelectedSizes(selectedSizes) {
             console.log('🎯 Displaying selected sizes with smart locations and pricing:', selectedSizes);
             
-            // Hide size selection area
+            // Ẩn size selection area
             $('#sizeSelectionArea').hide();
             
-            // Clear existing sizes
+            // Xóa existing sizes
             $('#sizesContainer').empty();
             
-            // Show header
+            // Hiển thị header
             $('.d-none.d-md-block').show();
             
-            // Add selected sizes to the form with smart logic
+            // Thêm selected sizes to the form with smart logic
             selectedSizes.forEach(sizeData => {
-                // Calculate sale price with 30% minimum markup
+                // Tính toán sale price with 30% minimum markup
                 const autoSalePrice = calculateSalePrice(sizeData.unit_price, sizeData.sale_price);
                 
                 addSizeRowAdvanced(
@@ -10566,7 +9917,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
             });
             
-            // Show success message with smart features info
+            // Hiển thị success message with smart features info
             const successHtml = `
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle mr-2"></i>
@@ -10592,7 +9943,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             `;
             $('#sizesContainer').before(successHtml);
             
-            // Add smart location regeneration button
+            // Thêm smart location regeneration button
             const toolsHtml = `
                 <div class="card mb-3 border-info">
                     <div class="card-body p-2">
@@ -10620,7 +9971,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const baseSku = $('#baseSku').val();
             const fullSku = sku || (baseSku ? `${baseSku}-${size}` : '');
             
-            // Hide the checkbox for this size in the selection area
+            // Ẩn the checkbox for this size in the selection area
             $(`.size-option[data-size="${size}"]`).hide();
             $(`#size_${size}`).prop('checked', false);
             
@@ -10748,11 +10099,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const $sizeRow = $(sizeRowHtml);
             $('#sizesContainer').append($sizeRow);
             
-            // Set default location first (will be replaced by smart location)
+            // Đặt default location first (will be replaced by smart location)
             const $locationInput = $sizeRow.find('.storage-location-input');
             $locationInput.val('⏳ Đang lấy vị trí...').prop('disabled', true);
             
-            // Generate smart storage location for this size (async)
+            // Tạo smart storage location for this size (async)
             const productName = $('#productName').val() || 'Product';
             
             console.log('🏢 Calling generateSmartStorageLocation with:', {
@@ -10768,7 +10119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     $locationInput.val(result.location_code).prop('disabled', false);
                     
-                    // Add visual indicator for reused locations
+                    // Thêm visual indicator for reused locations
                     if (result.is_reused) {
                         $locationInput
                             .css('background-color', '#e8f5e9')
@@ -10794,7 +10145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const autoSalePrice = calculateSalePrice(originalPrice, salePrice);
             $sizeRow.find('.sale-price-input').val(autoSalePrice);
             
-            // Add pricing validation styles
+            // Thêm pricing validation styles
             if (originalPrice > 0) {
                 if (validateSalePrice(originalPrice, autoSalePrice)) {
                     $sizeRow.find('.sale-price-input').addClass('border-success');
@@ -10804,30 +10155,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
-        // Handle reselect sizes
+        // Xử lý reselect sizes
         $(document).on('click', '#reselectSizes', function() {
             // Use the general function to show all sizes
             showAllSizes();
             
-            // Show selection area
+            // Hiển thị selection area
             $('#sizeSelectionArea').show();
             
-            // Clear size rows
+            // Xóa size rows
             $('#sizesContainer').empty();
             
-            // Hide header
+            // Ẩn header
             $('.d-none.d-md-block').hide();
             
-            // Remove alert
+            // Xóa alert
             $(this).closest('.alert').remove();
             $(this).closest('.card').remove(); // Remove tools card too
         });
         
-        // Handle regenerate storage locations
+        // Xử lý regenerate storage locations
         $(document).on('click', '#regenerateLocations', async function() {
             const productName = $('#productName').val() || 'Product';
             
-            // Process each row sequentially to avoid race conditions
+            // Xử lý each row sequentially to avoid race conditions
             const rows = $('.size-row').toArray();
             for (const row of rows) {
                 const $row = $(row);
@@ -10841,12 +10192,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     const $locationInput = $row.find('.storage-location-input');
                     $locationInput.val(result.location_code);
                     
-                    // Add visual feedback - different colors for reused vs new
+                    // Thêm visual feedback - different colors for reused vs new
                     const bgColor = result.is_reused ? '#e8f5e9' : '#fff3e0';
                     $locationInput.css('background-color', bgColor);
                     $locationInput.attr('title', result.message);
                     
-                    // Update icon
+                    // Cập nhật icon
                     if (result.is_reused) {
                         $row.find('.input-group-text i')
                             .removeClass('fa-magic')
@@ -10862,7 +10213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
-            // Show feedback message
+            // Hiển thị feedback message
             const $button = $(this);
             const originalText = $button.html();
             $button.html('<i class="fas fa-check mr-1"></i> Đã cập nhật!').prop('disabled', true);
@@ -10938,7 +10289,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             return currentSalePrice;
         }
 
-        // Validate sale price meets minimum requirement
+        // Kiểm tra sale price meets minimum requirement
         function validateSalePrice(purchasePrice, salePrice) {
             const price = parseFloat(purchasePrice) || 0;
             const sale = parseFloat(salePrice) || 0;
@@ -10982,7 +10333,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         });
 
-        // Reset choose content modal when closed
+        // Đặt lại choose content modal when closed
         $('#chooseContentModal').on('hidden.bs.modal', function() {
             $('.content-option').removeClass('border-primary').removeClass('selected');
             $('#confirmContentChoice').prop('disabled', true);
@@ -11018,10 +10369,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Store draft ID for later use
                         window.currentDraftId = response.draft_id;
                         
-                        // Enable finalize button
+                        // Bật finalize button
                         $('#finalizeReceiptBtn').prop('disabled', false);
                         
-                        // Update UI to show draft saved
+                        // Cập nhật UI to show draft saved
                         $('#draftStatus').html(`
                             <div class="alert alert-info">
                                 <i class="fas fa-save mr-2"></i>
@@ -11091,12 +10442,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
             
-            // Show confirmation dialog
+            // Hiển thị confirmation dialog
             if (!confirm('Bạn có chắc chắn muốn hoàn tất phiếu nhập hàng này? Sau khi hoàn tất sẽ không thể chỉnh sửa.')) {
                 return;
             }
             
-            // Show loading state
+            // Hiển thị loading state
             $('#finalizeReceiptBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang xử lý...');
             
             $.ajax({
@@ -11112,7 +10463,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (response.success) {
                         showToast('Phiếu nhập hàng đã được hoàn tất thành công!', 'success');
                         
-                        // Show success message with receipt details
+                        // Hiển thị success message with receipt details
                         const successHtml = `
                             <div class="alert alert-success">
                                 <h5><i class="fas fa-check-circle mr-2"></i>Phiếu nhập hàng hoàn tất!</h5>
@@ -11137,7 +10488,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         $('#receiptSummaryContainer').html(successHtml);
                         
-                        // Hide form steps
+                        // Ẩn form steps
                         $('.step-container').hide();
                         $('#navigationButtons').hide();
                         
@@ -11158,7 +10509,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             window.open(`xem_phieu_nhap.php?id=${receiptId}`, '_blank');
         }
         
-        // Create new receipt
+        // Tạo new receipt
         function createNewReceipt() {
             if (confirm('Bạn có muốn tạo phiếu nhập hàng mới? Trang sẽ được tải lại.')) {
                 window.location.reload();
@@ -11175,7 +10526,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const autoSalePrice = calculateSalePrice(originalPrice, 0);
                 $saleInput.val(autoSalePrice);
                 
-                // Validate pricing
+                // Kiểm tra pricing
                 if (validateSalePrice(originalPrice, autoSalePrice)) {
                     $saleInput.removeClass('border-warning').addClass('border-success');
                 } else {
@@ -11199,28 +10550,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         });
         
-        // Update Source Modal handlers
+        // Cập nhật Source Modal handlers
         $('#updateSourceModal').on('show.bs.modal', function() {
-            // Reset card selection
+            // Đặt lại card selection
             $('.update-source-option').removeClass('selected border-primary');
             $('#confirmUpdateSource').prop('disabled', true);
         });
         
-        // Handle update source option clicks
+        // Xử lý update source option clicks
         $(document).on('click', '.update-source-option', function() {
             console.log('🎯 Update source card clicked');
             
-            // Remove selection from all cards
+            // Xóa selection from all cards
             $('.update-source-option').removeClass('selected border-primary');
             
-            // Add selection to clicked card
+            // Thêm selection to clicked card
             $(this).addClass('selected border-primary');
             
-            // Get selected source
+            // Lấy selected source
             const selectedSource = $(this).data('source');
             console.log('✅ Selected source:', selectedSource);
             
-            // Enable confirm button
+            // Bật confirm button
             $('#confirmUpdateSource').prop('disabled', false);
         });
         
@@ -11239,11 +10590,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const selectedSource = selectedCard.data('source');
             console.log('✅ Selected source:', selectedSource);
             
-            // Remove focus to avoid aria-hidden warning then hide modal
+            // Xóa focus to avoid aria-hidden warning then hide modal
             $(this).blur();
             $('#updateSourceModal').modal('hide');
             
-            // Set update flags early if product is known
+            // Đặt update flags early if product is known
             const productInfo = window.selectedProductForReceipt || window.selectedUpdateProduct;
             if (productInfo && (productInfo.product_id || productInfo.id)) {
                 window.isUpdateMode = true;
@@ -11268,7 +10619,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         });
         
-        // Reset modal when closed
+        // Đặt lại modal when closed
         $('#updateSourceModal').on('hidden.bs.modal', function() {
             $('.update-source-option').removeClass('selected border-primary');
             $('#confirmUpdateSource').prop('disabled', true);
@@ -11308,7 +10659,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 return;
             }
             
-            // Move to step 4 and show loading
+            // Di chuyển to step 4 and show loading
             moveToStep(4);
             showStep4Loading('Đang chuẩn bị dữ liệu từ AI...');
             
@@ -11327,7 +10678,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Event handlers for step 5 buttons
         $(document).on('click', '#addMoreItems', function() {
-            // Reset form to add more items
+            // Đặt lại form to add more items
             resetFormToStep1();
             showToast('Sẵn sàng thêm sản phẩm mới vào phiếu nhập', 'info');
         });
@@ -11359,7 +10710,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     const size = $row.find('input[name="sizes[]"]').val();
                     const quantity = $row.find('input[name="import_quantities[]"]').val();
                     const sku = $row.find('input[name="skus[]"]').val();
-                    // Get raw values from formatted inputs
+                    // Lấy raw values from formatted inputs
                     const priceInput = $row.find('input[name="original_prices[]"]');
                     const salePriceInput = $row.find('input[name="sale_prices[]"]');
                     const price = priceInput.data('raw-value') || priceInput.val().replace(/[^\d]/g, '');
@@ -11403,12 +10754,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             console.log('✅ Validation passed, proceeding with save...');
             
-            // Show loading
+            // Hiển thị loading
             const $btn = $(this);
             const originalText = $btn.html();
             $btn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang lưu...').prop('disabled', true);
             
-            // Prepare receipt data
+            // Chuẩn bị receipt data
             const receiptData = {
                 supplier_id: selectedSupplier.id,
                 receipt_date: $('#receiptDate').val() || '<?php echo date('Y-m-d'); ?>',
@@ -11416,7 +10767,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 products: []
             };
             
-            // Group items by product
+            // Nhóm items by product
             const productMap = {};
             receiptItems.forEach(item => {
                 console.log('🔍 Processing item:', item); // Debug log
@@ -11453,7 +10804,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('📦 Total products to save:', receiptData.products.length);
             console.log('📦 Warehouse ID:', <?php echo $userWarehouseId ?? 'null'; ?>);
             
-            // Send AJAX request
+            // Gửi AJAX request
             console.log('🚀 Starting AJAX request...');
             $.ajax({
                 url: '',
@@ -11480,7 +10831,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Store receipt ID
                         window.currentReceiptId = response.receipt_id;
                         
-                        // Show success notification with receipt ID
+                        // Hiển thị success notification with receipt ID
                         const successHtml = `
                             <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
                                 <h5><i class="fas fa-check-circle mr-2"></i>Đã lưu thành công!</h5>
@@ -11516,7 +10867,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         statusCode: xhr.status
                     });
                     
-                    // Log full response text for debugging
+                    // Ghi nhật ký full response text for debugging
                     console.error('📄 Full Response Text:');
                     console.error(xhr.responseText);
                     
@@ -11535,7 +10886,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
         
         $(document).on('click', '#refreshSummaryBtn', function() {
-            // Refresh the summary
+            // Làm mới the summary
             console.log('🔄 Refreshing receipt summary...');
             updateReceiptSummary();
             showToast('Đã làm mới tóm tắt phiếu nhập', 'success');
@@ -11545,7 +10896,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function resetFormToStep1() {
             console.log('🔄 Resetting form to step 1 for adding more items');
             
-            // Reset form fields but keep supplier and receipt info
+            // Đặt lại form fields but keep supplier and receipt info
             $('#productName').val('');
             $('#category').val('');
             $('#description').val('');
@@ -11556,19 +10907,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $('#features').val('');
             $('#color').val('');
             
-            // Clear images
+            // Xóa images
             uploadedImages = [];
             $('#imagePreview').empty();
             $('.upload-area').show();
             $('.uploaded-images-area').hide();
             
-            // Clear size container
+            // Xóa size container
             $('#sizeContainer').empty();
             
             // Reset step indicators (nhưng không reset supplier và receipt info)
             moveToStep(2); // Về bước upload ảnh, không cần chọn lại supplier
             
-            // Clear AI data
+            // Xóa AI data
             aiData = null;
             suggestions = null;
             isUpdateMode = false;
@@ -11582,7 +10933,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function testStockReceiptSelection() {
             console.log('🧪 Testing stock receipt selection functionality');
             
-            // Create demo duplicate results
+            // Tạo demo duplicate results
             const testDuplicates = [
                 {
                     product_id: 123,
@@ -11606,7 +10957,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             ];
             
-            // Display test duplicates
+            // Hiển thị test duplicates
             displayStockReceiptDuplicateResults(testDuplicates);
             
             alert('✅ Test hoàn thành!\n\nDanh sách sản phẩm trùng lặp demo đã được hiển thị.\nBạn có thể click nút "Chọn nhập kho" để test chức năng.');
@@ -11614,7 +10965,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Function to setup price formatting for input fields
         function setupPriceFormatting() {
-            // Format price on blur only (avoid cursor jumping during typing)
+            // Định dạng price on blur only (avoid cursor jumping during typing)
             $(document).on('blur', '.price-format-input', function() {
                 let input = $(this);
                 let value = input.val().replace(/[^\d]/g, ''); // Remove non-digits
@@ -11636,7 +10987,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (rawValue && rawValue !== '0') {
                     input.val(rawValue);
                 }
-                // Select all after a short delay
+                // Chọn all after a short delay
                 setTimeout(function() {
                     input.select();
                 }, 50);
@@ -11659,7 +11010,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             });
             
-            // Update raw value on input
+            // Cập nhật raw value on input
             $(document).on('input', '.price-format-input', function() {
                 let input = $(this);
                 let value = input.val().replace(/[^\d]/g, '');
@@ -11682,12 +11033,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('=== suggestLocationForSize called ===');
             console.log('Size received:', size);
             
-            // Get product information from various sources
+            // Lấy product information from various sources
             const productType = $('#productType').val() || $('#productTypeText').val() || '';
             const productBrand = $('#productBrand').val() || $('#brandName').val() || '';
             const productName = $('#productName').val() || '';
             
-            // Get variant_id and SKU from row data
+            // Lấy variant_id and SKU from row data
             const variantId = $targetRow.data('variant-id') || $targetRow.attr('data-variant-id') || null;
             const sku = $targetRow.data('sku') || $targetRow.attr('data-sku') || null;
             
@@ -11750,7 +11101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             console.log('=== callStorageSuggestionAPIForSize ===');
             console.log('Request data:', requestData);
             
-            // Show loading on button
+            // Hiển thị loading on button
             const $button = $targetRow.find('.suggestion-btn-for-size');
             const originalHtml = $button.html();
             $button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
@@ -11767,7 +11118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (response.success && response.suggestions && response.suggestions.length > 0) {
                         showStorageSuggestionModalForSize(response, $targetRow);
                     } else {
-                        // Show message when no suggestions found
+                        // Hiển thị message when no suggestions found
                         const message = response.message || 'Không tìm thấy vị trí phù hợp';
                         const product = response.product || {};
                         
@@ -11799,7 +11150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     });
                 },
                 complete: function() {
-                    // Restore button
+                    // Khôi phục button
                     $button.prop('disabled', false).html(originalHtml);
                 }
             });
@@ -11943,11 +11294,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             `;
             
-            // Remove existing modal and add new one
+            // Xóa existing modal and add new one
             $('#storageSuggestionModal').remove();
             $('body').append(modalHtml);
             
-            // Set up click handlers for suggestion cards
+            // Đặt up click handlers for suggestion cards
             $('.suggestion-card').on('click', function() {
                 const locationCode = $(this).data('location-code');
                 const hasConflict = $(this).data('has-conflict') === true || $(this).data('has-conflict') === 'true';
@@ -11991,7 +11342,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Function để áp dụng vị trí vào row
             function applyLocationToRow(locationCode, $row) {
-                // Find and update the location input in the target row
+                // Tìm and update the location input in the target row
                 const $locationInput = $row.find('input[name="storage_locations[]"], .storage-location-input, .size-location');
                 $locationInput.val(locationCode);
                 
@@ -12026,7 +11377,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             );
             
-            // Show modal
+            // Hiển thị modal
             $('#storageSuggestionModal').modal('show');
         }
 
@@ -12092,7 +11443,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     return;
                 }
                 
-                // Show loading
+                // Hiển thị loading
                 const $btn = $(this);
                 const originalHtml = $btn.html();
                 $btn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Đang thêm vào phiếu...').prop('disabled', true);
