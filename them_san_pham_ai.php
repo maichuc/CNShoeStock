@@ -3847,7 +3847,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // ========================================
             // NOTE: Normalization functions (standardizeProductType, standardizeColor, 
-            // standardizeBrand, normalizeColors) are now loaded from js/normalization-utils.js
+            // standardizeBrand, normalizeColors) are now loaded from js/normalization-api-client.js
+            // which calls backend API (api_chuan_hoa_du_lieu.php)
             // ========================================
             
             // Hàm hiển thị thông tin AI đã tự động điền

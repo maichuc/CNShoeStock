@@ -88,7 +88,7 @@ try {
 
 // ============================================================================
 // REFACTORED: All AI analysis and similarity functions moved to helper files
-// - helpers/TroGiupPhanTichAI.php: translateColorToVietnamese(), normalizeAIData(), 
+// - helpers/TroGiupPhanTichAI.php: translateColorToVietnamese() [wrapper], normalizeAIData(), 
 //   analyzeImageWithOpenRouter(), analyzeImageWithGemini(), analyzeImageWithAI(),
 //   analyzeMultipleImagesWithGemini(), analyzeSingleImageFallback()
 // - helpers/TroGiupDoTuongDong.php: normalizeText(), extractKeywords(), 
@@ -6499,7 +6499,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // ========================================
             // NOTE: Normalization functions (standardizeProductType, standardizeColor, 
-            // standardizeBrand, normalizeColors) are now loaded from js/normalization-utils.js
+            // standardizeBrand, normalizeColors) are now loaded from js/normalization-api-client.js
+            // which calls backend API (api_chuan_hoa_du_lieu.php)
             // ========================================
             
             // Hàm hiển thị thông tin AI đã tự động điền
