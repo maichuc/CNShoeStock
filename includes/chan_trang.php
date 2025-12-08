@@ -6,18 +6,38 @@
         <!-- End of Content -->
 
         <!-- Footer -->
-        <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <div class="mb-2">
-                            <strong>CNShoeStock</strong> - Hệ Thống Quản Lý Kho Giày Thông Minh
+        <footer class="sticky-footer bg-white border-top">
+                <div class="container my-auto py-3">
+                    <div class="row">
+                        <div class="col-md-4 text-center text-md-left mb-3 mb-md-0">
+                            <h6 class="mb-2"><strong>CNShoeStock</strong></h6>
+                            <p class="text-muted small mb-0">Hệ Thống Quản Lý Kho Giày Thông Minh</p>
+                            <p class="text-muted small mb-0">Giải pháp số hóa kho hàng hiệu quả</p>
                         </div>
-                        <div class="text-muted small">
-                            Phát triển bởi <strong>Bùi Thị Mai Chúc</strong> & <strong>Đinh Thị Tuyết Nhi</strong>
+                        
+                        <div class="col-md-4 text-center mb-3 mb-md-0">
+                            <h6 class="mb-2">Phát triển bởi</h6>
+                            <p class="mb-1"><strong>Bùi Thị Mai Chúc</strong></p>
+                            <p class="mb-1"><strong>Đinh Thị Tuyết Nhi</strong></p>
                         </div>
-                        <div class="mt-2">
-                            <span>Copyright &copy; CNShoeStock <?php echo date('Y'); ?>. All rights reserved.</span>
+                        
+                        <div class="col-md-4 text-center text-md-right">
+                            <h6 class="mb-2">Liên hệ</h6>
+                            <p class="small mb-1">
+                                <i class="fas fa-envelope text-primary"></i> 
+                                <a href="mailto:nhichuc260@gmail.com" class="text-decoration-none">nhichuc260@gmail.com</a>
+                            </p>
+                            <p class="small mb-1">
+                                <i class="fas fa-phone text-success"></i> 
+                                <a href="tel:0337462385" class="text-decoration-none">0337 462 385</a>
+                            </p>
                         </div>
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="text-center">
+                        <span class="text-muted small">Copyright &copy; CNShoeStock <?php echo date('Y'); ?>. All rights reserved.</span>
                     </div>
                 </div>
             </footer>
