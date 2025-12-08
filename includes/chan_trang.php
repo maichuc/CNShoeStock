@@ -9,7 +9,15 @@
         <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Smart Warehouse System <?php echo date('Y'); ?></span>
+                        <div class="mb-2">
+                            <strong>CNShoeStock</strong> - Hệ Thống Quản Lý Kho Giày Thông Minh
+                        </div>
+                        <div class="text-muted small">
+                            Phát triển bởi <strong>Bùi Thị Mai Chúc</strong> & <strong>Đinh Thị Tuyết Nhi</strong>
+                        </div>
+                        <div class="mt-2">
+                            <span>Copyright &copy; CNShoeStock <?php echo date('Y'); ?>. All rights reserved.</span>
+                        </div>
                     </div>
                 </div>
             </footer>
