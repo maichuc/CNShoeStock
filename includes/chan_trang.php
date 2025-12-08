@@ -1,37 +1,56 @@
 
             <!-- Footer -->
-            <footer class="sticky-footer bg-white border-top">
-                <div class="container my-auto py-3">
+            <footer class="sticky-footer" style="background-color: #2c3e50; color: #b8c7ce; padding: 40px 0 20px;">
+                <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-4 text-center text-md-left mb-3 mb-md-0">
-                            <h6 class="mb-2"><strong>CNShoeStock</strong></h6>
-                            <p class="text-muted small mb-0">Hệ Thống Quản Lý Kho Giày Thông Minh</p>
-                            <p class="text-muted small mb-0">Giải pháp số hóa kho hàng hiệu quả</p>
+                        <div class="col-md-3 mb-4">
+                            <h5 class="mb-3" style="color: #ffffff; font-weight: 600;">CNShoeStock</h5>
+                            <p class="small mb-2" style="color: #b8c7ce; line-height: 1.6;">Hệ Thống Quản Lý Kho Giày Thông Minh</p>
+                            <p class="small" style="color: #95a5a6;">Giải pháp số hóa kho hàng hiệu quả</p>
                         </div>
                         
-                        <div class="col-md-4 text-center mb-3 mb-md-0">
-                            <h6 class="mb-2">Phát triển bởi</h6>
-                            <p class="mb-1"><strong>Bùi Thị Mai Chúc</strong></p>
-                            <p class="mb-1"><strong>Đinh Thị Tuyết Nhi</strong></p>
+                        <div class="col-md-3 mb-4">
+                            <h6 class="mb-3" style="color: #ffffff; font-weight: 600;">Chức năng</h6>
+                            <ul class="list-unstyled small">
+                                <li class="mb-2"><a href="quan_ly_kho.php" style="color: #b8c7ce; text-decoration: none;">Quản lý sản phẩm</a></li>
+                                <li class="mb-2"><a href="quan_ly_phieu_nhap_kho.php" style="color: #b8c7ce; text-decoration: none;">Quản lý nhập kho</a></li>
+                                <li class="mb-2"><a href="quan_ly_xuat_kho.php" style="color: #b8c7ce; text-decoration: none;">Quản lý xuất kho</a></li>
+                                <li class="mb-2"><a href="du_bao_ai.php" style="color: #b8c7ce; text-decoration: none;">Dự báo AI</a></li>
+                            </ul>
                         </div>
                         
-                        <div class="col-md-4 text-center text-md-right">
-                            <h6 class="mb-2">Liên hệ</h6>
-                            <p class="small mb-1">
-                                <i class="fas fa-envelope text-primary"></i> 
-                                <a href="mailto:nhichuc260@gmail.com" class="text-decoration-none">nhichuc260@gmail.com</a>
+                        <div class="col-md-3 mb-4">
+                            <h6 class="mb-3" style="color: #ffffff; font-weight: 600;">Phát triển bởi</h6>
+                            <p class="small mb-2" style="color: #ffffff;">Bùi Thị Mai Chúc</p>
+                            <p class="small mb-2" style="color: #ffffff;">Đinh Thị Tuyết Nhi</p>
+                        </div>
+                        
+                        <div class="col-md-3 mb-4">
+                            <h6 class="mb-3" style="color: #ffffff; font-weight: 600;">Liên hệ</h6>
+                            <p class="small mb-2">
+                                <i class="fas fa-envelope" style="color: #3498db;"></i> 
+                                <a href="mailto:nhichuc260@gmail.com" style="color: #b8c7ce; text-decoration: none;">nhichuc260@gmail.com</a>
                             </p>
-                            <p class="small mb-1">
-                                <i class="fas fa-phone text-success"></i> 
-                                <a href="tel:0337462385" class="text-decoration-none">0337 462 385</a>
+                            <p class="small mb-2">
+                                <i class="fas fa-phone" style="color: #2ecc71;"></i> 
+                                <a href="tel:0337462385" style="color: #b8c7ce; text-decoration: none;">0337 462 385</a>
                             </p>
+                            <div class="mt-3">
+                                <a href="#" class="mr-3" style="color: #b8c7ce; font-size: 18px;"><i class="fab fa-facebook"></i></a>
+                                <a href="#" class="mr-3" style="color: #b8c7ce; font-size: 18px;"><i class="fab fa-github"></i></a>
+                                <a href="#" style="color: #b8c7ce; font-size: 18px;"><i class="fab fa-linkedin"></i></a>
+                            </div>
                         </div>
                     </div>
                     
-                    <hr class="my-3">
+                    <hr style="border-top: 1px solid #34495e; margin: 20px 0;">
                     
-                    <div class="text-center">
-                        <span class="text-muted small">Copyright &copy; CNShoeStock <?php echo date('Y'); ?>. All rights reserved.</span>
+                    <div class="row">
+                        <div class="col-12 text-center">
+                            <p class="small mb-0" style="color: #95a5a6;">
+                                Copyright &copy; CNShoeStock <?php echo date('Y'); ?>. All rights reserved.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </footer>
