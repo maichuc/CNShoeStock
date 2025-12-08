@@ -2978,8 +2978,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 </div>
             </div>
-
-            </div>
             <!-- End of Main Content -->
 
             <?php include 'includes/chan_trang.php'; ?>

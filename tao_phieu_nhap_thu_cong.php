@@ -957,8 +957,6 @@ try {
                     </div>
                 </div>
             </div>
-
-            </div>
             <!-- End of Main Content -->
 
             <?php include 'includes/chan_trang.php'; ?>
