@@ -297,6 +297,44 @@ b87a05c - Update final report
 - **References**: Không có file nào tham chiếu đến file cũ (đã kiểm tra)
 - **Lợi ích**: Code sạch hơn, dễ maintain, giảm confusion
 
+## Code Duplication Eliminated (Commit: bafb32e)
+✅ **Centralized Normalization Functions** - Consolidate into `helpers/TroGiupDoTuongDong.php`
+
+### Problem Identified
+Code trùng lặp nghiêm trọng - các hàm normalization xuất hiện ở 3-4 nơi:
+- `standardizeBrand()` / `normalizeBrand()` - 3 nơi
+- `standardizeColor()` / `normalizeColor()` - 4 nơi  
+- `standardizeProductType()` - 2 nơi
+- Inline color mapping arrays - 2 nơi
+
+### Solution Applied
+1. **Added to `helpers/TroGiupDoTuongDong.php`**:
+   - `standardizeBrand($brand)` - Maps brand variants to standard names
+   - `standardizeColor($color)` - Translates EN/VI colors to standard Vietnamese
+   - `standardizeProductType($type)` - Normalizes product types (Sneaker, Giày cao gót, etc.)
+
+2. **Removed duplicates from**:
+   - `api_phan_tich_giay_ai.php`:
+     - Deleted 60+ line `standardizeBrand()` function
+     - Deleted 18-entry `$colorMapping` array in `normalizeAIOutput()`
+     - Deleted 60+ entry `$typeMapping` array in `normalizeAIOutput()`
+     - Updated to `require_once` helper and call centralized functions
+   - `classes/GhepSanPhamThongMinh.php`:
+     - Deleted `normalizeBrand()` method (20 lines)
+     - Deleted `normalizeColor()` method (25 lines)
+     - Updated to require helper and call standardized functions
+
+3. **Benefits**:
+   - **Single source of truth** - Chỉ 1 nơi cần update khi thay đổi logic
+   - **Consistency** - Tất cả normalization dùng chung logic
+   - **Maintainability** - Không còn phải tìm và sửa ở nhiều file
+   - **Reduced code** - Giảm ~200 lines code trùng lặp
+
+4. **Files Changed**:
+   - `helpers/TroGiupDoTuongDong.php` - Added 3 centralized functions
+   - `api_phan_tich_giay_ai.php` - Removed duplicates, now uses helper
+   - `classes/GhepSanPhamThongMinh.php` - Removed duplicates, now uses helper
+
 ## Lỗi Đã Sửa Trong Quá Trình Kiểm Tra Chi Tiết
 
 ### Commit 2f06162 - Fix Final Issues
@@ -327,8 +365,12 @@ b87a05c - Update final report
 - Xóa 6 files tạm trong `temp/bulk_imports/` (import_result_*.csv)
 - Database connection test: ✅ SUCCESS (9 users)
 
-## Git Commits Summary (15 commits)
+## Git Commits Summary (18 commits)
 ```
+bafb32e - refactor: Loại bỏ code trùng lặp, tập trung hóa các hàm normalization
+5080dd0 - refactor: Update references after merging api_phan_tich_ai.php
+029f55b - docs: Update TroGiupPhanTichAI.php documentation after API merge
+74ae458 - refactor: Merge api_phan_tich_ai.php into api_phan_tich_giay_ai.php
 f4e6843 - Fix: Login AJAX URL + cleanup temp import files
 08467b4 - Final: Complete validation report - 0 errors found
 43361aa - Fix: Revert database.php (technical term) + fix login/register forms
