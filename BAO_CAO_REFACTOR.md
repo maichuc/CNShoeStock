@@ -15,6 +15,8 @@
 ✅ **Đã kiểm tra từng chi tiết - 0 lỗi tham chiếu**  
 ✅ **Database kết nối thành công - 9 users**  
 ✅ **6 file tạm đã được dọn dẹp**
+✅ **1,624 lines duplicate code eliminated**
+✅ **Normalization logic migrated from JS to PHP**
 
 ## 📝 Files Từ Chuyên Ngành (KHÔNG ĐỔI)
 - `config/database.php` - "Database" là thuật ngữ kỹ thuật chuẩn
@@ -404,8 +406,11 @@ JavaScript code trùng lặp nghiêm trọng trong 2 files:
 - Xóa 6 files tạm trong `temp/bulk_imports/` (import_result_*.csv)
 - Database connection test: ✅ SUCCESS (9 users)
 
-## Git Commits Summary (18 commits)
+## Git Commits Summary (21 commits)
 ```
+e92fbff - refactor: Migrate normalization logic from JS to PHP (LATEST)
+d1556c0 - docs: Update report with JavaScript deduplication section
+6670f88 - refactor: Tạo JS normalization module, loại bỏ 1,700 lines duplicate code
 bafb32e - refactor: Loại bỏ code trùng lặp, tập trung hóa các hàm normalization
 5080dd0 - refactor: Update references after merging api_phan_tich_ai.php
 029f55b - docs: Update TroGiupPhanTichAI.php documentation after API merge
@@ -426,10 +431,92 @@ ddbf8e1 - Cleanup: Remove debug and automation files
 9839d1f - Pre-refactor: Backup before Vietnamese filename conversion
 ```
 
+---
+
+## 📦 NORMALIZATION MIGRATION (Commit e92fbff)
+
+### Vấn Đề
+- Frontend (JS) có 360+ type mappings, 150+ color mappings
+- Backend (PHP) chỉ có 12 type mappings, 30+ color mappings
+- **Không nhất quán** → Frontend và Backend chuẩn hóa khác nhau
+- Phải maintain 2 nơi khi update logic
+
+### Giải Pháp: Migrate JS → PHP
+✅ **Expanded `TroGiupDoTuongDong.php`**
+   - Thêm tất cả 360+ type mappings từ JS
+   - Thêm tất cả 150+ color mappings từ JS
+   - Thêm Vietnamese color detection
+   - Thêm partial match support (longest first)
+
+✅ **Created `api_chuan_hoa_du_lieu.php`**
+   - RESTful API endpoint cho normalization
+   - Support actions: `standardizeProductType`, `standardizeColor`, `standardizeBrand`, `normalizeColors`
+   - Batch processing: chuẩn hóa nhiều fields cùng lúc
+   - JSON response với error handling
+
+✅ **Created `js/normalization-api-client.js`** (155 lines)
+   - Lightweight API wrapper
+   - Async/await pattern
+   - Fallback to original value if API fails
+   - Backward compatibility với code cũ
+   - Batch normalization support
+
+❌ **Deleted `js/normalization-utils.js`** (977 lines)
+   - Logic moved to backend
+   - Reduced client-side code
+
+🔄 **Updated Frontend Files**
+   - `them_san_pham_ai.php`: Changed script import to API client
+   - `tao_phieu_nhap_moi.php`: Changed script import to API client
+
+### Lợi Ích
+1. **Single Source of Truth**: Chỉ maintain PHP (1 nơi)
+2. **100% Consistency**: Frontend và Backend cùng logic
+3. **Easier Maintenance**: Update 1 lần, áp dụng toàn hệ thống
+4. **Reduced Client Code**: 977 → 155 lines JS (-84%)
+5. **Better Performance**: Server-side processing
+6. **Centralized Logging**: Tất cả normalization logs ở 1 nơi
+
+### Breaking Changes
+- ⚠️ Frontend functions giờ là **async** (phải dùng `await`)
+- ⚠️ Yêu cầu PHP server running
+- ⚠️ API endpoint phải accessible từ frontend
+
+### Migration Guide
+```javascript
+// OLD (synchronous)
+const type = standardizeProductType('sneaker');
+
+// NEW (asynchronous)
+const type = await standardizeProductType('sneaker');
+
+// Batch processing (recommended)
+const normalized = await batchNormalize({
+    type: 'sneaker',
+    brand: 'nike',
+    colors: ['black', 'white']
+});
+// Returns: { type: 'Sneaker', brand: 'Nike', colors: ['Đen', 'Trắng'] }
+```
+
+### Files Changed
+- `helpers/TroGiupDoTuongDong.php`: +370 lines (comprehensive mappings)
+- `api_chuan_hoa_du_lieu.php`: +165 lines (NEW)
+- `js/normalization-api-client.js`: +155 lines (NEW)
+- `js/normalization-utils.js`: DELETED (-977 lines)
+- `them_san_pham_ai.php`: Script import changed
+- `tao_phieu_nhap_moi.php`: Script import changed
+
+**Net Code Reduction**: -287 lines total
+
+---
+
 ## Khuyến Nghị Tiếp Theo
 1. ✅ **HOÀN THÀNH**: Đã fix tất cả file references
 2. ✅ **HOÀN THÀNH**: Đã kiểm tra từng chi tiết
-3. **Tiếp theo**: Test toàn bộ chức năng của hệ thống
-4. **Tiếp theo**: Cập nhật documentation cho users
-5. **Tiếp theo**: Kiểm tra server configuration (Apache/Nginx)
+3. ✅ **HOÀN THÀNH**: Normalization logic centralized
+4. **Tiếp theo**: Test API endpoint với production data
+5. **Tiếp theo**: Test toàn bộ chức năng của hệ thống
+6. **Tiếp theo**: Cập nhật documentation cho users
+7. **Tiếp theo**: Kiểm tra server configuration (Apache/Nginx)
 6. **Sẵn sàng**: Merge branch vào main sau khi test xong
