@@ -5952,9 +5952,9 @@ Dữ liệu AI sẽ được merge:
             });
             
             // Proceed to edit step
-            $('#proceedToEdit').click(function() {
+            $('#proceedToEdit').click(async function() {
                 moveToStep(3);
-                displaySuggestions();
+                await displaySuggestions();
             });
             
             // Function to view product details (for duplicate check results)
@@ -6262,7 +6262,7 @@ Dữ liệu AI sẽ được merge:
                 moveToStep(1);
             });
 
-            function displaySuggestions() {
+            async function displaySuggestions() {
                 // Update UI for update mode
                 updateUIForMode();
                 
@@ -6298,7 +6298,7 @@ Dữ liệu AI sẽ được merge:
                         
                         // Show update mode suggestions
                         // Chuẩn hóa brand thành "Unknown" nếu trống hoặc không xác định
-                        const displayBrand = window.standardizeBrand(mergedData.brand);
+                        const displayBrand = await window.standardizeBrand(mergedData.brand);
                         
                         let suggestionsHtml = `
                             <div class="alert alert-info">
@@ -6322,7 +6322,7 @@ Dữ liệu AI sẽ được merge:
                         }
                         
                         // Chuẩn hóa brand thành "Unknown" nếu trống hoặc không xác định
-                        const displayBrand = window.standardizeBrand(suggestions.brand);
+                        const displayBrand = await window.standardizeBrand(suggestions.brand);
                         
                         // Hiển thị thông tin để người dùng xem
                         let suggestionsHtml = `
@@ -6776,12 +6776,12 @@ Dữ liệu AI sẽ được merge:
             });
 
             // Duplicate check modal handlers
-            $('#continueAddNew').click(function() {
+            $('#continueAddNew').click(async function() {
                 // Đóng modal và tiếp tục thêm sản phẩm mới
                 $('#duplicateCheckModal').modal('hide');
                 // Chuyển đến bước 3 để nhập thông tin
                 moveToStep(3);
-                displaySuggestions();
+                await displaySuggestions();
             });
             
             // Handler cho nút "Sửa thông tin" - Load thông tin sản phẩm để chỉnh sửa thủ công
@@ -7489,7 +7489,7 @@ Dữ liệu AI sẽ được merge:
                 addApplyAllPriceButton();
             });
 
-            function moveToStep(step) {
+            async function moveToStep(step) {
                 // Update step indicator
                 $('.step').removeClass('active completed');
                 for (let i = 1; i < step; i++) {
@@ -7523,7 +7523,7 @@ Dữ liệu AI sẽ được merge:
                     // Show suggestions if going back to step 3 (KHÔNG gọi khi update mode)
                     const isAIUpdateMode = window.aiUpdateMode && window.aiUpdateMode.productId;
                     if (suggestions && !isAIUpdateMode) {
-                        displaySuggestions();
+                        await displaySuggestions();
                     }
                     // In update mode, data will be filled by fillFormWithDatabaseData()
                 }
