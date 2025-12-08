@@ -335,6 +335,45 @@ Code trùng lặp nghiêm trọng - các hàm normalization xuất hiện ở 3-
    - `api_phan_tich_giay_ai.php` - Removed duplicates, now uses helper
    - `classes/GhepSanPhamThongMinh.php` - Removed duplicates, now uses helper
 
+## JavaScript Code Duplication Eliminated (Commit: 6670f88)
+✅ **Frontend Normalization Module** - Consolidate into `js/normalization-utils.js`
+
+### Problem Identified
+JavaScript code trùng lặp nghiêm trọng trong 2 files:
+- `them_san_pham_ai.php` - 3 functions (standardizeProductType, standardizeColor, normalizeColors)
+- `tao_phieu_nhap_moi.php` - 3 functions (duplicate hoàn toàn)
+- **Total: ~1,700 lines code trùng lặp!**
+
+### Solution Applied
+1. **Created `js/normalization-utils.js`**:
+   - `standardizeProductType(type)` - ~350 lines mapping
+   - `standardizeColor(color)` - ~300 lines mapping
+   - `standardizeBrand(brand)` - ~60 lines logic
+   - `normalizeColors(colors)` - ~20 lines helper
+   - Export to `window.NormalizationUtils` object + backward compatibility
+
+2. **Removed duplicates from**:
+   - `them_san_pham_ai.php`:
+     - Deleted ~764 lines (3 complete functions)
+     - Added `<script src="js/normalization-utils.js"></script>`
+     - Replaced with comment indicating functions loaded from module
+   - `tao_phieu_nhap_moi.php`:
+     - Deleted ~660 lines (3 complete functions)
+     - Added `<script src="js/normalization-utils.js"></script>`
+     - Replaced with comment indicating functions loaded from module
+
+3. **Benefits**:
+   - **Single source of truth** - Frontend normalization logic ở 1 file duy nhất
+   - **Reduced code** - Giảm 1,424 lines duplicate JavaScript code
+   - **Better caching** - Browser cache JS module, load 1 lần cho multiple pages
+   - **Module pattern** - Clean architecture, easy to maintain
+   - **Backward compatible** - Functions vẫn available trên window object
+
+4. **Files Changed**:
+   - `js/normalization-utils.js` - NEW file with centralized functions (977 lines)
+   - `them_san_pham_ai.php` - Removed 764 lines, added script import
+   - `tao_phieu_nhap_moi.php` - Removed 660 lines, added script import
+
 ## Lỗi Đã Sửa Trong Quá Trình Kiểm Tra Chi Tiết
 
 ### Commit 2f06162 - Fix Final Issues
