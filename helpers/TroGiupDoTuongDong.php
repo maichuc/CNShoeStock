@@ -5,22 +5,56 @@
  * Được sử dụng bởi: them_san_pham_ai.php, tao_phieu_nhap_moi.php
  */
 
-// Hàm normalize text để so sánh tốt hơn
+/**
+ * HÀM CHUẨN HÓA VĂN BẢN
+ * 
+ * Mục đích: Chuẩn hóa văn bản trước khi so sánh độ tương đồng
+ * 
+ * Các bước xử lý:
+ * 1. Chuyển về chữ thường
+ * 2. Loại bỏ dấu câu
+ * 3. Chuẩn hóa khoảng trắng
+ * 4. Thay thế các từ đồng nghĩa
+ * 
+ * Ví dụ:
+ * Input:  "Giày Thể Thao Nike!!!   Sneaker"
+ * Output: "giay thethao nike giay thethao"
+ * 
+ * @param string|array $text - Văn bản cần chuẩn hóa
+ * @return string - Văn bản đã chuẩn hóa
+ */
 if (!function_exists('normalizeText')) {
     function normalizeText($text) {
+        // BƯỚC 1: Nếu là array, ghép thành string
         if (is_array($text)) {
             $text = implode(' ', $text);
         }
         
+        // BƯỚC 2: Chuyển về chữ thường và loại khoảng trắng thừa
         $text = strtolower(trim((string)$text));
         
-        // Loại bỏ dấu câu
+        // BƯỚC 3: Loại bỏ dấu câu và ký tự đặc biệt
+        // Giữ lại: chữ cái (\p{L}), số (\p{N}), khoảng trắng (\s)
+        // Thay thế tất cả các ký tự khác bằng khoảng trắng
         $text = preg_replace('/[^\p{L}\p{N}\s]/u', ' ', $text);
         
-        // Normalize spaces
+        // BƯỚC 4: Chuẩn hóa nhiều khoảng trắng thành 1 khoảng trắng
+        // Ví dụ: "giày    thể   thao" -> "giày thể thao"
         $text = preg_replace('/\s+/', ' ', $text);
         
-        // Enhanced synonyms dictionary for Vietnamese shoe terms
+        /**
+         * BƯỚC 5: TỪ ĐIỂN ĐỒNG NGHĨA
+         * 
+         * Mục đích: Thống nhất các từ có nghĩa tương tự
+         * 
+         * Ví dụ:
+         * - "sneaker", "shoe", "boot" -> Tất cả đều chuyển thành "giay"
+         * - "cao gót", "high heel", "gót cao" -> "đều thành "caogot"
+         * - "thể thao", "sport", "running" -> Tất cả thành "thethao"
+         * 
+         * Lợi ích: Tăng độ chính xác khi so sánh
+         * Ví dụ: "Giày thể thao" và "Sneaker" sẽ được coi là giống nhau
+         */
         $synonyms = [
             'giay' => 'giay|sneaker|shoe|boot|sandal|dep',
             'sandal' => 'sandal|dep|giay mo|open toe|giay sandal',
@@ -56,11 +90,19 @@ if (!function_exists('normalizeText')) {
             'in' => 'in|khac|logo in|chu in|duoc in',
         ];
         
+        // Duyệt qua từng cặp đồng nghĩa và thay thế
         foreach ($synonyms as $normalized => $variants) {
+            // Tạo pattern regex để tìm các từ đồng nghĩa
+            // \b = word boundary (đảm bảo khớp đúng từ, không khớp 1 phần)
+            // Ví dụ: Pattern cho 'giay': /\b(giay|sneaker|shoe|boot|sandal|dep)\b/
             $pattern = '/\b(' . $variants . ')\b/u';
+            
+            // Thay thế tất cả các biến thể bằng từ chuẩn (bỏ khoảng trắng)
+            // Ví dụ: "sneaker" -> "giay", "high heel" -> "caogot"
             $text = preg_replace($pattern, str_replace(' ', '', $normalized), $text);
         }
         
+        // Trả về văn bản đã chuẩn hóa
         return trim($text);
     }
 }
@@ -85,9 +127,27 @@ if (!function_exists('extractKeywords')) {
     }
 }
 
-// Hàm tính toán độ tương đồng văn bản với semantic matching
+/**
+ * HÀM TÍNH ĐỘ TƯƠNG ĐỒNG VĂN BẢN
+ * 
+ * Mục đích: Tính độ giống nhau giữa 2 đoạn văn bản (0-100%)
+ * 
+ * Thuật toán kết hợp 3 phương pháp:
+ * 1. Keyword Matching (60% trọng số) - So sánh từ khóa chung
+ * 2. Levenshtein Distance (30%) - Tính khoảng cách chỉnh sửa
+ * 3. Substring Matching (10%) - Kiểm tra chuỗi con
+ * 
+ * Ví dụ:
+ * "Giày thể thao Nike Air Max" vs "Nike Air Max Sneaker"
+ * -> Similarity: ~85% (cùng brand, cùng loại, có từ khóa chung)
+ * 
+ * @param string $text1 - Văn bản 1
+ * @param string $text2 - Văn bản 2
+ * @return float - Độ tương đồng (0-100)
+ */
 if (!function_exists('calculateTextSimilarity')) {
     function calculateTextSimilarity($text1, $text2) {
+        // Xử lý nếu input là array
         if (is_array($text1)) {
             $text1 = implode(' ', $text1);
         }
@@ -95,49 +155,107 @@ if (!function_exists('calculateTextSimilarity')) {
             $text2 = implode(' ', $text2);
         }
         
+        // Chuyển sang string và loại bỏ khoảng trắng thừa
         $text1 = trim((string)$text1);
         $text2 = trim((string)$text2);
         
+        // Nếu 1 trong 2 rỗng -> Không giống (0%)
         if (empty($text1) || empty($text2)) {
             return 0;
         }
         
+        // BƯỚC 1: Chuẩn hóa văn bản
         $normalized1 = normalizeText($text1);
         $normalized2 = normalizeText($text2);
         
+        // Nếu sau khi chuẩn hóa giống y hệt -> 100%
         if ($normalized1 === $normalized2) {
             return 100;
         }
         
+        // BƯỚC 2: Trích xuất từ khóa
         $keywords1 = extractKeywords($text1);
         $keywords2 = extractKeywords($text2);
         
+        // Nếu không có từ khóa nào -> Không tính được (0%)
         if (empty($keywords1) || empty($keywords2)) {
             return 0;
         }
         
-        $intersection = array_intersect($keywords1, $keywords2);
-        $union = array_unique(array_merge($keywords1, $keywords2));
+        /**
+         * BƯỚC 3: TÍNH KEYWORD SIMILARITY (Jaccard Index)
+         * 
+         * Công thức: (Số từ khóa chung) / (Tổng số từ khóa unique)
+         * 
+         * Ví dụ:
+         * Text1 keywords: [giay, nike, air, max]
+         * Text2 keywords: [nike, air, max, sneaker]
+         * 
+         * Intersection (chung): [nike, air, max] = 3 từ
+         * Union (tổng unique): [giay, nike, air, max, sneaker] = 5 từ
+         * Similarity = 3/5 = 60%
+         */
+        $intersection = array_intersect($keywords1, $keywords2);  // Từ khóa chung
+        $union = array_unique(array_merge($keywords1, $keywords2));  // Tất cả từ khóa unique
         
+        // Tính % tương đồng dựa trên từ khóa
         $keywordSimilarity = count($union) > 0 ? (count($intersection) / count($union)) * 100 : 0;
         
+        /**
+         * BƯỚC 4: TÍNH LEVENSHTEIN DISTANCE
+         * 
+         * Thuật toán: Đếm số thao tác tối thiểu để biến text1 thành text2
+         * Thao tác: Thêm, xóa, thay thế 1 ký tự
+         * 
+         * Giới hạn: Chỉ áp dụng với text <= 255 ký tự (giới hạn của hàm levenshtein)
+         * 
+         * Ví dụ:
+         * "kitten" -> "sitting"
+         * Thao tác: k->s, e->i, thêm g = 3 thao tác
+         * Distance = 3
+         * Similarity = (1 - 3/7) * 100 = 57.14%
+         */
         $maxLen = max(strlen($normalized1), strlen($normalized2));
+        
         if ($maxLen > 0 && $maxLen <= 255) {
-            $distance = levenshtein($normalized1, $normalized2);
-            $levenshteinSimilarity = (1 - ($distance / $maxLen)) * 100;
+            $distance = levenshtein($normalized1, $normalized2);  // Số thao tác cần thiết
+            $levenshteinSimilarity = (1 - ($distance / $maxLen)) * 100;  // Chuyển thành %
         } else {
+            // Text quá dài -> Bỏ qua Levenshtein
             $levenshteinSimilarity = 0;
         }
         
+        /**
+         * BƯỚC 5: SUBSTRING MATCHING BONUS
+         * 
+         * Kiểm tra xem text này có phải là chuỗi con của text kia không
+         * Nếu có -> Tặng thêm 20 điểm bonus
+         * 
+         * Ví dụ:
+         * "Nike Air" là substring của "Nike Air Max" -> +20 điểm
+         */
         $substringBonus = 0;
         if (strpos($normalized1, $normalized2) !== false || strpos($normalized2, $normalized1) !== false) {
             $substringBonus = 20;
         }
         
+        /**
+         * BƯỚC 6: TÍNH ĐIỂM CUỐI CÙNG (Weighted Average)
+         * 
+         * Công thức: 
+         * Final = (Keyword × 60%) + (Levenshtein × 30%) + (Substring × 10%)
+         * 
+         * Giải thích trọng số:
+         * - Keyword: 60% (quan trọng nhất - nội dung ngữ nghĩa)
+         * - Levenshtein: 30% (cấu trúc văn bản)
+         * - Substring: 10% (bonus nếu text1 chứa text2)
+         */
         $finalScore = ($keywordSimilarity * 0.6) + ($levenshteinSimilarity * 0.3) + ($substringBonus * 0.1);
         
+        // Ghi log để debug
         error_log("Text similarity: '$text1' vs '$text2' = {$finalScore}% (keyword: {$keywordSimilarity}%, levenshtein: {$levenshteinSimilarity}%, substring: {$substringBonus})");
         
+        // Đảm bảo kết quả trong khoảng 0-100
         return max(0, min(100, $finalScore));
     }
 }
@@ -416,7 +534,7 @@ if (!function_exists('calculateColorSimilarityEnhanced')) {
             return 0;
         }
         
-        // Count matched colors from input
+        // Đếm matched colors from input
         $matchedInputColors = 0;
         foreach ($inputColors as $inputColor) {
             foreach ($dbColorList as $dbColor) {
@@ -427,7 +545,7 @@ if (!function_exists('calculateColorSimilarityEnhanced')) {
             }
         }
         
-        // Count matched colors from database
+        // Đếm matched colors từ database
         $matchedDbColors = 0;
         foreach ($dbColorList as $dbColor) {
             foreach ($inputColors as $inputColor) {
@@ -441,7 +559,7 @@ if (!function_exists('calculateColorSimilarityEnhanced')) {
         $totalInputColors = count($inputColors);
         $totalDbColors = count($dbColorList);
         
-        // Calculate match percentage
+        // Tính toán match percentage
         $inputMatchPercentage = ($matchedInputColors / $totalInputColors) * 100;
         $dbMatchPercentage = ($matchedDbColors / $totalDbColors) * 100;
         $avgMatchPercentage = ($inputMatchPercentage + $dbMatchPercentage) / 2;
@@ -466,7 +584,7 @@ if (!function_exists('normalizeColorEnhanced')) {
     function normalizeColorEnhanced($color) {
         $color = strtolower(trim($color));
         
-        // Remove Vietnamese accents
+        // Xóa Vietnamese accents
         $color = preg_replace('/[àáạảãâầấậẩẫăằắặẳẵ]/u', 'a', $color);
         $color = preg_replace('/[èéẹẻẽêềếệểễ]/u', 'e', $color);
         $color = preg_replace('/[ìíịỉĩ]/u', 'i', $color);
@@ -494,7 +612,7 @@ if (!function_exists('normalizeColorEnhanced')) {
             return $colorMap[$color];
         }
         
-        // Check contains
+        // Kiểm tra contains
         foreach ($colorMap as $key => $standardColor) {
             if (strpos($color, $key) !== false) {
                 return $standardColor;
@@ -502,6 +620,163 @@ if (!function_exists('normalizeColorEnhanced')) {
         }
         
         return $color;
+    }
+}
+
+/**
+ * ============================================================================
+ * CENTRALIZED NORMALIZATION FUNCTIONS
+ * Tập trung hóa tất cả logic chuẩn hóa để tránh code trùng lặp
+ * ============================================================================
+ */
+
+/**
+ * Chuẩn hóa thương hiệu - Version tổng hợp
+ * Gộp logic từ: api_phan_tich_giay_ai.php, GhepSanPhamThongMinh.php
+ */
+if (!function_exists('standardizeBrand')) {
+    function standardizeBrand($brand) {
+        // Danh sách unknown brands
+        $unknownBrands = [
+            'fashion', 'không xác định', 'khong xac dinh', 'chưa xác định', 
+            'chua xac dinh', 'không rõ', 'khong ro', 'chưa rõ', 'chua ro',
+            'không thương hiệu', 'khong thuong hieu', 'không có thương hiệu', 
+            'khong co thuong hieu', 'chưa có thương hiệu', 'chua co thuong hieu',
+            'không nhãn hiệu', 'khong nhan hieu', 'không có nhãn hiệu', 
+            'khong co nhan hieu', 'không nhãn', 'khong nhan', 'chưa có nhãn', 
+            'chua co nhan', 'không brand', 'khong brand', 'không có brand', 
+            'khong co brand', 'no brand', 'nobrand', 'no-brand', 'unbranded', 
+            'non-branded', 'non branded', 'undefined', 'none', 'null', 'n/a', 
+            'na', 'n.a', 'n.a.', '-', '--', '---', '_', '__', '___', '?', '??', '???',
+        ];
+        
+        if (empty($brand) || !trim($brand)) {
+            return 'Unknown';
+        }
+        
+        $brandLower = mb_strtolower(trim($brand), 'UTF-8');
+        
+        if (in_array($brandLower, $unknownBrands)) {
+            return 'Unknown';
+        }
+        
+        // Mapping các variant của brand phổ biến
+        $brandMap = [
+            'Nike' => ['nike', 'nike shoes', 'nike sportswear'],
+            'Adidas' => ['adidas', 'adidas originals', 'adidas performance'],
+            'Puma' => ['puma', 'puma shoes'],
+            'Converse' => ['converse', 'converse all star'],
+            'Vans' => ['vans', 'vans shoes'],
+            'New Balance' => ['new balance', 'nb', 'newbalance'],
+            'Reebok' => ['reebok'],
+            'Asics' => ['asics'],
+            'Under Armour' => ['under armour'],
+            'MLB' => ['mlb'],
+            'Charles & Keith' => ['charles & keith', 'charles keith'],
+            'Jeremy' => ['jeremy'],
+            'Gucci' => ['gucci'],
+            'Balenciaga' => ['balenciaga'],
+            'Versace' => ['versace'],
+            'Lecos' => ['lecos'],
+            'Boston' => ['boston']
+        ];
+        
+        foreach ($brandMap as $standard => $variants) {
+            if (in_array($brandLower, $variants)) {
+                return $standard;
+            }
+        }
+        
+        return ucfirst(trim($brand));
+    }
+}
+
+/**
+ * Chuẩn hóa màu sắc - Version tổng hợp
+ * Gộp logic từ nhiều file
+ */
+if (!function_exists('standardizeColor')) {
+    function standardizeColor($color) {
+        if (empty($color) || !trim($color)) {
+            return '';
+        }
+        
+        $colorMap = [
+            'black' => 'Đen', 'den' => 'Đen',
+            'white' => 'Trắng', 'trang' => 'Trắng', 'off white' => 'Trắng ngà',
+            'red' => 'Đỏ', 'do' => 'Đỏ',
+            'blue' => 'Xanh dương', 'xanh duong' => 'Xanh dương',
+            'green' => 'Xanh lá', 'xanh la' => 'Xanh lá',
+            'yellow' => 'Vàng', 'vang' => 'Vàng',
+            'orange' => 'Cam', 'cam' => 'Cam',
+            'purple' => 'Tím', 'tim' => 'Tím',
+            'pink' => 'Hồng', 'hong' => 'Hồng',
+            'brown' => 'Nâu', 'nau' => 'Nâu',
+            'gray' => 'Xám', 'grey' => 'Xám', 'xam' => 'Xám',
+            'beige' => 'Be',
+            'navy' => 'Xanh navy', 'navy blue' => 'Xanh navy',
+            'burgundy' => 'Đỏ burgundy',
+            'gold' => 'Vàng kim', 'vang kim' => 'Vàng kim',
+            'silver' => 'Bạc', 'bac' => 'Bạc',
+            'bronze' => 'Đồng', 'dong' => 'Vàng kim',
+            'rose gold' => 'Vàng hồng',
+            'light blue' => 'Xanh dương nhạt',
+            'dark blue' => 'Xanh dương đậm',
+            'mint' => 'Xanh bạc hà',
+            'coral' => 'San hô',
+            'turquoise' => 'Xanh lam',
+        ];
+        
+        $colorLower = mb_strtolower(trim($color), 'UTF-8');
+        
+        // Exact match
+        if (isset($colorMap[$colorLower])) {
+            return $colorMap[$colorLower];
+        }
+        
+        // Multi-word color
+        $words = explode(' ', $colorLower);
+        if (count($words) > 1) {
+            $translatedWords = [];
+            foreach ($words as $word) {
+                $translatedWords[] = $colorMap[$word] ?? $word;
+            }
+            $result = implode(' ', $translatedWords);
+            return mb_strtoupper(mb_substr($result, 0, 1, 'UTF-8'), 'UTF-8') . 
+                   mb_substr($result, 1, null, 'UTF-8');
+        }
+        
+        return ucfirst($color);
+    }
+}
+
+/**
+ * Chuẩn hóa loại sản phẩm
+ * Từ api_phan_tich_giay_ai.php
+ */
+if (!function_exists('standardizeProductType')) {
+    function standardizeProductType($type) {
+        if (empty($type)) {
+            return '';
+        }
+        
+        $typeMapping = [
+            'sneaker' => 'Sneaker', 'sneakers' => 'Sneaker',
+            'running shoe' => 'Sneaker', 'sport shoe' => 'Sneaker',
+            'high heel' => 'Giày cao gót', 'high heels' => 'Giày cao gót',
+            'pump' => 'Giày cao gót', 'pumps' => 'Giày cao gót',
+            'wedge' => 'Giày đế xuồng', 'wedges' => 'Giày đế xuồng',
+            'sandal' => 'Sandal', 'sandals' => 'Sandal',
+            'boot' => 'Giày boot', 'boots' => 'Giày boot',
+            'oxford' => 'Giày tây', 'dress shoe' => 'Giày tây',
+            'loafer' => 'Giày lười', 'slip-on' => 'Giày lười',
+            'flat' => 'Giày bệt', 'flats' => 'Giày bệt',
+            'mule' => 'Giày mules', 'mules' => 'Giày mules',
+        ];
+        
+        $typeLower = strtolower(trim($type));
+        
+        return $typeMapping[$typeLower] ?? ucfirst($type);
     }
 }
 

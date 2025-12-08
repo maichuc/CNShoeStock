@@ -9,6 +9,7 @@ header('Content-Type: application/json');
 
 require_once 'config/database.php';
 require_once 'helpers/TroGiupPhanTichAI.php';
+require_once 'helpers/TroGiupDoTuongDong.php'; // Centralized normalization functions
 require_once 'classes/GhepSanPhamThongMinh.php';
 require_once 'helpers/DichVuTaiAnhLen.php';
 
@@ -311,146 +312,24 @@ function testAPI() {
 }
 
 // ============================================================================
-// HELPER FUNCTIONS (Merged from old api_phan_tich_ai.php)
-// These functions were consolidated here to eliminate code duplication
+// HELPER FUNCTIONS (Use centralized functions from TroGiupDoTuongDong.php)
+// standardizeBrand(), standardizeColor(), standardizeProductType() are now
+// imported from helpers/TroGiupDoTuongDong.php to eliminate code duplication
 // ============================================================================
 
 /**
- * Chuẩn hóa thương hiệu sản phẩm
- * Tất cả các thương hiệu không xác định sẽ được chuyển về "Unknown"
- */
-function standardizeBrand($brand) {
-    // Danh sách các giá trị brand cần chuyển thành "Unknown"
-    $unknownBrands = [
-        // Fashion (thường bị AI nhận diện sai)
-        'fashion',
-        
-        // Không xác định (tiếng Việt)
-        'không xác định', 'khong xac dinh', 'chưa xác định', 'chua xac dinh',
-        'không rõ', 'khong ro', 'chưa rõ', 'chua ro',
-        
-        // Không thương hiệu
-        'không thương hiệu', 'khong thuong hieu', 
-        'không có thương hiệu', 'khong co thuong hieu',
-        'chưa có thương hiệu', 'chua co thuong hieu',
-        
-        // Không nhãn hiệu
-        'không nhãn hiệu', 'khong nhan hieu', 
-        'không có nhãn hiệu', 'khong co nhan hieu',
-        'không nhãn', 'khong nhan', 'chưa có nhãn', 'chua co nhan',
-        
-        // Không brand
-        'không brand', 'khong brand', 
-        'không có brand', 'khong co brand',
-        
-        // English variants
-        'no brand', 'nobrand', 'no-brand',
-        'unbranded', 'non-branded', 'non branded',
-        'undefined', 'none', 'null',
-        
-        // N/A variants
-        'n/a', 'na', 'n.a', 'n.a.',
-        
-        // Ký tự đặc biệt
-        '-', '--', '---', '_', '__', '___',
-        '?', '??', '???',
-    ];
-    
-    // Nếu brand rỗng hoặc chỉ có khoảng trắng
-    if (empty($brand) || !trim($brand)) {
-        return 'Unknown';
-    }
-    
-    // Chuẩn hóa để so sánh
-    $brandLower = mb_strtolower(trim($brand), 'UTF-8');
-    
-    // Kiểm tra trong danh sách unknown brands
-    if (in_array($brandLower, $unknownBrands)) {
-        error_log("⚠️ Standardizing brand '{$brand}' to 'Unknown'");
-        return 'Unknown';
-    }
-    
-    // Giữ nguyên brand hợp lệ (capitalize first letter)
-    return ucfirst(trim($brand));
-}
-
-/**
  * Chuẩn hóa output từ AI để tăng tính nhất quán
+ * Note: Uses standardizeBrand(), standardizeProductType() from helper
  */
 function normalizeAIOutput($aiData) {
-    // 1. CHUẨN HÓA CATEGORY/TYPE
-    $typeMapping = [
-        // === SNEAKER ===
-        'sneaker' => 'Sneaker',
-        'sneakers' => 'Sneaker',
-        'running shoe' => 'Sneaker',
-        'running shoes' => 'Sneaker',
-        'giày chạy bộ' => 'Sneaker',
-        'giày thể thao' => 'Sneaker',
-        'sport shoes' => 'Sneaker',
-        'sport shoe' => 'Sneaker',
-        
-        // === GIÀY CAO GÓT ===
-        'high heel' => 'Giày cao gót',
-        'high heels' => 'Giày cao gót',
-        'giày cao gót' => 'Giày cao gót',
-        'cao gót' => 'Giày cao gót',
-        'pump' => 'Giày cao gót',
-        'pumps' => 'Giày cao gót',
-        'wedge heel' => 'Giày đế xuồng',
-        'wedge heels' => 'Giày đế xuồng',
-        'wedges' => 'Giày đế xuồng',
-        'wedge' => 'Giày đế xuồng',
-        'giày đế xuồng' => 'Giày đế xuồng',
-        
-        // === SANDAL ===
-        'sandal' => 'Sandal',
-        'sandals' => 'Sandal',
-        'slide' => 'Sandal',
-        
-        // === GIÀY BOOT ===
-        'boot' => 'Giày boot',
-        'boots' => 'Giày boot',
-        'giày boot' => 'Giày boot',
-        
-        // === GIÀY TÂY ===
-        'oxford' => 'Giày tây',
-        'oxfords' => 'Giày tây',
-        'dress shoe' => 'Giày tây',
-        'dress shoes' => 'Giày tây',
-        'giày tây' => 'Giày tây',
-        
-        // === GIÀY LƯỜI ===
-        'loafer' => 'Giày lười',
-        'loafers' => 'Giày lười',
-        'slip-on' => 'Giày lười',
-        'slip on' => 'Giày lười',
-        'giày lười' => 'Giày lười',
-        
-        // === GIÀY BỆT ===
-        'flat' => 'Giày bệt',
-        'flats' => 'Giày bệt',
-        'giày bệt' => 'Giày bệt',
-        
-        // === KHÁC ===
-        'giày quai hậu' => 'Giày quai hậu',
-        'mule' => 'Giày mules',
-        'mules' => 'Giày mules',
-    ];
-    
+    // 1. CHUẨN HÓA CATEGORY/TYPE - Dùng hàm từ helper
     if (isset($aiData['category'])) {
-        $categoryLower = strtolower(trim($aiData['category']));
-        if (isset($typeMapping[$categoryLower])) {
-            $aiData['category'] = $typeMapping[$categoryLower];
-            $aiData['type'] = $typeMapping[$categoryLower];
-        }
+        $aiData['category'] = standardizeProductType($aiData['category']);
+        $aiData['type'] = $aiData['category'];
     }
     
     if (isset($aiData['type'])) {
-        $typeLower = strtolower(trim($aiData['type']));
-        if (isset($typeMapping[$typeLower])) {
-            $aiData['type'] = $typeMapping[$typeLower];
-        }
+        $aiData['type'] = standardizeProductType($aiData['type']);
     }
     
     // 2. Chuẩn hóa brand
@@ -460,30 +339,10 @@ function normalizeAIOutput($aiData) {
         $aiData['brand'] = 'Unknown';
     }
     
-    // 3. Chuẩn hóa màu sắc
-    $colorMapping = [
-        'black' => 'Đen',
-        'white' => 'Trắng',
-        'red' => 'Đỏ',
-        'blue' => 'Xanh dương',
-        'green' => 'Xanh lá',
-        'yellow' => 'Vàng',
-        'pink' => 'Hồng',
-        'purple' => 'Tím',
-        'orange' => 'Cam',
-        'brown' => 'Nâu',
-        'gray' => 'Xám',
-        'grey' => 'Xám',
-        'navy' => 'Xanh navy',
-        'navy blue' => 'Xanh navy',
-        'beige' => 'Be',
-        'gold' => 'Vàng kim',
-        'silver' => 'Bạc',
-        'burgundy' => 'Đỏ burgundy',
-    ];
-    
+    // 3. Chuẩn hóa màu sắc - Dùng hàm từ helper
     if (isset($aiData['color']) && !empty($aiData['color'])) {
         $originalColor = $aiData['color'];
+        // Loại bỏ phần trong ngoặc (nếu có)
         $colorString = preg_replace('/\s*\([^)]*\)/u', '', $aiData['color']);
         
         $colors = explode(',', $colorString);
@@ -493,13 +352,8 @@ function normalizeAIOutput($aiData) {
             $colorTrimmed = trim($color);
             if (empty($colorTrimmed)) continue;
             
-            $colorLower = mb_strtolower($colorTrimmed, 'UTF-8');
-            
-            if (isset($colorMapping[$colorLower])) {
-                $normalizedColors[] = $colorMapping[$colorLower];
-            } else {
-                $normalizedColors[] = ucfirst($colorTrimmed);
-            }
+            $normalized = standardizeColor($colorTrimmed);
+            $normalizedColors[] = $normalized;
         }
         
         $normalizedColors = array_unique($normalizedColors);

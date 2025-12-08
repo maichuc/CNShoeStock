@@ -4,6 +4,9 @@
  * Phát hiện sản phẩm trùng lặp và nhóm variants
  */
 
+// Import helper functions
+require_once __DIR__ . '/../helpers/TroGiupDoTuongDong.php';
+
 class SmartProductMatcher {
     private $pdo;
     
@@ -89,59 +92,12 @@ class SmartProductMatcher {
         $color = strtolower(trim($result['color'] ?? ''));
         $size = trim($result['size'] ?? '');
         
-        // Xử lý các tên tương đương
-        $brand = $this->normalizeBrand($brand);
-        $color = $this->normalizeColor($color);
+        // Xử lý các tên tương đương - Dùng hàm từ helper
+        $brand = strtolower(standardizeBrand($brand));
+        $color = strtolower(standardizeColor($color));
         
         // Tạo key unique
         return "{$brand}|{$model}|{$color}|{$size}";
-    }
-    
-    /**
-     * Chuẩn hóa tên brand
-     */
-    private function normalizeBrand($brand) {
-        $brandMap = [
-            'nike' => ['nike', 'nike shoes', 'nike sportswear'],
-            'adidas' => ['adidas', 'adidas originals', 'adidas performance'],
-            'puma' => ['puma', 'puma shoes'],
-            'converse' => ['converse', 'converse all star'],
-            'vans' => ['vans', 'vans shoes'],
-            'new balance' => ['new balance', 'nb', 'newbalance']
-        ];
-        
-        foreach ($brandMap as $standard => $variants) {
-            if (in_array($brand, $variants)) {
-                return $standard;
-            }
-        }
-        
-        return $brand;
-    }
-    
-    /**
-     * Chuẩn hóa tên màu
-     */
-    private function normalizeColor($color) {
-        $colorMap = [
-            'đen' => ['đen', 'black', 'den', 'đen nhám', 'đen bóng'],
-            'trắng' => ['trắng', 'white', 'trang', 'trắng tinh', 'trắng sữa'],
-            'xanh navy' => ['xanh navy', 'navy', 'navy blue', 'xanh đậm'],
-            'xanh dương' => ['xanh dương', 'blue', 'xanh', 'xanh da trời'],
-            'đỏ' => ['đỏ', 'red', 'do', 'đỏ tươi'],
-            'vàng' => ['vàng', 'yellow', 'vang'],
-            'xanh lá' => ['xanh lá', 'green', 'xanh lá cây'],
-            'nâu' => ['nâu', 'brown', 'nau', 'nâu đất'],
-            'xám' => ['xám', 'gray', 'grey', 'xam', 'xám nhạt']
-        ];
-        
-        foreach ($colorMap as $standard => $variants) {
-            if (in_array($color, $variants)) {
-                return $standard;
-            }
-        }
-        
-        return $color;
     }
     
     /**
@@ -151,9 +107,9 @@ class SmartProductMatcher {
         $score = 0;
         $maxScore = 4;
         
-        // Brand similarity (weight: 25%)
-        if ($this->normalizeBrand(strtolower($product1['brand'] ?? '')) === 
-            $this->normalizeBrand(strtolower($product2['brand'] ?? ''))) {
+        // Brand similarity (weight: 25%) - Dùng hàm từ helper
+        if (strtolower(standardizeBrand($product1['brand'] ?? '')) === 
+            strtolower(standardizeBrand($product2['brand'] ?? ''))) {
             $score += 1;
         }
         
@@ -168,9 +124,9 @@ class SmartProductMatcher {
             $score += 0.5;
         }
         
-        // Color similarity (weight: 25%)
-        if ($this->normalizeColor(strtolower($product1['color'] ?? '')) === 
-            $this->normalizeColor(strtolower($product2['color'] ?? ''))) {
+        // Color similarity (weight: 25%) - Dùng hàm từ helper
+        if (strtolower(standardizeColor($product1['color'] ?? '')) === 
+            strtolower(standardizeColor($product2['color'] ?? ''))) {
             $score += 1;
         }
         
@@ -205,7 +161,7 @@ class SmartProductMatcher {
      */
     public function findSimilarInDatabase($product) {
         try {
-            // Search by brand and model
+            // Tìm kiếm by brand and model
             $sql = "SELECT p.product_id, p.name, p.description,
                            pv.variant_id, pv.sku, pv.color, pv.size, pv.price
                     FROM products p
@@ -241,7 +197,7 @@ class SmartProductMatcher {
                 }
             }
             
-            // Sort by similarity
+            // Sắp xếp by similarity
             usort($matches, function($a, $b) {
                 return $b['similarity'] <=> $a['similarity'];
             });
