@@ -311,7 +311,8 @@ function testAPI() {
 }
 
 // ============================================================================
-// HELPER FUNCTIONS FROM api_phan_tich_ai.php
+// HELPER FUNCTIONS (Merged from old api_phan_tich_ai.php)
+// These functions were consolidated here to eliminate code duplication
 // ============================================================================
 
 /**

@@ -8,7 +8,7 @@
  * - Các ngày lễ và sự kiện
  */
 
-// Load environment variables
+// Tải environment variables
 require_once __DIR__ . '/env_loader.php';
 
 // Suppress all PHP errors and warnings for clean JSON output
@@ -27,7 +27,7 @@ header('Access-Control-Allow-Methods: GET, POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
 require_once 'config/database.php';
-require_once 'api_phan_tich_ai.php';  // Import hàm chuẩn hóa loại giày
+require_once 'api_phan_tich_giay_ai.php';  // Import hàm chuẩn hóa loại giày (API đã gộp)
 
 session_start();
 
@@ -3363,7 +3363,7 @@ function getRestockSuggestions($conn, $warehouse_id, $month, $region) {
         $is_rainy = strpos($month_data['rainfall'], 'Mưa') !== false;
         
         foreach ($hot_shoes as $shoe_type) {
-            // Sử dụng hàm chuẩn hóa từ api_phan_tich_ai.php
+            // Sử dụng hàm chuẩn hóa từ api_phan_tich_giay_ai.php (API đã gộp)
             $mapped_type = $shoe_mapping[$shoe_type] ?? standardizeProductType($shoe_type);
             
             // Log để debug
@@ -4216,7 +4216,7 @@ function generateRecommendation($category, $change_percent, $month) {
  * Xử lý dữ liệu theo mùa
  */
 function processSeasonalData($data) {
-    // Group by category and month
+    // Nhóm by category and month
     $processed = [];
     foreach ($data as $row) {
         $category = $row['category_name'];

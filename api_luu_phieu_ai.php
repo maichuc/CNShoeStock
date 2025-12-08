@@ -11,9 +11,9 @@ require_once 'config/database.php';
 require_once 'classes/LichSuPhieuNhap.php';
 require_once 'classes/QuanLyMaQR.php';
 
-// Import standardizeBrand function
-if (file_exists(__DIR__ . '/api_phan_tich_ai.php')) {
-    require_once __DIR__ . '/api_phan_tich_ai.php';
+// Nhập standardizeBrand function từ API đã gộp
+if (file_exists(__DIR__ . '/api_phan_tich_giay_ai.php')) {
+    require_once __DIR__ . '/api_phan_tich_giay_ai.php';
 }
 
 // Kiểm tra đăng nhập
@@ -47,21 +47,21 @@ $input = json_decode(file_get_contents('php://input'), true);
 try {
     $pdo->beginTransaction();
     
-    // Validate input
+    // Kiểm tra input
     if (!isset($input['supplier_id']) || !isset($input['products']) || empty($input['products'])) {
         throw new Exception('Thiếu thông tin bắt buộc');
     }
     
-    // Generate receipt code
+    // Tạo receipt code
     $receiptCode = 'SR' . date('Ymd') . rand(1000, 9999);
     
-    // Calculate total
+    // Tính toán total
     $totalAmount = 0;
     foreach ($input['products'] as $product) {
         $totalAmount += ($product['quantity'] ?? 0) * ($product['price'] ?? 0);
     }
     
-    // Create main receipt
+    // Tạo main receipt
     $stmt = $pdo->prepare("
         INSERT INTO stock_receipts (
             receipt_code, supplier_id, warehouse_id, user_id, 
@@ -81,7 +81,7 @@ try {
     
     $receiptId = $pdo->lastInsertId();
     
-    // Create products and variants
+    // Tạo products and variants
     foreach ($input['products'] as $product) {
         // Chuẩn hóa thương hiệu thành "Unknown" nếu không xác định
         if (isset($product['brand'])) {
@@ -96,7 +96,7 @@ try {
             $product['brand'] = 'Unknown';
         }
         
-        // Check if product exists
+        // Kiểm tra if product exists
         $stmt = $pdo->prepare("
             SELECT product_id FROM products 
             WHERE LOWER(name) = LOWER(?) 
@@ -122,7 +122,7 @@ try {
             $productId = $pdo->lastInsertId();
         }
         
-        // Check if variant exists
+        // Kiểm tra if variant exists
         $stmt = $pdo->prepare("
             SELECT variant_id FROM product_variants 
             WHERE product_id = ? AND color = ? AND size = ?
@@ -138,7 +138,7 @@ try {
         if ($existingVariant) {
             $variantId = $existingVariant['variant_id'];
         } else {
-            // Create new variant
+            // Tạo new variant
             $sku = strtoupper(substr($product['brand'] ?? 'UNK', 0, 3)) . '-' . 
                    strtoupper(substr($product['model'] ?? 'UNK', 0, 3)) . '-' .
                    strtoupper(substr($product['color'] ?? 'UNK', 0, 3)) . '-' .
@@ -163,7 +163,7 @@ try {
             $variantId = $pdo->lastInsertId();
         }
         
-        // Create receipt item
+        // Tạo receipt item
         $stmt = $pdo->prepare("
             INSERT INTO stock_receipt_items (
                 receipt_id, variant_id, quantity, unit_price, 
@@ -185,14 +185,14 @@ try {
             ])
         ]);
         
-        // Generate QR code for variant if not exists
+        // Tạo QR code for variant if not exists
         $existingQR = $qrManager->getQRCode($productId, $variantId);
         if (!$existingQR) {
             $qrManager->generateQRCode($productId, $variantId, $userId);
         }
     }
     
-    // Log history
+    // Ghi nhật ký history
     $historyManager->logChange(
         $receiptId, 
         $userId, 
