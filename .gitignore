@@ -1,21 +1,82 @@
 # OS artifacts
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*~
+.directory
 
 # Environment
 .env
+.env.local
+.env.*.local
+
+# IDE & Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.code-workspace
+.netbeans/
+.project
+.settings/
+.classpath
+
+# Composer & NPM
+/vendor/
+node_modules/
+composer.lock
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
 
 # Cache directories
 /cache/
 cache/
 *.cache
+.cache/
 
-# Logs
+# Logs & Debug
 *.log
+logs/
 /storage/logs/
+debug_log.txt
 
-# Composer/npm lock if you don't want to commit
-composer.lock
-package-lock.json
-pnpm-lock.yaml
-node_modules
+# Temporary files
+/storage/temp/
+/storage/cache/
+temp/
+tmp/
+
+# Uploads (keep directory, ignore files)
+/public/uploads/*
+!/public/uploads/.gitkeep
+uploads/*
+!/uploads/.gitkeep
+
+# Database files
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+*.mdb
+
+# OS specific
+.AppleDouble/
+.LSOverride/
+._*
+.TemporaryItems/
+.Spotlight-V100/
+.Trashes/
+ehthumbs.db
+
+# Build & Dist
+/dist/
+/build/
+/out/
+
+# System files
+.DS_Store
+.env.production.local
+config/database.php
+/public/cleanup_root.php
