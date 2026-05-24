@@ -1,0 +1,117 @@
+/* Fix for Bootstrap Dropdown Menu Issues */
+
+/* Đảm bảo dropdown menu hiển thị đúng */
+.dropdown-menu {
+    position: absolute !important;
+    will-change: transform;
+    top: 100% !important;
+    left: auto !important;
+    right: 0 !important;
+    z-index: 1050 !important;
+    display: none;
+    min-width: 10rem;
+    padding: 0.5rem 0;
+    margin: 0.125rem 0 0;
+    font-size: 0.85rem;
+    color: #858796;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.dropdown-menu.show {
+    display: block !important;
+}
+
+/* Ẩn arrow mặc định của Bootstrap */
+.dropdown-toggle::after {
+    display: none;
+}
+
+/* Đảm bảo dropdown items hiển thị đúng */
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.25rem 1.5rem;
+    clear: both;
+    font-weight: 400;
+    color: #3a3b45;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    text-decoration: none;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    color: #2e2f37;
+    background-color: #f8f9fc;
+    text-decoration: none;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+    color: #fff;
+    background-color: #4e73df;
+    text-decoration: none;
+}
+
+/* Fix cho dropdown header */
+.dropdown-header {
+    display: block;
+    padding: 0.5rem 1.5rem;
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    color: #858796;
+    white-space: nowrap;
+}
+
+/* Fix cho dropdown divider */
+.dropdown-divider {
+    height: 0;
+    margin: 0.5rem 0;
+    overflow: hidden;
+    border-top: 1px solid #e3e6f0;
+}
+
+/* Đảm bảo dropdown menu right align */
+.dropdown-menu-right {
+    right: 0 !important;
+    left: auto !important;
+}
+
+/* Animation cho dropdown */
+.dropdown-menu.animated--grow-in {
+    animation: growIn 0.2s ease-out;
+}
+
+@keyframes growIn {
+    0% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Fix cho topbar dropdown */
+.topbar .dropdown-menu {
+    position: absolute !important;
+    transform: translate3d(0, 0, 0) !important;
+}
+
+/* Đảm bảo dropdown không bị che bởi elements khác */
+.nav-item.dropdown {
+    position: relative;
+}
+
+.nav-item.dropdown .dropdown-menu {
+    position: absolute !important;
+}

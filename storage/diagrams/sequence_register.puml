@@ -1,0 +1,37 @@
+@startuml
+' Sequence diagram: Đăng ký tài khoản
+actor User as "Người dùng"
+participant "Trình duyệt" as Browser
+participant "Frontend (Form)" as Frontend
+participant "AuthController (Server)" as Auth
+participant "UserService" as UserSvc
+participant "EmailService" as EmailSvc
+
+User -> Browser : Mở trang "Đăng ký"
+Browser -> Frontend : Hiển thị form đăng ký
+
+User -> Frontend : Nhập thông tin và ấn "Đăng ký"
+Frontend -> Frontend : Kiểm tra client-side
+note right: Kiểm tra: trường bắt buộc,
+email hợp lệ, mật khẩu khớp
+alt Nếu validation client thất bại
+  Frontend -> User : Hiển thị lỗi (ví dụ: "Email không hợp lệ")
+else Validation ok
+  Frontend -> Auth : POST /register (username,email,password,...)
+  Auth -> UserSvc : Kiểm tra trùng (email/username)
+  alt Nếu trùng
+    UserSvc -> Auth : Trả về lỗi trùng
+    Auth -> Frontend : 400, {message: "Email đã được sử dụng"}
+    Frontend -> User : Hiển thị lỗi trùng
+  else Không trùng
+    Auth -> UserSvc : Yêu cầu tạo người dùng (role=manager)
+    UserSvc -> UserSvc : Tạo bản ghi user (không mô tả DB)
+    UserSvc -> Auth : Trả về thành công (userId)
+    Auth -> EmailSvc : Gửi yêu cầu gửi email xác minh (async)
+    EmailSvc -> EmailSvc : Gửi email / xếp vào hàng gửi
+    Auth -> Frontend : 200, {message: "Đăng ký thành công"}
+    Frontend -> User : Hiển thị "Đăng ký thành công" + hướng dẫn kiểm tra email
+  end
+end
+
+@enduml

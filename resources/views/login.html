@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Smart Warehouse - Hệ thống quản lý kho thông minh">
+    <meta name="author" content="Smart Warehouse Team">
+
+    <title>Smart Warehouse - Đăng nhập</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+
+    <!-- Custom styles -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            display: flex;
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-left {
+            flex: 1;
+            padding: 60px 50px;
+            background: white;
+        }
+
+        .login-right {
+            flex: 1;
+            background: linear-gradient(135deg, #0f4c75 0%, #1b6ca8 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 50px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-right::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            bottom: -200px;
+            right: -200px;
+        }
+
+        .login-right::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            top: -150px;
+            left: -150px;
+        }
+
+        .login-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .login-subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+            font-size: 18px;
+            pointer-events: none;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 45px 15px 15px;
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: #bdc3c7;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #ecf0f1;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: #95a5a6;
+            font-size: 14px;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .social-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            font-size: 20px;
+            color: #7f8c8d;
+        }
+
+        .social-btn:hover {
+            border-color: #3498db;
+            color: #3498db;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .welcome-text {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .welcome-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-register {
+            padding: 15px 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-register:hover {
+            background: white;
+            color: #0f4c75;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .alert {
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+                border-radius: 20px;
+            }
+
+            .login-right {
+                order: -1;
+                padding: 40px 30px;
+            }
+
+            .login-left {
+                padding: 40px 30px;
+            }
+
+            .welcome-text {
+                font-size: 36px;
+            }
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #95a5a6;
+            font-size: 18px;
+            z-index: 10;
+        }
+
+        .password-toggle:hover {
+            color: #3498db;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper label {
+            font-size: 14px;
+            color: #7f8c8d;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: -15px;
+            margin-bottom: 20px;
+        }
+
+        .forgot-password a {
+            color: #3498db;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <!-- Right Side - Welcome Message -->
+        <div class="login-right">
+            <h2 class="welcome-text">Welcome Back!</h2>
+            <p class="welcome-subtitle">Already have an Account</p>
+            <a href="register.html" class="btn-register">
+                <i class="fas fa-user-plus"></i> Đăng ký
+            </a>
+        </div>
+
+        <!-- Left Side - Login Form -->
+        <div class="login-left">
+            <h1 class="login-title">Đăng nhập</h1>
+            <p class="login-subtitle">Hệ thống quản lý kho thông minh</p>
+            
+            <!-- Alert messages -->
+            <div id="alert-container"></div>
+            
+            <form id="loginForm" method="POST" action="auth/xu_ly_dang_nhap.php">
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="text" class="form-control" 
+                            id="username" name="username" required
+                            placeholder="Tên đăng nhập" value="admin">
+                        <i class="fas fa-user input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="password" class="form-control" 
+                            id="password" name="password" required
+                            placeholder="Mật khẩu" value="password">
+                        <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                    </div>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="remember_me" name="remember_me">
+                    <label for="remember_me">Ghi nhớ đăng nhập</label>
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                </button>
+            </form>
+
+            <div class="divider">
+                <span>hoặc đăng nhập với</span>
+            </div>
+
+            <div class="social-login">
+                <div class="social-btn" title="Google">
+                    <i class="fab fa-google"></i>
+                </div>
+                <div class="social-btn" title="Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </div>
+                <div class="social-btn" title="GitHub">
+                    <i class="fab fa-github"></i>
+                </div>
+                <div class="social-btn" title="LinkedIn">
+                    <i class="fab fa-linkedin-in"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="js/sb-admin-2.min.js"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Login script -->
+    <script>
+        $(document).ready(function() {
+            // Toggle password visibility
+            $('#togglePassword').on('click', function() {
+                const passwordField = $('#password');
+                const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+                passwordField.attr('type', type);
+                
+                // Toggle icon
+                $(this).toggleClass('fa-eye fa-eye-slash');
+            });
+
+            // Login form submission
+            $('#loginForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const username = $('#username').val().trim();
+                const password = $('#password').val();
+                const remember_me = $('#remember_me').is(':checked');
+                
+                if (!username || !password) {
+                    showAlert('Vui lòng nhập đầy đủ thông tin!', 'warning');
+                    return;
+                }
+                
+                const $btn = $('#loginBtn');
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang đăng nhập...');
+                
+                $.ajax({
+                    url: 'api.php', // Thay vì index.php
+                    type: 'POST',
+                    data: {
+                        action: 'login', // Thêm action để Router nhận diện
+                        username: username,
+                        password: password,
+                        remember_me: remember_me ? 1 : 0
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('Login Response:', response);
+                        
+                        if (response.success) {
+                            if (response.must_change_password) {
+                                showAlert('Đăng nhập thành công! Bạn cần đổi mật khẩu...', 'warning');
+                            } else {
+                                showAlert('Đăng nhập thành công! Đang chuyển hướng...', 'success');
+                            }
+                            
+                            setTimeout(function() {
+                                window.location.href = response.redirect || 'index.php';
+                            }, 1500);
+                        } else {
+                            showAlert(response.message || 'Đăng nhập thất bại!', 'danger');
+                            $btn.prop('disabled', false).html('<i class="fas fa-sign-in-alt"></i> Đăng nhập');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', xhr.responseText);
+                        showAlert('Có lỗi xảy ra. Vui lòng thử lại!', 'danger');
+                        $btn.prop('disabled', false).html('<i class="fas fa-sign-in-alt"></i> Đăng nhập');
+                    }
+                });
+            });
+
+            // Social login buttons (demo - add real implementation)
+            $('.social-btn').on('click', function() {
+                const platform = $(this).attr('title');
+                showAlert(`Tính năng đăng nhập bằng ${platform} đang được phát triển`, 'warning');
+            });
+        });
+        
+        function showAlert(message, type) {
+            const alertHtml = `
+                <div class="alert alert-${type}">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    ${message}
+                </div>
+            `;
+            $('#alert-container').html(alertHtml);
+            
+            // Auto hide after 5 seconds
+            setTimeout(function() {
+                $('#alert-container').fadeOut(300, function() {
+                    $(this).html('').show();
+                });
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

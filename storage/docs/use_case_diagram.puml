@@ -1,0 +1,134 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Nhân viên" as Staff
+actor "Quản lý kho" as Manager
+
+ ' Generalization: "Quản lý kho" là dạng mở rộng của "Nhân viên" (Manager inherits Staff)
+Manager --|> Staff
+
+rectangle "Hệ thống Quản lý Kho" {
+  package "Quản lý Nhân viên" {
+    usecase "Thêm nhân viên" as UC_AddEmployee
+    usecase "Cập nhật nhân viên" as UC_UpdateEmployee
+    usecase "Vô hiệu nhân viên" as UC_DisableEmployee
+  }
+
+  package "Quản lý Sản phẩm" {
+    usecase "Thêm sản phẩm" as UC_AddProduct
+    usecase "Sửa sản phẩm" as UC_EditProduct
+    usecase "Cập nhật sản phẩm" as UC_UpdateProduct
+    usecase "Tạm ngưng sản phẩm" as UC_SuspendProduct
+    usecase "Vô hiệu hóa sản phẩm" as UC_DisableProduct
+  }
+
+  package "Quản lý Nhà cung cấp" {
+    usecase "Thêm nhà cung cấp" as UC_AddSupplier
+    usecase "Sửa nhà cung cấp" as UC_EditSupplier
+    usecase "Cập nhật nhà cung cấp" as UC_UpdateSupplier
+    usecase "Vô hiệu hóa nhà cung cấp" as UC_DisableSupplier
+  }
+
+  package "Quản lý Tài khoản" {
+    usecase "Đăng ký tài khoản" as UC_Register
+    usecase "Thêm tài khoản nhân viên mới" as UC_AddStaffAccount
+    usecase "Vô hiệu hóa tài khoản nhân viên" as UC_DisableAccount
+    usecase "Sửa thông tin tài khoản nhân viên" as UC_EditStaffAccount
+  }
+
+  package "Quản lý Vị trí Kho" {
+    usecase "Thêm vị trí kho" as UC_AddLocation
+    usecase "Vô hiệu vị trí kho" as UC_DisableLocation
+    usecase "Quản lý vị trí kho" as UC_ManageLocations
+  }
+
+  package "Đơn hàng & Kho" {
+    usecase "Tạo đơn hàng" as UC_CreateOrder
+    usecase "Xử lý đơn xuất kho" as UC_ProcessOutbound
+    usecase "Tạo phiếu nhập kho" as UC_CreateReceipt
+    usecase "Xác nhận phiếu nhập kho" as UC_ConfirmReceipt
+    usecase "Xác nhận đơn hàng" as UC_ConfirmOrder
+    usecase "Xác nhận xuất hàng" as UC_ConfirmOutbound
+    usecase "Cập nhật trạng thái giao hàng" as UC_UpdateDelivery
+    usecase "Dự báo kho" as UC_Forecast
+  }
+
+  usecase "Đăng nhập" as UC_Login
+  usecase "Đăng xuất" as UC_Logout
+}
+
+'' Associations: Actors are associated only to base use cases (Included use cases must not have direct actor links)
+' Association: Nhân viên — chỉ kết nối tới các use case mà Nhân viên thực sự thực hiện
+Staff --> UC_Logout
+Staff --> UC_AddProduct
+Staff --> UC_EditProduct
+Staff --> UC_CreateOrder
+Staff --> UC_ProcessOutbound
+Staff --> UC_UpdateDelivery
+Staff --> UC_CreateReceipt
+Staff --> UC_AddSupplier
+Staff --> UC_EditSupplier
+
+' Association: Quản lý kho (bao gồm quyền Nhân viên + các quyền quản lý)
+Manager --> UC_Logout
+Manager --> UC_AddProduct
+Manager --> UC_EditProduct
+Manager --> UC_CreateOrder
+Manager --> UC_ProcessOutbound
+Manager --> UC_UpdateDelivery
+Manager --> UC_CreateReceipt
+Manager --> UC_AddSupplier
+Manager --> UC_EditSupplier
+
+Manager --> UC_Register
+Manager --> UC_AddStaffAccount
+Manager --> UC_DisableAccount
+Manager --> UC_EditStaffAccount
+Manager --> UC_AddEmployee
+Manager --> UC_UpdateEmployee
+Manager --> UC_DisableEmployee
+Manager --> UC_SuspendProduct
+Manager --> UC_DisableProduct
+Manager --> UC_Forecast
+Manager --> UC_SuspendSupplier
+Manager --> UC_UpdateSupplier
+Manager --> UC_DisableSupplier
+Manager --> UC_ManageLocations
+Manager --> UC_AddLocation
+Manager --> UC_DisableLocation
+Manager --> UC_ConfirmReceipt
+Manager --> UC_ConfirmOrder
+Manager --> UC_ConfirmOutbound
+
+'' Include relationships: reused common behaviour (Included use cases MUST NOT have actor associations)
+UC_AddProduct ..> UC_Login : <<include>>
+UC_EditProduct ..> UC_Login : <<include>>
+UC_CreateOrder ..> UC_Login : <<include>>
+UC_ProcessOutbound ..> UC_Login : <<include>>
+UC_CreateReceipt ..> UC_Login : <<include>>
+UC_AddSupplier ..> UC_Login : <<include>>
+UC_EditSupplier ..> UC_Login : <<include>>
+UC_AddStaffAccount ..> UC_Login : <<include>>
+UC_AddEmployee ..> UC_Login : <<include>>
+UC_AddLocation ..> UC_Login : <<include>>
+
+'' Extend relationships: hành vi mở rộng, xảy ra trong điều kiện cụ thể
+UC_ConfirmOrder ..> UC_CreateOrder : <<extend>>
+UC_ConfirmReceipt ..> UC_CreateReceipt : <<extend>>
+UC_DisableSupplier ..> UC_EditSupplier : <<extend>>
+UC_DisableEmployee ..> UC_EditStaffAccount : <<extend>>
+
+note right of UC_Login
+  Luật vẽ chính (tóm tắt):
+  - Actors: đại diện người dùng/HT bên ngoài
+  - Use Case: chức năng (GIỮ NGUYÊN TÊN USECASE)
+  - Association: kết nối Actor <-> Base Use Case
+  - Generalization: quan hệ kế thừa giữa Actor
+  - Include: reuse bắt buộc (Included use cases không có liên kết tới Actor)
+  - Extend: hành vi mở rộng, có điều kiện
+  - System Boundary: mọi use case bên trong rectangle
+end note
+
+@enduml
