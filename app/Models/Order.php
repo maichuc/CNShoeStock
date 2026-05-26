@@ -172,20 +172,16 @@ class Order {
             $totalPrice = $orderInfo['total_price'] ?? array_sum(array_column($orderInfo['items'], 'total_price'));
             $discount = $orderInfo['discount'] ?? 0;
             
-            $sql = "INSERT INTO orders (customer_id, warehouse_id, status, total_price, discount, notes, 
-                                      customer_name, customer_phone, customer_address,
-                                      created_at, updated_at) 
-                    VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+            $sql = "INSERT INTO orders (customer_id, warehouse_id, status, total_price, discount, 
+                                      created_by, created_at, updated_at) 
+                    VALUES (?, ?, 'pending', ?, ?, ?, NOW(), NOW())";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute([
                 $customerId, 
                 $warehouseId, 
                 $totalPrice,
                 $discount,
-                $customerNote,
-                $customerName,
-                $customerPhone,
-                $customerAddress
+                $userId
             ]);
             $orderId = $this->conn->lastInsertId();
 
