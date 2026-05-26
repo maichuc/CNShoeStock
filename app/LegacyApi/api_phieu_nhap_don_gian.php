@@ -277,7 +277,7 @@ function confirmReceiptSimple($pdo, $data, $userId) {
                 ], JSON_UNESCAPED_UNICODE);
                 
                 // Tạo QR code file
-                $qrDir = __DIR__ . '/uploads/qr/';
+                $qrDir = __DIR__ . '/../../public/uploads/qr/';
                 if (!is_dir($qrDir)) {
                     mkdir($qrDir, 0777, true);
                 }

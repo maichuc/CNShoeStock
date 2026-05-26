@@ -94,7 +94,7 @@ class QRCodeGenerator {
              * Tạo thư mục uploads/qr/ nếu chưa tồn tại
              * Quyền 0755: owner có full quyền, group và other chỉ đọc/execute
              */
-            $uploadDir = __DIR__ . '/../uploads/qr/';
+            $uploadDir = __DIR__ . '/../../public/uploads/qr/';
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true); // true = tạo cả thư mục cha nếu cần
             }

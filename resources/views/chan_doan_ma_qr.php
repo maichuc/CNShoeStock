@@ -125,13 +125,13 @@
         <div class="card">
             <h3>Thư Mục QR Code</h3>
             <?php 
-            $qrDir = __DIR__ . '/uploads/qr/';
+            $qrDir = __DIR__ . '/../../public/uploads/qr/';
             $qrDirExists = is_dir($qrDir);
             $qrDirWritable = is_writable($qrDir);
             ?>
             <?php if ($qrDirExists && $qrDirWritable): ?>
                 <div class="status ok">✓ Đã Sẵn Sàng</div>
-                <p>Thư mục <code>uploads/qr/</code> tồn tại và có quyền ghi.</p>
+                <p>Thư mục <code>public/uploads/qr/</code> tồn tại và có quyền ghi.</p>
                 <?php
                 $qrFiles = glob($qrDir . '*.png');
                 $qrCount = count($qrFiles);
@@ -215,7 +215,7 @@
             <h3>Vấn đề: QR Code Không Được Tạo</h3>
             <ol>
                 <li>Kiểm tra GD extension đã bật chưa</li>
-                <li>Kiểm tra quyền ghi thư mục <code>uploads/qr/</code></li>
+                <li>Kiểm tra quyền ghi thư mục <code>public/uploads/qr/</code></li>
                 <li>Xem Apache error log: <code>C:\xampp\apache\logs\error.log</code></li>
                 <li>Thử test tạo QR code thủ công</li>
             </ol>
