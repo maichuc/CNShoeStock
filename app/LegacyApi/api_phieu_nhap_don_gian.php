@@ -164,13 +164,13 @@ function getReceiptDetails($pdo, $receiptId) {
         $receipt['receipt_code'] = 'RC-' . str_pad($receiptId, 6, '0', STR_PAD_LEFT);
         
         // Lấy danh sách sản phẩm với thông tin chi tiết
-        $sql = "SELECT sri.receipt_item_id as item_id,
+        $sql = "SELECT MIN(sri.receipt_item_id) as item_id,
                        sri.receipt_id,
                        sri.variant_id,
-                       sri.quantity as quantity_expected, 
-                       sri.quantity as quantity_received,
-                       sri.unit_price,
-                       sri.location_code,
+                       SUM(sri.quantity) as quantity_expected, 
+                       SUM(sri.quantity) as quantity_received,
+                       MAX(sri.unit_price) as unit_price,
+                       MAX(sri.location_code) as location_code,
                        COALESCE(p.product_id, 0) as product_id,
                        COALESCE(p.name, 'N/A') as product_name, 
                        COALESCE(p.description, '') as description,
@@ -181,12 +181,13 @@ function getReceiptDetails($pdo, $receiptId) {
                        COALESCE(pv.color, '') as color, 
                        COALESCE(pv.size, '') as size, 
                        COALESCE(pv.price, 0) as current_price,
-                       sri.location_code as location_code_name, 
-                       CONCAT('Vị trí: ', sri.location_code) as location_name
+                       MAX(sri.location_code) as location_code_name, 
+                       CONCAT('Vị trí: ', MAX(sri.location_code)) as location_name
                 FROM stock_receipt_items sri
                 LEFT JOIN product_variants pv ON sri.variant_id = pv.variant_id
                 LEFT JOIN products p ON pv.product_id = p.product_id
                 WHERE sri.receipt_id = ?
+                GROUP BY sri.receipt_id, sri.variant_id, p.product_id, p.name, p.description, pv.sku, pv.color, pv.size, pv.price
                 ORDER BY p.name, pv.color, pv.size";
         
         $stmt = $pdo->prepare($sql);

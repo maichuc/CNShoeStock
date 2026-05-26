@@ -43,19 +43,31 @@ class StockReceipt {
     }
 
     public function getReceiptItems($receiptId) {
-        $sql = "SELECT sri.*, p.product_id, p.name as product_name, p.description,
+        $sql = "SELECT MIN(sri.receipt_item_id) as receipt_item_id, sri.receipt_id, sri.variant_id,
+                       SUM(sri.quantity) as quantity, MAX(sri.unit_price) as unit_price,
+                       MAX(sri.location_code) as location_code, MAX(sri.location_id) as location_id,
+                       MAX(sri.warehouse_id) as warehouse_id,
+                       MIN(sri.created_at) as created_at,
+                       p.product_id, p.name as product_name, p.description,
                        CONCAT(COALESCE(pv.color, ''), 
                               CASE WHEN pv.color IS NOT NULL AND pv.size IS NOT NULL THEN ' - ' ELSE '' END,
                               COALESCE(pv.size, '')) as variant_name,
                        pv.sku, pv.color, pv.size, pv.price as current_price,
-                       l.shelf_code as location_code, l.description as location_name,
-                       qr.qr_code, qr.qr_image_path, pv.product_id
+                       MAX(l.shelf_code) as location_code_alias, MAX(l.description) as location_name,
+                       MAX(qr.qr_code) as qr_code, MAX(qr.qr_image_path) as qr_image_path
                 FROM stock_receipt_items sri
+                INNER JOIN stock_receipts sr ON sri.receipt_id = sr.receipt_id
                 LEFT JOIN product_variants pv ON sri.variant_id = pv.variant_id
                 LEFT JOIN products p ON pv.product_id = p.product_id
-                LEFT JOIN locations l ON sri.location_code = l.shelf_code
-                LEFT JOIN product_qr_codes qr ON (qr.product_id = p.product_id AND qr.variant_id = pv.variant_id AND qr.is_active = 1)
+                LEFT JOIN locations l ON (sri.location_code = l.shelf_code AND sr.warehouse_id = l.warehouse_id)
+                LEFT JOIN (
+                    SELECT variant_id, MAX(qr_code) as qr_code, MAX(qr_image_path) as qr_image_path 
+                    FROM product_qr_codes 
+                    WHERE is_active = 1 
+                    GROUP BY variant_id
+                ) qr ON qr.variant_id = pv.variant_id
                 WHERE sri.receipt_id = :id
+                GROUP BY sri.receipt_id, sri.variant_id, p.product_id, p.name, p.description, pv.sku, pv.color, pv.size, pv.price
                 ORDER BY p.name, pv.color, pv.size";
         
         $stmt = $this->conn->prepare($sql);
