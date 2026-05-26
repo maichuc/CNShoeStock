@@ -80,3 +80,20 @@ ehthumbs.db
 .env.production.local
 config/database.php
 /public/cleanup_root.php
+# Developer scratch & tests
+scratch/
+test.php
+test_*.php
+git_files.txt
+
+# Accidental composer installs in public
+public/vendor/autoload.php
+public/vendor/bin/
+public/vendor/composer/
+public/vendor/maennchen/
+public/vendor/markbaker/
+public/vendor/myclabs/
+public/vendor/phpmailer/
+public/vendor/phpoffice/
+public/vendor/phpstan/
+public/vendor/psr/
