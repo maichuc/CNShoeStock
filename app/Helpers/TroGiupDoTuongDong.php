@@ -1135,4 +1135,111 @@ if (!function_exists('standardizeProductType')) {
     }
 }
 
+/**
+ * HÀM CHUẨN HÓA KẾT QUẢ SẢN PHẨM TRÙNG LẶP
+ * 
+ * @param array $duplicates Danh sách các sản phẩm trùng lặp (chứa product_id và similarity / similarity_percentage)
+ * @param PDO $pdo Kết nối CSDL để lấy thêm thông tin variants nếu cần
+ * @param int $limit Số lượng kết quả trả về tối đa (mặc định 5)
+ * @return array Mảng kết quả chuẩn hóa chứa has_duplicates, duplicates, max_similarity, warning_level
+ */
+if (!function_exists('formatDuplicateProductsResponse')) {
+    function formatDuplicateProductsResponse($duplicates, $pdo, $limit = 5) {
+        $groupedDuplicates = [];
+        $maxSimilarity = 0;
+
+        foreach ($duplicates as $dup) {
+            $productId = $dup['product_id'];
+            
+            if (!isset($groupedDuplicates[$productId])) {
+                // Fetch created_at for this product
+                $pSql = "SELECT created_at, status FROM products WHERE product_id = ?";
+                $pStmt = $pdo->prepare($pSql);
+                $pStmt->execute([$productId]);
+                $pRow = $pStmt->fetch(PDO::FETCH_ASSOC);
+                $createdAt = $pRow ? $pRow['created_at'] : '';
+                $status = $pRow ? $pRow['status'] : ($dup['status'] ?? 'active');
+                
+                // Fetch all variants (sizes, prices, colors)
+                $vSql = "SELECT DISTINCT size, price, color FROM product_variants WHERE product_id = ? ORDER BY size ASC";
+                $vStmt = $pdo->prepare($vSql);
+                $vStmt->execute([$productId]);
+                $vRows = $vStmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                $sizes = [];
+                $prices = [];
+                $colorSet = [];
+                foreach ($vRows as $vRow) {
+                    if (!empty($vRow['size'])) {
+                        $sizes[] = $vRow['size'];
+                        $prices[] = $vRow['price'];
+                    }
+                    if (!empty($vRow['color'])) {
+                        $colorSet[trim($vRow['color'])] = true;
+                    }
+                }
+                
+                $aggregatedColors = implode(', ', array_keys($colorSet));
+                $similarityVal = floatval($dup['similarity_percentage'] ?? $dup['similarity'] ?? 0);
+                $maxSimilarity = max($maxSimilarity, $similarityVal);
+                
+                $sizePriceText = 'Chưa có size';
+                if (!empty($sizes)) {
+                    $sizePriceText = implode(', ', array_map(function($size, $price) {
+                        return "Size $size: " . number_format($price, 0, ',', '.') . "đ";
+                    }, $sizes, $prices));
+                }
+                
+                // Standardize structure with dual keys for compatibility
+                $groupedDuplicates[$productId] = [
+                    'product_id' => $productId,
+                    'name' => $dup['name'] ?? '',
+                    'brand' => $dup['brand'] ?? '',
+                    'description' => $dup['description'] ?? '',
+                    'type' => $dup['type'] ?? '',
+                    'material' => $dup['material'] ?? '',
+                    'status' => $status,
+                    'color' => $aggregatedColors ?: ($dup['color'] ?? $dup['colors'] ?? ''),
+                    'colors' => $aggregatedColors ?: ($dup['colors'] ?? $dup['color'] ?? ''),
+                    'sizes' => $sizes,
+                    'prices' => $prices,
+                    'size_price_text' => $sizePriceText,
+                    'similarity' => round($similarityVal, 1),
+                    'similarity_percentage' => round($similarityVal, 1),
+                    'image_path' => $dup['image_path'] ?? $dup['image_url'] ?? '',
+                    'image_url' => $dup['image_url'] ?? $dup['image_path'] ?? '',
+                    'created_at' => $createdAt
+                ];
+            } else {
+                $similarityVal = floatval($dup['similarity_percentage'] ?? $dup['similarity'] ?? 0);
+                if ($similarityVal > $groupedDuplicates[$productId]['similarity_percentage']) {
+                    $groupedDuplicates[$productId]['similarity'] = round($similarityVal, 1);
+                    $groupedDuplicates[$productId]['similarity_percentage'] = round($similarityVal, 1);
+                    $maxSimilarity = max($maxSimilarity, $similarityVal);
+                }
+            }
+        }
+        
+        $finalDuplicates = array_values($groupedDuplicates);
+        usort($finalDuplicates, function($a, $b) {
+            return $b['similarity'] <=> $a['similarity'];
+        });
+        
+        $warningLevel = 'safe';
+        if ($maxSimilarity >= 85) {
+            $warningLevel = 'high';
+        } elseif ($maxSimilarity >= 70) {
+            $warningLevel = 'medium';
+        }
+        
+        return [
+            'has_duplicates' => !empty($finalDuplicates),
+            'duplicates' => array_slice($finalDuplicates, 0, $limit),
+            'count' => count($finalDuplicates),
+            'max_similarity' => round($maxSimilarity, 1),
+            'warning_level' => $warningLevel
+        ];
+    }
+}
+
 ?>

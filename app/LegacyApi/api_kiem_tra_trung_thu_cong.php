@@ -118,35 +118,14 @@ if ($action === 'check_manual_duplicates') {
                 $statusInfo = isset($product['status']) ? $product['status'] : 'UNDEFINED';
                 error_log("✓ DUPLICATE FOUND: Product ID {$product['product_id']} (Status: {$statusInfo}) with {$similarity}% similarity");
                 
-                // Lấy thông tin sizes và prices từ bảng product_variants
-                $variantsSql = "SELECT size, price FROM product_variants WHERE product_id = ? ORDER BY size ASC";
-                $variantsStmt = $pdo->prepare($variantsSql);
-                $variantsStmt->execute([$product['product_id']]);
-                $variants = $variantsStmt->fetchAll(PDO::FETCH_ASSOC);
-                
-                // Tách sizes và prices thành 2 mảng riêng
-                $sizes = [];
-                $prices = [];
-                foreach ($variants as $variant) {
-                    if (!empty($variant['size'])) {
-                        $sizes[] = $variant['size'];
-                        $prices[] = $variant['price'];
-                    }
-                }
-                
-                // Thêm sản phẩm trùng lặp vào danh sách kết quả
+                // Ghi nhận duplicate cơ bản, logic lấy variants đã được chuyển vào helper
                 $duplicates[] = [
                     'product_id' => $product['product_id'],
                     'name' => $product['name'],
                     'brand' => $product['brand'],
                     'type' => $product['type'],
-                    'color' => $product['colors'],
+                    'colors' => $product['colors'],
                     'status' => $product['status'] ?? 'active',
-                    'sizes' => $sizes,
-                    'prices' => $prices,
-                    'size_price_text' => !empty($sizes) ? implode(', ', array_map(function($size, $price) {
-                        return "Size $size: " . number_format($price, 0, ',', '.') . "đ";
-                    }, $sizes, $prices)) : 'Chưa có size',
                     'similarity' => round($similarity, 1),
                     'image_url' => $product['image_path'] ?? '',
                     'created_at' => $product['created_at']
@@ -160,31 +139,15 @@ if ($action === 'check_manual_duplicates') {
         // Log tổng kết kết quả
         error_log("Similarity calculation completed:");
         error_log("  Total products compared: {$totalCompared}");
-        error_log("  Duplicates found (>= 50%): " . count($duplicates));
+        error_log("  Duplicates found (>= 65%): " . count($duplicates));
         error_log("  Max similarity: " . round($maxSimilarity, 1) . "%");
         
-        // Sắp xếp danh sách trùng lặp theo độ tương đồng từ cao xuống thấp
-        usort($duplicates, function($a, $b) {
-            return $b['similarity'] <=> $a['similarity'];
-        });
-        
-        // Xác định mức độ cảnh báo dựa trên độ tương đồng cao nhất
-        $warningLevel = 'safe';          // Mặc định: An toàn
-        if ($maxSimilarity >= 85) {
-            $warningLevel = 'high';       // >= 85%: Cảnh báo cao (rất giống)
-        } elseif ($maxSimilarity >= 70) {
-            $warningLevel = 'medium';     // >= 70%: Cảnh báo trung bình
-        }
-        
+        // Sử dụng hàm helper chung để chuẩn hóa format trả về
+        $formattedData = formatDuplicateProductsResponse($duplicates, $pdo);
+        $formattedData['total_found'] = $formattedData['count'];
+
         // Trả về JSON kết quả
-        echo json_encode([
-            'success' => true,
-            'has_duplicates' => !empty($duplicates),    // Có sản phẩm trùng hay không
-            'duplicates' => array_slice($duplicates, 0, 5), // Chỉ trả về top 5 sản phẩm trùng nhất
-            'max_similarity' => round($maxSimilarity, 1),   // Độ tương đồng cao nhất
-            'warning_level' => $warningLevel,           // Mức cảnh báo (safe/medium/high)
-            'total_found' => count($duplicates)         // Tổng số sản phẩm trùng tìm được
-        ]);
+        echo json_encode(array_merge(['success' => true], $formattedData));
         
     } catch (Exception $e) {
         // Bắt lỗi và trả về thông báo lỗi
