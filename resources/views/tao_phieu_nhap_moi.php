@@ -803,13 +803,101 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $duplicates = checkDuplicateProductsEnhanced($aiData, $pdo);
                     
                     if (is_array($duplicates)) {
-                        error_log("[ADD_PRODUCT] Found " . count($duplicates) . " potential duplicates");
+                        error_log("[ADD_PRODUCT] Found " . count($duplicates) . " raw duplicate rows");
+                        
+                        $groupedDuplicates = [];
+                        $maxSimilarity = 0;
+                        
+                        foreach ($duplicates as $dup) {
+                            $productId = $dup['product_id'];
+                            
+                            if (!isset($groupedDuplicates[$productId])) {
+                                // Fetch created_at for this product
+                                $pSql = "SELECT created_at FROM products WHERE product_id = ?";
+                                $pStmt = $pdo->prepare($pSql);
+                                $pStmt->execute([$productId]);
+                                $pRow = $pStmt->fetch(PDO::FETCH_ASSOC);
+                                $createdAt = $pRow ? $pRow['created_at'] : '';
+                                
+                                // Fetch all variants (sizes, prices, colors)
+                                $vSql = "SELECT DISTINCT size, price, color FROM product_variants WHERE product_id = ? ORDER BY size ASC";
+                                $vStmt = $pdo->prepare($vSql);
+                                $vStmt->execute([$productId]);
+                                $vRows = $vStmt->fetchAll(PDO::FETCH_ASSOC);
+                                
+                                $sizes = [];
+                                $prices = [];
+                                $colorSet = [];
+                                foreach ($vRows as $vRow) {
+                                    if (!empty($vRow['size'])) {
+                                        $sizes[] = $vRow['size'];
+                                        $prices[] = $vRow['price'];
+                                    }
+                                    if (!empty($vRow['color'])) {
+                                        $colorSet[trim($vRow['color'])] = true;
+                                    }
+                                }
+                                
+                                $aggregatedColors = implode(', ', array_keys($colorSet));
+                                $similarityVal = floatval($dup['similarity_percentage'] ?? 0);
+                                $maxSimilarity = max($maxSimilarity, $similarityVal);
+                                
+                                $sizePriceText = 'Chưa có size';
+                                if (!empty($sizes)) {
+                                    $sizePriceText = implode(', ', array_map(function($size, $price) {
+                                        return "Size $size: " . number_format($price, 0, ',', '.') . "đ";
+                                    }, $sizes, $prices));
+                                }
+                                
+                                // Standardize structure with dual keys
+                                $groupedDuplicates[$productId] = [
+                                    'product_id' => $productId,
+                                    'name' => $dup['name'] ?? '',
+                                    'brand' => $dup['brand'] ?? '',
+                                    'description' => $dup['description'] ?? '',
+                                    'type' => $dup['type'] ?? '',
+                                    'material' => $dup['material'] ?? '',
+                                    'status' => $dup['status'] ?? 'active',
+                                    'color' => $aggregatedColors,
+                                    'colors' => $aggregatedColors,
+                                    'sizes' => $sizes,
+                                    'prices' => $prices,
+                                    'size_price_text' => $sizePriceText,
+                                    'similarity' => $similarityVal,
+                                    'similarity_percentage' => $similarityVal,
+                                    'image_path' => $dup['image_path'] ?? '',
+                                    'image_url' => $dup['image_path'] ?? '',
+                                    'created_at' => $createdAt
+                                ];
+                            } else {
+                                $similarityVal = floatval($dup['similarity_percentage'] ?? 0);
+                                if ($similarityVal > $groupedDuplicates[$productId]['similarity_percentage']) {
+                                    $groupedDuplicates[$productId]['similarity'] = $similarityVal;
+                                    $groupedDuplicates[$productId]['similarity_percentage'] = $similarityVal;
+                                    $maxSimilarity = max($maxSimilarity, $similarityVal);
+                                }
+                            }
+                        }
+                        
+                        $finalDuplicates = array_values($groupedDuplicates);
+                        usort($finalDuplicates, function($a, $b) {
+                            return $b['similarity'] <=> $a['similarity'];
+                        });
+                        
+                        $warningLevel = 'safe';
+                        if ($maxSimilarity >= 85) {
+                            $warningLevel = 'high';
+                        } elseif ($maxSimilarity >= 70) {
+                            $warningLevel = 'medium';
+                        }
                         
                         $response = [
                             'success' => true,
-                            'has_duplicates' => !empty($duplicates),
-                            'duplicates' => $duplicates,
-                            'count' => count($duplicates)
+                            'has_duplicates' => !empty($finalDuplicates),
+                            'duplicates' => array_slice($finalDuplicates, 0, 5),
+                            'count' => count($finalDuplicates),
+                            'max_similarity' => $maxSimilarity,
+                            'warning_level' => $warningLevel
                         ];
                     } else {
                         error_log("[ADD_PRODUCT] checkDuplicateProducts returned non-array: " . gettype($duplicates));
@@ -7046,69 +7134,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 console.log('🔍 [STOCK_RECEIPT] Checking duplicates with multi-image AI data:', aiData);
                 console.log('🔍 [STOCK_RECEIPT] Current warehouse context from session');
                 
-                // Show loading indicator inline (giống them_san_pham_ai.php)
-                $('#aiDuplicateCheckResult').html('<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Đang kiểm tra trùng lặp sản phẩm...</div>').show();
+                // Show loading indicator inline
+                $('#aiDuplicateCheckResult').html('<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Đang kiểm tra trùng lặp sản phẩm bằng AI...</div>').show();
                 
-                // ===== SỬ DỤNG TRỰC TIẾP DỮ LIỆU TỪ aiData (ĐÃ ĐƯỢC CHUẨN HÓA) =====
-                // Ưu tiên dữ liệu từ aiData thay vì lấy từ DOM (giống them_san_pham_ai.php)
-                const productType = aiData.type || aiData.category || '';
-                const brand = aiData.brand || '';
-                const productName = aiData.name || '';
-                // Xử lý colors - có thể là array hoặc string
-                const colors = Array.isArray(aiData.colors) ? aiData.colors.join(', ') : (aiData.colors || aiData.color || '');
+                // Prepare AI data for sending
+                const preparedAiData = {
+                    name: aiData.name || '',
+                    brand: aiData.brand || '',
+                    type: aiData.type || aiData.category || '',
+                    colors: Array.isArray(aiData.colors) ? aiData.colors : (aiData.colors ? [aiData.colors] : []),
+                    material: aiData.material || '',
+                    features: aiData.features || '',
+                    description: aiData.description || '',
+                    category: aiData.category || '',
+                    tags: Array.isArray(aiData.tags) ? aiData.tags : []
+                };
                 
-                console.log('📋 [STOCK_RECEIPT] Using AI data directly (after standardization):');
-                console.log('  🏷️ Tên sản phẩm:', productName);
-                console.log('  🏢 Thương hiệu:', brand);
-                console.log('  📦 Loại sản phẩm:', productType);
-                console.log('  🎨 Màu sắc:', colors);
-                
-                // Kiểm tra data
-                if (!productName || !brand) {
-                    console.warn('⚠️ Missing required data for duplicate check');
-                    $('#aiDuplicateCheckResult').html(`
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i> Thiếu thông tin để kiểm tra trùng lặp (cần tên sản phẩm và thương hiệu)
-                        </div>
-                    `).show();
-                    return;
-                }
-                
-                // Normalize brand
-                const normalizedBrand = brand === 'Không xác định' ? 'Unknown' : brand;
-                
-                console.log('📤 [STOCK_RECEIPT] Data being sent to API:');
-                console.log('  product_name:', productName);
-                console.log('  brand:', normalizedBrand);
-                console.log('  type:', productType);
-                console.log('  color:', colors);
-                
-                // ===== GỬI REQUEST GIỐNG HỆT THEM_SAN_PHAM_AI.PHP =====
-                // Sử dụng cùng API: api_kiem_tra_trung_thu_cong.php (cập nhật đường dẫn)
-                // Cùng action: check_manual_duplicates
-                // Cùng tham số: product_name, brand, type, color
                 $.ajax({
-                    url: '../../app/LegacyApi/api_kiem_tra_trung_thu_cong.php',
+                    url: '',
                     method: 'POST',
                     data: {
-                        action: 'check_manual_duplicates',
-                        product_name: productName,
-                        brand: normalizedBrand,
-                        type: productType,
-                        color: colors
+                        action: 'check_duplicates',
+                        ai_data: preparedAiData
                     },
                     dataType: 'json',
                     success: function(response) {
-                        console.log('🔍 [STOCK_RECEIPT] Duplicate check response (from manual API):', response);
-                        
-                        // Hiển thị kết quả GIỐNG HỆT them_san_pham_ai.php
+                        console.log('🔍 [STOCK_RECEIPT] Duplicate check response:', response);
                         displayStockReceiptDuplicateResult(response, aiData);
                     },
                     error: function(xhr, status, error) {
-                        console.log('❌ [STOCK_RECEIPT] Lỗi khi kiểm tra trùng lặp:', error);
-                        console.log('[STOCK_RECEIPT] Status:', status);
-                        console.log('[STOCK_RECEIPT] Response:', xhr.responseText);
-                        
+                        console.error('❌ [STOCK_RECEIPT] Lỗi khi kiểm tra trùng lặp:', error);
                         $('#aiDuplicateCheckResult').html(`
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle"></i> 
